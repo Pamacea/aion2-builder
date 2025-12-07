@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Aladin } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const aladin = Aladin({
+  weight: "400",
+  variable: "--font-aladin",
+  subsets: ["latin-ext"],
 });
 
 export const metadata: Metadata = {
@@ -23,11 +20,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${aladin.variable}  antialiased`}
       >
+        <Providers>
         {children}
+        </Providers>
       </body>
     </html>
   );

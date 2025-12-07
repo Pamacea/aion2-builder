@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -11,4 +5,162 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ===================================================================
+// I. Modèles de Base
+// ===================================================================
+
+// 1. Modèle des Classes
+model Class {
+  id            Int     @id @default(autoincrement())
+  name          String  @unique // Ex: Clerc, Gladiateur
+  description   String?
+  
+  // Relations
+  tags          Tag[]     // Les tags appliqués à la classe
+  abilities     Ability[] // Les 12 sorts de base
+  passives      Passive[] // Les 10 passifs de base
+  stigmas       Stigma[]  // Les stigmas spécifiques/communs
+  builds        Build[]   // Les builds créés pour cette classe
+}
+
+// 2. Modèle des Tags (Catégories de Classes)
+model Tag {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique // Ex: "Mêlée", "Heal", "Debuff"
+
+  classes Class[] // Relation plusieurs-à-plusieurs
+}
+
+
+// 3. Modèle des Sorts (Abilities - 12 par classe)
+model Ability {
+  id                Int     @id @default(autoincrement())
+  name              String
+  description       String?
+  
+  // Stats et Coûts
+  damageMin         Int?
+  damageMax         Int?
+  targetRange       Int?
+  effect            String?
+  type              String? @default("Physical")
+  category          String? @default("Attack")
+  isNontarget       Boolean @default(false)
+  isMobile          Boolean @default(false)
+  castingDuration   String? @default("Instant Cast")
+  cooldown          String? @default("Instant Cast")
+  maxLevel          Int     @default(20) // Niveau max pour le SP
+  
+  // Relations
+  classId           Int
+  class             Class @relation(fields: [classId], references: [id])
+  
+  specialtyChoices  SpecialtyChoice[] // Les 5 choix de spécialité possibles
+  buildAbilities    BuildAbility[]    // Utilisé dans les builds
+}
+
+// 4. Modèle des Choix de Spécialité (5 choix par Sort)
+model SpecialtyChoice {
+  id          Int     @id @default(autoincrement())
+  description String
+  unlockLevel Int     // Niveau de sort requis (8, 12, 16)
+  
+  // Relations
+  abilityId   Int
+  ability     Ability @relation(fields: [abilityId], references: [id])
+}
+
+// 5. Modèle des Passifs (10 par classe)
+model Passive {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  maxLevel    Int     @default(10) // Niveau max pour le SP
+  
+  // Relations
+  classId     Int
+  class       Class @relation(fields: [classId], references: [id])
+  buildPassives BuildPassive[] // Utilisé dans les builds
+}
+
+// 6. Modèle des Stigmas (11 Stigmas uniques dont 1 partagée)
+model Stigma {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  
+  isShared    Boolean @default(false) // Vrai si partagé entre les classes
+  baseCost    Int     @default(10)     // Coût par défaut en Points de Stigma (STP)
+  
+  // Relations
+  classes     Class[]         // Classes pouvant l'équiper
+  buildStigmas BuildStigma[] // Utilisé dans les builds
+}
+
+// ===================================================================
+// II. Modèles du Builder
+// ===================================================================
+
+model Build {
+  id        Int      @id @default(autoincrement())
+  name      String
+  
+  // Informations de la classe
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+  
+  // Points de Compétence (Skills Points - SP)
+  baseSP          Int @default(231) // Points de base à la fin du leveling
+  extraSP         Int @default(0)   // Points supplémentaires (Wisdom Stone)
+  
+  // Points de Stigma (Stigma Points - STP)
+  baseSTP         Int @default(40)   // Points de base pour Stigma (Valeur 'X')
+  extraSTP        Int @default(0)   // Points supplémentaires farmables
+  
+  // Relations détaillées des choix
+  abilities     BuildAbility[]
+  passives      BuildPassive[]
+  stigmas       BuildStigma[]
+}
+
+// 8. Modèle BuildAbility (Niveau et Spécialités actives du Sort)
+model BuildAbility {
+  id              Int     @id @default(autoincrement())
+  buildId         Int
+  build           Build @relation(fields: [buildId], references: [id])
+  abilityId       Int
+  ability         Ability @relation(fields: [abilityId], references: [id])
+  
+  // Dépense en Points de Compétence : Le niveau choisi par l'utilisateur
+  level           Int     @default(1) 
+  
+  // Les IDs des 3 spécialités actives. (Se réfèrent aux SpecialtyChoice.id)
+  activeSpecialtyChoiceIds Int[] 
+}
+
+// 9. Modèle BuildPassive (Niveau du Passif)
+model BuildPassive {
+  id              Int     @id @default(autoincrement())
+  buildId         Int
+  build           Build @relation(fields: [buildId], references: [id])
+  passiveId       Int
+  passive         Passive @relation(fields: [passiveId], references: [id])
+  
+  // Dépense en Points de Compétence : Le niveau choisi par l'utilisateur
+  level           Int     @default(1)
+}
+
+// 10. Modèle BuildStigma (Stigmas Équipés)
+model BuildStigma {
+  id          Int     @id @default(autoincrement())
+  buildId     Int
+  build       Build   @relation(fields: [buildId], references: [id])
+  stigmaId    Int
+  stigma      Stigma  @relation(fields: [stigmaId], references: [id])
+  
+  // Coût du Stigma dans ce build. On pourrait utiliser stigma.baseCost 
+  // mais on le met ici pour des potentiels ajustements futurs
+  stigmaCost  Int     @default(10)
 }
