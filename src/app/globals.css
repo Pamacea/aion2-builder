@@ -113,10 +113,17 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
     @apply bg-background text-foreground;
   }
 }
+
+html, body {
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 0px;      /* épaisseur verticale */
+  height: 0px;     /* empêche la barre horizontale */
+}
+

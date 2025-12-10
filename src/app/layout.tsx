@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Aladin } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Layout } from "@/components/Layout";
 
 const aladin = Aladin({
   weight: "400",
@@ -22,10 +23,12 @@ export default function RootLayout({
   return (
     <html>
       <body
-        className={`${aladin.variable}  antialiased`}
+        className={`${aladin.variable} dark antialiased bg-[url('/aion-background.webp')] bg-cover`}
       >
         <Providers>
-        {children}
+          <Layout>
+            {children}
+          </Layout>
         </Providers>
       </body>
     </html>
