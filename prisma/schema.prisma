@@ -1,48 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ================================================================
+// Prisma Schema - MMORPG Build System
+// ================================================================
+// Ce schéma définit les modèles de base pour les Classes, Sorts,
+// Passifs, Stigmas, ainsi que le système de Build pour les joueurs.
+// Documentation Prisma : https://pris.ly/d/prisma-schema
+// ================================================================
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// ---------------------------
+// GENERATOR
+// ---------------------------
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts" 
+  importFileExtension    = "ts" 
 }
 
+// ---------------------------
+// DATASOURCE
+// ---------------------------
 datasource db {
   provider = "postgresql"
 }
 
-// ===================================================================
-// I. Modèles de Base
-// ===================================================================
+// ================================================================
+// I. Modèles de Base (Classes, Tags, Abilities, Passives, Stigmas)
+// ================================================================
 
-// 1. Modèle des Classes
+enum TagRole {
+  TANK
+  HEALER
+  SUPPORT
+  OFFTANK
+  SUSTAIN
+  BUFF
+  DEBUFF
+  DPS
+}
+
+// ---------------------------
+// 1. Classes
+// ---------------------------
 model Class {
   id          Int     @id @default(autoincrement())
-  name        String  @unique // Ex: Clerc, Gladiateur
+  name        String  @unique
+  iconUrl       String?
   description String?
 
   // Relations
-  tags      Tag[] // Les tags appliqués à la classe
-  abilities Ability[] // Les 12 sorts de base
-  passives  Passive[] // Les 10 passifs de base
-  stigmas   Stigma[] // Les stigmas spécifiques/communs
-  builds    Build[] // Les builds créés pour cette classe
+  tags      Tag[] // Catégories attribuées à la classe
+  abilities Ability[] // Sorts de base (12 par classe)
+  passives  Passive[] // Passifs de base (10 par classe)
+  stigmas   Stigma[] // Stigmas spécifiques ou communs
+  builds    Build[] // Builds créés pour cette classe
 }
 
-// 2. Modèle des Tags (Catégories de Classes)model Tag {
+// ---------------------------
+// 2. Tags (Catégories de Classes)
+// ---------------------------
 model Tag {
-  id   Int    @id @default(autoincrement())
-  name String @unique // Ex: "Mêlée", "Heal", "Debuff"
+  id   Int     @id @default(autoincrement())
+  name TagRole @map("name") @unique
 
-  classes Class[] // Relation plusieurs-à-plusieurs
+  // Relation plusieurs-à-plusieurs avec les classes
+  classes Class[]
 }
 
-// 3. Modèle des Sorts (Abilities - 12 par classe)
+// ---------------------------
+// 3. Sorts (Abilities)
+// ---------------------------
 model Ability {
   id          Int     @id @default(autoincrement())
   name        String
+  iconUrl        String?
   description String?
 
   // Stats et Coûts
@@ -56,81 +87,96 @@ model Ability {
   isMobile        Boolean @default(false)
   castingDuration String? @default("Instant Cast")
   cooldown        String? @default("Instant Cast")
-  maxLevel        Int     @default(20) // Niveau max pour le SP
+  maxLevel        Int     @default(20)
 
-  // Relations
+  // Relation vers la classe
   classId Int
   class   Class @relation(fields: [classId], references: [id])
 
-  specialtyChoices SpecialtyChoice[] // Les 5 choix de spécialité possibles
-  buildAbilities   BuildAbility[] // Utilisé dans les builds
+  // Relations avec le système de spécialités et les builds
+  specialtyChoices SpecialtyChoice[]
+  buildAbilities   BuildAbility[]
 }
 
-// 4. Modèle des Choix de Spécialité (5 choix par Sort)
+// ---------------------------
+// 4. Choix de Spécialité (SpecialtyChoice)
+// ---------------------------
 model SpecialtyChoice {
   id          Int    @id @default(autoincrement())
   description String
-  unlockLevel Int // Niveau de sort requis (8, 12, 16)
+  unlockLevel Int // Niveau requis pour débloquer (ex: 8, 12, 16)
 
-  // Relations
+  // Relation vers le sort correspondant
   abilityId Int
   ability   Ability @relation(fields: [abilityId], references: [id])
 }
 
-// 5. Modèle des Passifs (10 par classe)
+// ---------------------------
+// 5. Passifs (Passive)
+// ---------------------------
 model Passive {
   id          Int     @id @default(autoincrement())
   name        String
+  iconUrl        String?
   description String?
-  maxLevel    Int     @default(10) // Niveau max pour le SP
+  maxLevel    Int     @default(10)
 
-  // Relations
-  classId       Int
-  class         Class          @relation(fields: [classId], references: [id])
-  buildPassives BuildPassive[] // Utilisé dans les builds
+  // Relation vers la classe
+  classId Int
+  class   Class @relation(fields: [classId], references: [id])
+
+  // Relation vers les builds
+  buildPassives BuildPassive[]
 }
 
-// 6. Modèle des Stigmas (11 Stigmas uniques dont 1 partagée)
+// ---------------------------
+// 6. Stigmas
+// ---------------------------
 model Stigma {
   id          Int     @id @default(autoincrement())
   name        String
+  iconUrl        String?
   description String?
-
-  isShared Boolean @default(false) // Vrai si partagé entre les classes
-  baseCost Int     @default(10) // Coût par défaut en Points de Stigma (STP)
+  isShared    Boolean @default(false) // Partagé entre plusieurs classes
+  baseCost    Int     @default(10) // Coût par défaut en Stigma Points (STP)
 
   // Relations
-  classes      Class[] // Classes pouvant l'équiper
-  buildStigmas BuildStigma[] // Utilisé dans les builds
+  classes      Class[] // Classes pouvant équiper ce stigma
+  buildStigmas BuildStigma[] // Relation vers les builds
 }
 
-// ===================================================================
-// II. Modèles du Builder
-// ===================================================================
+// ================================================================
+// II. Modèles du Builder (Build, BuildAbility, BuildPassive, BuildStigma)
+// ================================================================
 
+// ---------------------------
+// 7. Builds (Configuration de Classe)
+// ---------------------------
 model Build {
   id   Int    @id @default(autoincrement())
   name String
 
-  // Informations de la classe
+  // Classe associée
   classId Int
   class   Class @relation(fields: [classId], references: [id])
 
-  // Points de Compétence (Skills Points - SP)
-  baseSP  Int @default(231) // Points de base à la fin du leveling
+  // Points de compétence
+  baseSP  Int @default(231) // Points de base après leveling
   extraSP Int @default(0) // Points supplémentaires (Wisdom Stone)
 
-  // Points de Stigma (Stigma Points - STP)
-  baseSTP  Int @default(40) // Points de base pour Stigma (Valeur 'X')
+  // Points de stigma
+  baseSTP  Int @default(40) // Points de base
   extraSTP Int @default(0) // Points supplémentaires farmables
 
-  // Relations détaillées des choix
+  // Relations détaillées
   abilities BuildAbility[]
   passives  BuildPassive[]
   stigmas   BuildStigma[]
 }
 
-// 8. Modèle BuildAbility (Niveau et Spécialités actives du Sort)
+// ---------------------------
+// 8. BuildAbility (Niveau et spécialités actives)
+// ---------------------------
 model BuildAbility {
   id        Int     @id @default(autoincrement())
   buildId   Int
@@ -138,14 +184,16 @@ model BuildAbility {
   abilityId Int
   ability   Ability @relation(fields: [abilityId], references: [id])
 
-  // Dépense en Points de Compétence : Le niveau choisi par l'utilisateur
+  // Niveau choisi par l'utilisateur
   level Int @default(1)
 
-  // Les IDs des 3 spécialités actives. (Se réfèrent aux SpecialtyChoice.id)
+  // Spécialités actives (référencent SpecialtyChoice.id)
   activeSpecialtyChoiceIds Int[]
 }
 
-// 9. Modèle BuildPassive (Niveau du Passif)
+// ---------------------------
+// 9. BuildPassive (Niveau du passif)
+// ---------------------------
 model BuildPassive {
   id        Int     @id @default(autoincrement())
   buildId   Int
@@ -153,11 +201,13 @@ model BuildPassive {
   passiveId Int
   passive   Passive @relation(fields: [passiveId], references: [id])
 
-  // Dépense en Points de Compétence : Le niveau choisi par l'utilisateur
+  // Niveau choisi par l'utilisateur
   level Int @default(1)
 }
 
-// 10. Modèle BuildStigma (Stigmas Équipés)
+// ---------------------------
+// 10. BuildStigma (Stigmas équipés)
+// ---------------------------
 model BuildStigma {
   id       Int    @id @default(autoincrement())
   buildId  Int
@@ -165,7 +215,6 @@ model BuildStigma {
   stigmaId Int
   stigma   Stigma @relation(fields: [stigmaId], references: [id])
 
-  // Coût du Stigma dans ce build. On pourrait utiliser stigma.baseCost 
-  // mais on le met ici pour des potentiels ajustements futurs
+  // Coût du stigma pour ce build (peut différer du baseCost)
   stigmaCost Int @default(10)
 }
