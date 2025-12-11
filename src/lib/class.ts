@@ -17,23 +17,3 @@ export const getClassByName = async (name: string): Promise<ClassType | null> =>
 
   return cls;
 };
-
-export const getStarterBuildIdByClassName = async (className: string): Promise<number | null> => {
-  const cls = await prisma.class.findUnique({
-    where: { name: className },
-    select: { 
-      builds: { 
-        select: { id: true }, 
-        take: 1 
-      } 
-    },
-  });
-
-  if (!cls) {
-    return null;
-  }
-  if (cls.builds.length === 0) {
-    return null; 
-  }
-  return cls.builds[0].id;
-};

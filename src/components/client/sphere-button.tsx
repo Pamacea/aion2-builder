@@ -10,10 +10,10 @@ export const SphereButton = () => {
 
   return (
     <Link
-      href="/build/sphere"
+      href={`/build/${pathname.split("/")[2]}/sphere`}
       className={cn(
         "h-full justify-start items-center flex px-6",
-        pathname.startsWith("/build/sphere") 
+        pathname.endsWith("/sphere") 
           ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
           : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
       )}

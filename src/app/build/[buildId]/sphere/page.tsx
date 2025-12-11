@@ -2,7 +2,7 @@ import { getBuildById } from "@/lib/build";
 import { BuildType } from "@/types/schema";
 import { notFound, redirect } from "next/navigation";
 
-export default async function BuildSkillPage(props: {
+export default async function BuildSpherePage(props: {
   params: { buildId: string };
 }) {
   // 1. CORRECTION : Retirer 'await' de la déstructuration
@@ -26,7 +26,7 @@ export default async function BuildSkillPage(props: {
   return (
     <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
       <h1 className="text-2xl font-bold">
-        skill
+        sphere
       </h1>
     </main>
   );

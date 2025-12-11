@@ -1,32 +1,33 @@
-"use client";
+import { getBuildById } from "@/lib/build";
+import { BuildType } from "@/types/schema";
+import { notFound, redirect } from "next/navigation";
 
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-
-export default function BuildProfilePage() {
-  const router = useRouter();
-  const { buildId } = router.query; 
-
-  const [buildData, setBuildData] = useState(null);
-
-  useEffect(() => {
-    if (buildId) {
-      // 1. Appel à votre API ou Base de Données pour charger les détails du Build
-      fetch(`/api/builds/${buildId}`) 
-        .then(res => res.json())
-        .then(data => setBuildData(data));
-    }
-  }, [buildId]);
-
-  if (!buildData) {
-    return <div>Chargement du Build...</div>;
-  }
+export default async function BuildProfilePage(props: {
+  params: { buildId: string };
+}) {
+  // 1. CORRECTION : Retirer 'await' de la déstructuration
+  const { buildId } = await props.params;
   
-  // Affiche le contenu spécifique au profil du build chargé
+  const numericBuildId = parseInt(buildId, 10);
+
+  // 2. CORRECTION : Utiliser 'redirect' de next/navigation pour la redirection dans l'App Router
+  if (isNaN(numericBuildId)) {
+    // Redirection vers la page d'accueil (ou notFound si c'est une erreur 404)
+    redirect('/'); 
+  }
+
+  const buildData: BuildType | null = await getBuildById(numericBuildId);
+
+  // 3. CORRECTION : Utiliser 'notFound' de next/navigation pour le 404
+  if (!buildData) {
+    notFound(); 
+  }
+
   return (
-    <div>
-      <h1>Build ID: {buildId}</h1>
-      {/* ... Votre contenu de profil ... */}
-    </div>
+    <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
+      <h1 className="text-2xl font-bold">
+        profile
+      </h1>
+    </main>
   );
 }
