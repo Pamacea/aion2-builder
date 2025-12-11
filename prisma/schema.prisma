@@ -13,8 +13,8 @@ generator client {
   provider               = "prisma-client"
   output                 = "../src/generated/prisma"
   moduleFormat           = "esm"
-  generatedFileExtension = "ts" 
-  importFileExtension    = "ts" 
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
 }
 
 // ---------------------------
@@ -28,24 +28,17 @@ datasource db {
 // I. Modèles de Base (Classes, Tags, Abilities, Passives, Stigmas)
 // ================================================================
 
-enum TagRole {
-  TANK
-  HEALER
-  SUPPORT
-  OFFTANK
-  SUSTAIN
-  BUFF
-  DEBUFF
-  DPS
-}
-
 // ---------------------------
 // 1. Classes
 // ---------------------------
 model Class {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
-  iconUrl       String?
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  iconUrl      String?
+  bannerUrl    String?
+  characterUrl String?
+
   description String?
 
   // Relations
@@ -60,8 +53,8 @@ model Class {
 // 2. Tags (Catégories de Classes)
 // ---------------------------
 model Tag {
-  id   Int     @id @default(autoincrement())
-  name TagRole @map("name") @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
   // Relation plusieurs-à-plusieurs avec les classes
   classes Class[]
@@ -73,7 +66,7 @@ model Tag {
 model Ability {
   id          Int     @id @default(autoincrement())
   name        String
-  iconUrl        String?
+  iconUrl     String?
   description String?
 
   // Stats et Coûts
@@ -117,9 +110,9 @@ model SpecialtyChoice {
 model Passive {
   id          Int     @id @default(autoincrement())
   name        String
-  iconUrl        String?
+  iconUrl     String?
   description String?
-  maxLevel    Int     @default(10)
+  maxLevel    Int     @default(20)
 
   // Relation vers la classe
   classId Int
@@ -135,10 +128,12 @@ model Passive {
 model Stigma {
   id          Int     @id @default(autoincrement())
   name        String
-  iconUrl        String?
+  iconUrl     String?
+  maxLevel    Int     @default(20)
   description String?
-  isShared    Boolean @default(false) // Partagé entre plusieurs classes
-  baseCost    Int     @default(10) // Coût par défaut en Stigma Points (STP)
+
+  isShared Boolean @default(false) // Partagé entre plusieurs classes
+  baseCost Int     @default(10) // Coût par défaut en Stigma Points (STP)
 
   // Relations
   classes      Class[] // Classes pouvant équiper ce stigma
@@ -185,7 +180,8 @@ model BuildAbility {
   ability   Ability @relation(fields: [abilityId], references: [id])
 
   // Niveau choisi par l'utilisateur
-  level Int @default(1)
+  level    Int @default(1)
+  maxLevel Int @default(20)
 
   // Spécialités actives (référencent SpecialtyChoice.id)
   activeSpecialtyChoiceIds Int[]
@@ -202,7 +198,8 @@ model BuildPassive {
   passive   Passive @relation(fields: [passiveId], references: [id])
 
   // Niveau choisi par l'utilisateur
-  level Int @default(1)
+  level    Int @default(1)
+  maxLevel Int @default(20)
 }
 
 // ---------------------------
@@ -214,6 +211,9 @@ model BuildStigma {
   build    Build  @relation(fields: [buildId], references: [id])
   stigmaId Int
   stigma   Stigma @relation(fields: [stigmaId], references: [id])
+
+  level    Int @default(1)
+  maxLevel Int @default(20)
 
   // Coût du stigma pour ce build (peut différer du baseCost)
   stigmaCost Int @default(10)

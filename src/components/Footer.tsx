@@ -5,10 +5,14 @@ import { usePathname } from "next/navigation";
 
 export const Footer = () => {
   const pathname = usePathname();
-  if (pathname !== "/" && pathname !== "/classes") {
+  if (
+    pathname !== "/" &&
+    pathname !== "/classes" &&
+    !pathname.startsWith("/classes/")
+  ) {
     return null;
   }
-  
+
   const sections = [
     {
       title: "Find Us",

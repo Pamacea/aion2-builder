@@ -8,8 +8,10 @@ import { z, ZodType } from "zod";
 export const ClassSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
-  iconUrl: z.string().optional(),
-  description: z.string().optional(),
+  iconUrl: z.string().nullable(),
+  bannerUrl: z.string().nullable(),
+  characterUrl: z.string().nullable(),
+  description: z.string().nullable(),
 });
 export type ClassTypeBase = z.infer<typeof ClassSchemaBase>;
 
@@ -167,6 +169,7 @@ export const StigmaSchema: ZodType = z.object({
   name: z.string(),
   iconUrl: z.string().optional(),
   description: z.string().optional(),
+  level: z.number().default(1),
   isShared: z.boolean().default(false),
   baseCost: z.number().default(10),
 }).extend({
@@ -194,7 +197,7 @@ export type BuildType = z.infer<typeof BuildSchema>;
 // Class (references Tag, Ability, Passive, Stigma, Build)
 // ---------------------------
 export const ClassSchema = ClassSchemaBase.extend({
-  tags: z.array(TagSchema).optional(),
+  tags: z.array(TagSchema).default([]),
   abilities: z.array(AbilitySchema).optional(),
   passives: z.array(PassiveSchema).optional(),
   stigmas: z.array(StigmaSchema).optional(),

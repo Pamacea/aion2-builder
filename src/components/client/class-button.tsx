@@ -10,10 +10,10 @@ export const ClassButton = () => {
 
   return (
     <Link
-      href="/"
+      href="/classes"
       className={cn(
         "h-full justify-start items-center flex px-6",
-        pathname === "/classes"
+        pathname.startsWith("/classes") 
           ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
           : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
       )}
