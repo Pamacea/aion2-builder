@@ -1,8 +1,8 @@
-import { getClassByName } from "@/lib/class";
+import { ClassType } from "@/types/schema";
+import { getStarterBuildIdByClassName } from "actions/buildActions";
+import { getClassByName } from "actions/classActions";
 import { Class } from "./_components/Class";
 import { ExploreOthersClasses } from "./_components/ExploreOthersClasses";
-import { ClassType } from "@/types/schema";
-import { getStarterBuildIdByClassName } from "@/lib/build";
 
 export default async function ClassPage(props: {
   params: Promise<{ slug: string }>;

@@ -1,6 +1,6 @@
 import { CLASS_PATH } from "@/constants/paths";
-import { getAllClass } from "@/lib/class";
 import { ClassType } from "@/types/schema";
+import { getAllClass } from "actions/classActions";
 import Image from "next/image";
 import Link from "next/link";
 import { ExploreHead } from "../client/explore-head";

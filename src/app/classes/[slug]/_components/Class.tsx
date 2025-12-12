@@ -19,8 +19,8 @@ export const Class = ({ classData, starterbuildId }: { classData: ClassType | nu
         <ClassBanner
           classBanner={classData.bannerUrl || "default-banner.webp"}
         />
-        <CreateYourBuildButton starterBuildHref={`/build/${starterbuildId}`} />
-        <MoreBuild />
+        <CreateYourBuildButton starterBuildId={starterbuildId} />
+        <MoreBuild starterBuildHref={`/build/${starterbuildId}`} />
       </div>
       <div className="flex justify-center items-center">
         <ClassCharacter

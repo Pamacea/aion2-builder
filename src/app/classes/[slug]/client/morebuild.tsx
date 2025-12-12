@@ -1,10 +1,10 @@
 import { DefaultBuildButton } from "./defaultbuild-button"
 import { ShowMoreBuildButton } from "./showmorebuild-button"
 
-export const MoreBuild = () => {
+export const MoreBuild = ({starterBuildHref} : {starterBuildHref: string}) => {
     return (
         <div className="flex items-center justify-between gap-4">
-            <DefaultBuildButton />
+            <DefaultBuildButton starterBuildHref={starterBuildHref} />
             <ShowMoreBuildButton />
         </div>
     );

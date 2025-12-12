@@ -1,5 +1,7 @@
-import { prisma } from "./prisma";
-import { ClassType } from "@/types/schema";
+"use server";
+
+import { ClassType, TagTypeBase } from "@/types/schema";
+import { prisma } from "../lib/prisma";
 
 export const getAllClass = async (): Promise<ClassType[]> => {
   return prisma.class.findMany({
@@ -16,4 +18,17 @@ export const getClassByName = async (name: string): Promise<ClassType | null> =>
   if (!cls) return null;
 
   return cls;
+};
+
+export const getClassTags = async (className: string): Promise<TagTypeBase[]> => {
+  const cls = await prisma.class.findUnique({
+    where: { name: className },
+    include: { tags: true },
+  });
+
+  if (!cls) {
+    return [];
+  }
+
+  return cls.tags; 
 };

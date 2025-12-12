@@ -1,5 +1,5 @@
-import { getBuildById } from "@/lib/build";
 import { BuildType } from "@/types/schema";
+import { getBuildById } from "actions/buildActions";
 import { redirect } from "next/navigation";
 
 export default async function BuildPage(props: {

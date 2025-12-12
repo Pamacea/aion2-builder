@@ -1,4 +1,4 @@
-import { z, ZodType } from "zod";
+import { z } from "zod";
 
 // ================================================================
 // I. Modèles de Base (Forward Declarations for Circular Dependencies)
@@ -57,6 +57,91 @@ export const BuildSchemaBase = z.object({
 });
 export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 
+// ================================================================
+// Forward type declarations for circular references
+// ================================================================
+export type ClassType = ClassTypeBase & {
+  tags?: TagType[];
+  abilities?: AbilityType[];
+  passives?: PassiveType[];
+  stigmas?: StigmaType[];
+  builds?: BuildType[];
+};
+
+export type TagType = TagTypeBase & {
+  classes?: ClassType[];
+};
+
+export type AbilityType = AbilityTypeBase & {
+  specialtyChoices?: SpecialtyChoiceType[];
+  buildAbilities?: BuildAbilityType[];
+};
+
+export type SpecialtyChoiceType = {
+  id: number;
+  description: string;
+  unlockLevel: number;
+  abilityId: number;
+  ability: AbilityType;
+};
+
+export type BuildAbilityType = {
+  id: number;
+  buildId: number;
+  abilityId: number;
+  level: number;
+  activeSpecialtyChoiceIds: number[];
+  build: BuildType;
+  ability: AbilityType;
+};
+
+export type BuildPassiveType = {
+  id: number;
+  buildId: number;
+  passiveId: number;
+  level: number;
+  build: BuildType;
+  passive: PassiveType;
+};
+
+export type PassiveType = {
+  id: number;
+  name: string;
+  iconUrl?: string;
+  description?: string;
+  maxLevel: number;
+  classId: number;
+  buildPassives?: BuildPassiveType[];
+};
+
+export type BuildStigmaType = {
+  id: number;
+  buildId: number;
+  stigmaId: number;
+  stigmaCost: number;
+  build: BuildType;
+  stigma: StigmaType;
+};
+
+export type StigmaType = {
+  id: number;
+  name: string;
+  iconUrl?: string;
+  description?: string;
+  level: number;
+  isShared: boolean;
+  baseCost: number;
+  classes?: ClassType[];
+  buildStigmas?: BuildStigmaType[];
+};
+
+export type BuildType = BuildTypeBase & {
+  class: ClassType;
+  abilities?: BuildAbilityType[];
+  passives?: BuildPassiveType[];
+  stigmas?: BuildStigmaType[];
+};
+
 
 // ================================================================
 // III. Définitions Complètes (Including all z.lazy() extensions)
@@ -65,106 +150,83 @@ export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 // ---------------------------
 // Tag (references Class)
 // ---------------------------
-export const TagSchema: ZodType = TagSchemaBase.extend({
-  // FIX: Ensure ClassSchema is imported via lazy
+export const TagSchema: z.ZodType<TagType> = TagSchemaBase.extend({
   classes: z.lazy(() => z.array(ClassSchema)).optional(),
-});
-export type TagType = z.infer<typeof TagSchema>;
+}) as z.ZodType<TagType>;
 
 // ---------------------------
 // SpecialtyChoice (references Ability)
 // ---------------------------
-export const SpecialtyChoiceSchema: ZodType = z.object({
+export const SpecialtyChoiceSchema: z.ZodType<SpecialtyChoiceType> = z.object({
   id: z.number(),
   description: z.string(),
   unlockLevel: z.number(),
   abilityId: z.number(),
-}).extend({
-  // FIX: Ensure AbilitySchema is imported via lazy
   ability: z.lazy(() => AbilitySchema),
-});
-export type SpecialtyChoiceType = z.infer<typeof SpecialtyChoiceSchema>;
+}) as z.ZodType<SpecialtyChoiceType>;
 
 // ---------------------------
 // BuildAbility (references Build and Ability)
 // ---------------------------
-export const BuildAbilitySchema: ZodType = z.object({
+export const BuildAbilitySchema: z.ZodType<BuildAbilityType> = z.object({
   id: z.number(),
   buildId: z.number(),
   abilityId: z.number(),
   level: z.number().default(1),
   activeSpecialtyChoiceIds: z.array(z.number()),
-}).extend({
-  // FIX: Ensure BuildSchema is imported via lazy
   build: z.lazy(() => BuildSchema),
-  // FIX: Ensure AbilitySchema is imported via lazy
   ability: z.lazy(() => AbilitySchema),
-});
-export type BuildAbilityType = z.infer<typeof BuildAbilitySchema>;
+}) as z.ZodType<BuildAbilityType>;
 
 // ---------------------------
 // Ability (references SpecialtyChoice and BuildAbility)
 // ---------------------------
-export const AbilitySchema: ZodType = AbilitySchemaBase.extend({
+export const AbilitySchema: z.ZodType<AbilityType> = AbilitySchemaBase.extend({
   specialtyChoices: z.array(SpecialtyChoiceSchema).optional(),
-  // FIX: Ensure BuildAbilitySchema is imported via lazy
   buildAbilities: z.lazy(() => z.array(BuildAbilitySchema)).optional(),
-});
-export type AbilityType = z.infer<typeof AbilitySchema>;
+}) as z.ZodType<AbilityType>;
 
 // ---------------------------
 // BuildPassive (references Build and Passive)
 // ---------------------------
-export const BuildPassiveSchema: ZodType = z.object({
+export const BuildPassiveSchema: z.ZodType<BuildPassiveType> = z.object({
   id: z.number(),
   buildId: z.number(),
   passiveId: z.number(),
   level: z.number().default(1),
-}).extend({
-  // FIX: Ensure BuildSchema is imported via lazy
   build: z.lazy(() => BuildSchema),
-  // FIX: Ensure PassiveSchema is imported via lazy
   passive: z.lazy(() => PassiveSchema),
-});
-export type BuildPassiveType = z.infer<typeof BuildPassiveSchema>;
+}) as z.ZodType<BuildPassiveType>;
 
 // ---------------------------
 // Passive (references BuildPassive)
 // ---------------------------
-export const PassiveSchema: ZodType = z.object({
+export const PassiveSchema: z.ZodType<PassiveType> = z.object({
   id: z.number(),
   name: z.string(),
   iconUrl: z.string().optional(),
   description: z.string().optional(),
   maxLevel: z.number().default(10),
   classId: z.number(),
-}).extend({
-  // FIX: Ensure BuildPassiveSchema is imported via lazy
   buildPassives: z.lazy(() => z.array(BuildPassiveSchema)).optional(),
-});
-export type PassiveType = z.infer<typeof PassiveSchema>;
+}) as z.ZodType<PassiveType>;
 
 // ---------------------------
 // BuildStigma (references Build and Stigma)
 // ---------------------------
-export const BuildStigmaSchema: ZodType = z.object({
+export const BuildStigmaSchema: z.ZodType<BuildStigmaType> = z.object({
   id: z.number(),
   buildId: z.number(),
   stigmaId: z.number(),
   stigmaCost: z.number().default(10),
-}).extend({
-  // FIX: Ensure BuildSchema is imported via lazy
   build: z.lazy(() => BuildSchema),
-  // FIX: Ensure StigmaSchema is imported via lazy
   stigma: z.lazy(() => StigmaSchema),
-});
-export type BuildStigmaType = z.infer<typeof BuildStigmaSchema>;
-
+}) as z.ZodType<BuildStigmaType>;
 
 // ---------------------------
 // Stigma (references Class and BuildStigma)
 // ---------------------------
-export const StigmaSchema: ZodType = z.object({
+export const StigmaSchema: z.ZodType<StigmaType> = z.object({
   id: z.number(),
   name: z.string(),
   iconUrl: z.string().optional(),
@@ -172,37 +234,27 @@ export const StigmaSchema: ZodType = z.object({
   level: z.number().default(1),
   isShared: z.boolean().default(false),
   baseCost: z.number().default(10),
-}).extend({
-  // FIX: Ensure ClassSchema is imported via lazy
   classes: z.array(z.lazy(() => ClassSchema)).optional(),
-  // FIX: Ensure BuildStigmaSchema is imported via lazy
   buildStigmas: z.lazy(() => z.array(BuildStigmaSchema)).optional(),
-});
-export type StigmaType = z.infer<typeof StigmaSchema>;
-
+}) as z.ZodType<StigmaType>;
 
 // ---------------------------
 // Build (references Class, BuildAbility, BuildPassive, BuildStigma)
 // ---------------------------
-export const BuildSchema: ZodType = BuildSchemaBase.extend({
-  // FIX: Ensure ClassSchema is imported via lazy
+export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
   class: z.lazy(() => ClassSchema),
   abilities: z.array(BuildAbilitySchema).optional(),
   passives: z.array(BuildPassiveSchema).optional(),
   stigmas: z.array(BuildStigmaSchema).optional(),
-});
-export type BuildType = z.infer<typeof BuildSchema>;
+}) as z.ZodType<BuildType>;
 
 // ---------------------------
 // Class (references Tag, Ability, Passive, Stigma, Build)
 // ---------------------------
-export const ClassSchema = ClassSchemaBase.extend({
+export const ClassSchema: z.ZodType<ClassType> = ClassSchemaBase.extend({
   tags: z.array(TagSchema).default([]),
   abilities: z.array(AbilitySchema).optional(),
   passives: z.array(PassiveSchema).optional(),
   stigmas: z.array(StigmaSchema).optional(),
-  // FIX: Ensure BuildSchema is imported via lazy
   builds: z.lazy(() => z.array(BuildSchema)).optional(),
-});
-export type ClassType = z.infer<typeof ClassSchema>;
-
+}) as z.ZodType<ClassType>;

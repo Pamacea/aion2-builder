@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Exclude Prisma and database packages from client bundles
+  serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg'],
 };
 
 export default nextConfig;

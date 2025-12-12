@@ -4,12 +4,20 @@ import { usePathname } from "next/navigation";
 import { CreateButton } from "./client/create-button";
 import { Bahion } from "./Header/Bahion";
 import { Navbar } from "./Header/Navbar";
-import { SaveButton } from "./client/save-button";
 import { ShareButton } from "./client/share-button";
 import { Buildbar } from "./Header/BuildBar";
+import { useBuildStore } from "@/store/useBuildEditor";
+import { isStarterBuild } from "@/utils/buildUtils";
 
 export const Header = () => {
   const pathname = usePathname();
+
+  const { build } = useBuildStore();
+
+  if (!build) return null;
+
+  const isStarter = isStarterBuild(build);
+
   return (
     <header className="w-full h-16  flex items-center justify-center">
       <Bahion />
@@ -19,8 +27,8 @@ export const Header = () => {
         {!pathname?.startsWith("/build") && <CreateButton />}
         {pathname?.startsWith("/build") && (
           <>
-            <SaveButton />
-            <ShareButton />
+            {!isStarter && <ShareButton />}
+            {isStarter && <CreateButton />}
           </>
         )}
       </div>

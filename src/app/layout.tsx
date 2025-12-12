@@ -3,6 +3,7 @@ import { Aladin } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Layout } from "@/components/Layout";
+import { Toaster } from "sonner";
 
 const aladin = Aladin({
   weight: "400",
@@ -28,6 +29,7 @@ export default function RootLayout({
         <Providers>
           <Layout>
             {children}
+            <Toaster />
           </Layout>
         </Providers>
       </body>
