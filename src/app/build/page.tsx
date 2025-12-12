@@ -1,3 +1,3 @@
 export default function BuildPage() {
-  return <div>Build Page</div>;
+  return null;
 }

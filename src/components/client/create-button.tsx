@@ -1,6 +1,10 @@
 "use client";
 
-import { createBuildFromStarter, getRandomStarterBuildId } from "@/actions/buildActions";
+import {
+  createBuildFromStarter,
+  getRandomStarterBuildId,
+} from "@/actions/buildActions";
+import { useBuildStore } from "@/store/useBuildEditor";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,15 +12,18 @@ import { useState } from "react";
 export const CreateButton = () => {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
+  const { build } = useBuildStore();
 
   const handleCreate = async () => {
     if (isCreating) return;
-    
+
     setIsCreating(true);
     try {
       const randomStarterBuildId = await getRandomStarterBuildId();
-      if (randomStarterBuildId) {
-        const newBuild = await createBuildFromStarter(randomStarterBuildId);
+      const buildIdToUse = build ? build.id : randomStarterBuildId;
+
+      if (buildIdToUse) {
+        const newBuild = await createBuildFromStarter(buildIdToUse);
         if (newBuild) {
           router.push(`/build/${newBuild.id}/profile`);
         }

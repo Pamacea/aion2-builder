@@ -1,33 +1,29 @@
-import { BuildType } from "@/types/schema";
-import { getBuildById } from "actions/buildActions";
-import { notFound, redirect } from "next/navigation";
+"use client";
 
-export default async function BuildSkillPage(props: {
-  params: { buildId: string };
-}) {
-  // 1. CORRECTION : Retirer 'await' de la déstructuration
-  const { buildId } = await props.params;
-  
-  const numericBuildId = parseInt(buildId, 10);
+import { useBuildStore } from "@/store/useBuildEditor";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
-  // 2. CORRECTION : Utiliser 'redirect' de next/navigation pour la redirection dans l'App Router
-  if (isNaN(numericBuildId)) {
-    // Redirection vers la page d'accueil (ou notFound si c'est une erreur 404)
-    redirect('/'); 
-  }
+export default function BuildSkillPage() {
+  const params = useParams();
+  const buildId = params?.buildId as string;
+  const { build, loadBuild, loading } = useBuildStore();
 
-  const buildData: BuildType | null = await getBuildById(numericBuildId);
+  useEffect(() => {
+    if (buildId) {
+      const numericBuildId = Number(buildId);
+      if (!isNaN(numericBuildId)) {
+        loadBuild(numericBuildId);
+      }
+    }
+  }, [buildId, loadBuild]);
 
-  // 3. CORRECTION : Utiliser 'notFound' de next/navigation pour le 404
-  if (!buildData) {
-    notFound(); 
-  }
+  if (loading || !build) return <p>Loading...</p>;
 
   return (
     <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
-      <h1 className="text-2xl font-bold">
-        skill
-      </h1>
+      <div className="flex justify-between items-center w-1/2"></div>
+      <div className="w-1/2"></div>
     </main>
   );
 }
