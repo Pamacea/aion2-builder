@@ -13,9 +13,6 @@ export const Header = () => {
   const pathname = usePathname();
 
   const { build } = useBuildStore();
-
-  if (!build) return null;
-
   const isStarter = isStarterBuild(build);
 
   return (
