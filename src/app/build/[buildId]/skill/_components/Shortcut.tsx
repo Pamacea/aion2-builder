@@ -28,6 +28,16 @@ const LEFT_SLOTS_COUNT = 20; // 4x5 grid
 const MIDDLE_SLOTS_COUNT = 10; // 2x5 grid
 const RIGHT_SLOTS_COUNT = 5; // 1x5 grid
 const BOTTOM_SLOTS_COUNT = 12; // 1x12 row
+// Slot 11 (index 10) of Main Bar is reserved for the first ability
+const RESERVED_SLOT_ID = LEFT_SLOTS_COUNT + 10; // Slot 30 (index 10 of Main Bar)
+// Slots 5-8 (indices 4-7) of Main Bar are reserved for stigmas only
+const STIGMA_SLOT_START = LEFT_SLOTS_COUNT + 4; // Slot 24 (index 4 of Main Bar)
+const STIGMA_SLOT_END = LEFT_SLOTS_COUNT + 7; // Slot 27 (index 7 of Main Bar)
+
+// Helper function to check if a slot is reserved for stigmas
+const isStigmaOnlySlot = (slotId: number): boolean => {
+  return slotId >= STIGMA_SLOT_START && slotId <= STIGMA_SLOT_END;
+};
 
 // Helper function to check if two skills are the same
 const isSameSkill = (
@@ -142,12 +152,47 @@ export const Shortcut = () => {
     return shortcuts;
   }, [build]);
 
-  // Sync loaded shortcuts to local state
+  // Get the first ability from build (reserved for slot 11)
+  const firstAbility = useMemo(() => {
+    if (!build?.abilities || build.abilities.length === 0) return null;
+    const firstBuildAbility = build.abilities[0];
+    const firstAbility = build.class?.abilities?.find(
+      (a) => a.id === firstBuildAbility.abilityId
+    );
+    if (firstAbility && firstBuildAbility) {
+      return {
+        type: "ability" as const,
+        ability: firstAbility,
+        buildAbility: firstBuildAbility,
+      };
+    }
+    return null;
+  }, [build]);
+
+  // Sync loaded shortcuts to local state and ensure first ability is in slot 11
   useEffect(() => {
     isInitialLoad.current = true;
     // Use setTimeout to avoid synchronous setState in effect
     const timeoutId = setTimeout(() => {
-      setShortcuts(loadedShortcuts);
+      const updatedShortcuts = { ...loadedShortcuts };
+      
+      // Ensure first ability is always in slot 11
+      if (firstAbility) {
+        // Remove first ability from any other slot
+        Object.keys(updatedShortcuts).forEach((key) => {
+          const existingSlotId = Number(key);
+          if (existingSlotId !== RESERVED_SLOT_ID) {
+            const existingSkill = updatedShortcuts[existingSlotId];
+            if (isSameSkill(existingSkill, firstAbility)) {
+              delete updatedShortcuts[existingSlotId];
+            }
+          }
+        });
+        // Place first ability in slot 11
+        updatedShortcuts[RESERVED_SLOT_ID] = firstAbility;
+      }
+      
+      setShortcuts(updatedShortcuts);
       // Reset flag after state is set
       setTimeout(() => {
         isInitialLoad.current = false;
@@ -155,7 +200,7 @@ export const Shortcut = () => {
     }, 0);
     
     return () => clearTimeout(timeoutId);
-  }, [loadedShortcuts]);
+  }, [loadedShortcuts, firstAbility]);
 
   // Save shortcuts to build when they change (but not during initial load)
   useEffect(() => {
@@ -210,6 +255,42 @@ export const Shortcut = () => {
     setShortcuts((prev) => {
       const newShortcuts = { ...prev };
 
+      // Check if the skill being dropped is the first ability
+      const isFirstAbility = firstAbility && skill && isSameSkill(skill, firstAbility);
+
+      // If trying to drop the first ability anywhere except slot 11, force it to slot 11
+      if (isFirstAbility && slotId !== RESERVED_SLOT_ID) {
+        // Remove from any other slot
+        if (sourceSlotId !== undefined) {
+          delete newShortcuts[sourceSlotId];
+        }
+        // Remove from any other slot if it exists
+        Object.keys(newShortcuts).forEach((key) => {
+          const existingSlotId = Number(key);
+          if (existingSlotId !== RESERVED_SLOT_ID) {
+            const existingSkill = newShortcuts[existingSlotId];
+            if (isSameSkill(existingSkill, firstAbility)) {
+              delete newShortcuts[existingSlotId];
+            }
+          }
+        });
+        // Force first ability to slot 11
+        newShortcuts[RESERVED_SLOT_ID] = firstAbility;
+        return newShortcuts;
+      }
+
+      // If trying to drop a different skill in slot 11, prevent it
+      if (slotId === RESERVED_SLOT_ID && !isFirstAbility) {
+        // Don't allow dropping other skills in reserved slot
+        return prev;
+      }
+
+      // If trying to drop an ability in stigma-only slots (5-8), prevent it
+      if (isStigmaOnlySlot(slotId) && skill && skill.type !== "stigma") {
+        // Don't allow dropping abilities in stigma-only slots
+        return prev;
+      }
+
       // If the skill is being moved from another slot, clear the source slot
       if (sourceSlotId !== undefined && sourceSlotId !== slotId) {
         delete newShortcuts[sourceSlotId];
@@ -219,8 +300,8 @@ export const Shortcut = () => {
       if (skill) {
         Object.keys(newShortcuts).forEach((key) => {
           const existingSlotId = Number(key);
-          // Skip the source slot (already handled above) and the target slot
-          if (existingSlotId !== sourceSlotId && existingSlotId !== slotId) {
+          // Skip the source slot (already handled above), the target slot, and reserved slot
+          if (existingSlotId !== sourceSlotId && existingSlotId !== slotId && existingSlotId !== RESERVED_SLOT_ID) {
             const existingSkill = newShortcuts[existingSlotId];
             if (isSameSkill(existingSkill, skill)) {
               delete newShortcuts[existingSlotId];
@@ -239,6 +320,10 @@ export const Shortcut = () => {
   };
 
   const handleClear = (slotId: number) => {
+    // Cannot clear reserved slot
+    if (slotId === RESERVED_SLOT_ID) {
+      return;
+    }
     setShortcuts((prev) => {
       const newShortcuts = { ...prev };
       delete newShortcuts[slotId];
@@ -339,6 +424,8 @@ export const Shortcut = () => {
           <div className="grid grid-cols-12 gap-2">
             {Array.from({ length: BOTTOM_SLOTS_COUNT }).map((_, index) => {
               const slotId = LEFT_SLOTS_COUNT + index;
+              const isReserved = slotId === RESERVED_SLOT_ID;
+              const isStigmaOnly = isStigmaOnlySlot(slotId);
               return (
                 <ShortcutSlot
                   key={slotId}
@@ -346,6 +433,8 @@ export const Shortcut = () => {
                   skill={shortcuts[slotId]}
                   onDrop={handleDrop}
                   onClear={handleClear}
+                  isReserved={isReserved}
+                  isStigmaOnly={isStigmaOnly}
                 />
               );
             })}

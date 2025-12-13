@@ -20,15 +20,17 @@ type ShortcutSlotProps = {
   onDrop: (slotId: number, skill: ShortcutSlotProps["skill"], sourceSlotId?: number) => void;
   onClear: (slotId: number) => void;
   className?: string;
+  isReserved?: boolean; // If true, this slot is reserved and cannot be dragged from or have other skills dropped in
+  isStigmaOnly?: boolean; // If true, this slot only accepts stigmas
 };
 
-export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }: ShortcutSlotProps) => {
+export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: { skill, slotId },
-    canDrag: () => !!skill,
+    canDrag: () => !!skill && !isReserved, // Cannot drag from reserved slot
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -37,6 +39,20 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }:
   const [{ isOver }, drop] = useDrop({
     accept: "skill",
     canDrop: (item: { skill?: ShortcutSlotProps["skill"]; slotId?: number }) => {
+      // Reserved slots can only accept the reserved skill
+      if (isReserved) {
+        // The reserved slot logic is handled in handleDrop, so we allow drop here
+        // but handleDrop will redirect if needed
+        return true;
+      }
+      // Stigma-only slots can only accept stigmas
+      if (isStigmaOnly) {
+        const skillToDrop = item?.skill;
+        if (skillToDrop && "type" in skillToDrop) {
+          return skillToDrop.type === "stigma";
+        }
+        return false;
+      }
       // Only accept ability and stigma, reject passive
       const skillToDrop = item?.skill;
       if (skillToDrop && "type" in skillToDrop) {
@@ -102,6 +118,11 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }:
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
     
+    // Cannot clear reserved slot
+    if (isReserved) {
+      return;
+    }
+    
     // If there's a skill in the slot, clear it
     if (skill) {
       onClear(slotId);
@@ -116,6 +137,14 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }:
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    // Cannot place skills in reserved slot via click (only the reserved skill can be there)
+    if (isReserved) {
+      return;
+    }
+    // Stigma-only slots can only accept stigmas via click
+    if (isStigmaOnly && selectedSkill && selectedSkill.type !== "stigma") {
+      return;
+    }
     // Only handle click if we're not dragging and there's a selected skill
     if (!isDragging && selectedSkill && (selectedSkill.type === "ability" || selectedSkill.type === "stigma")) {
       e.stopPropagation();
