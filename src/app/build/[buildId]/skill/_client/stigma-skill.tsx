@@ -54,7 +54,17 @@ export const StigmaSkill = ({
     }),
   });
 
-  const handleSelect = () => {
+  const handleClick = () => {
+    // Handle left click for selection (only if not dragging)
+    if (!isDragging && isInBuild) {
+      setSelectedSkill({
+        type: "stigma",
+        stigma,
+        buildStigma,
+      });
+    }
+    
+    // Also handle the original onSelect if provided
     if (onSelect) {
       onSelect();
     } else {
@@ -64,6 +74,7 @@ export const StigmaSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    // Handle right click for selection
     if (isInBuild) {
       setSelectedSkill({
         type: "stigma",
@@ -86,7 +97,7 @@ export const StigmaSkill = ({
       className={`relative cursor-pointer transition-all ${className} border inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
       } ${isInBuild ? "cursor-move" : ""}`}
-      onClick={handleSelect}
+      onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
       {/* Icon with gold border */}

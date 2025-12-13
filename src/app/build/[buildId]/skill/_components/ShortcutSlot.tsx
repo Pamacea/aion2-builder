@@ -101,13 +101,22 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }:
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
+    
+    // If there's a skill in the slot, clear it
     if (skill) {
       onClear(slotId);
+      return;
+    }
+    
+    // If there's a selected skill, place it in this slot
+    if (selectedSkill && (selectedSkill.type === "ability" || selectedSkill.type === "stigma")) {
+      onDrop(slotId, selectedSkill);
+      setSelectedSkill(null); // Clear selection after placing
     }
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // Only handle click if we're not dragging and there's a selected skill from right-click
+    // Only handle click if we're not dragging and there's a selected skill
     if (!isDragging && selectedSkill && (selectedSkill.type === "ability" || selectedSkill.type === "stigma")) {
       e.stopPropagation();
       onDrop(slotId, selectedSkill);

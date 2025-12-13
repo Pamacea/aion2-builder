@@ -48,7 +48,17 @@ export const ActiveSkill = ({
     }),
   });
 
-  const handleSelect = () => {
+  const handleClick = () => {
+    // Handle left click for selection (only if not dragging)
+    if (!isDragging && isInBuild) {
+      setSelectedSkill({
+        type: "ability",
+        ability,
+        buildAbility,
+      });
+    }
+    
+    // Also handle the original onSelect if provided
     if (onSelect) {
       onSelect();
     } else {
@@ -58,6 +68,7 @@ export const ActiveSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    // Handle right click for selection
     if (isInBuild) {
       setSelectedSkill({
         type: "ability",
@@ -80,7 +91,7 @@ export const ActiveSkill = ({
       className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
       } ${isInBuild ? "cursor-move" : ""}`}
-      onClick={handleSelect}
+      onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
       {/* Icon with gold border */}

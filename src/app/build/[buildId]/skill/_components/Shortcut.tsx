@@ -9,9 +9,9 @@ import {
   PassiveType,
   StigmaType,
 } from "@/types/schema";
-import { useEffect, useMemo, useState } from "react";
-import { ShortcutSlot } from "./ShortcutSlot";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ResetShortcutButton } from "../_client/reset-shortcut-button";
+import { ShortcutSlot } from "./ShortcutSlot";
 
 type ShortcutSkill = {
   type: "ability" | "passive" | "stigma";
@@ -59,6 +59,8 @@ export const Shortcut = () => {
   const [shortcuts, setShortcuts] = useState<
     Record<number, ShortcutSkill | undefined>
   >({});
+  const isInitialLoad = useRef(true);
+  const [shouldSave, setShouldSave] = useState(false);
 
   // Convert saved shortcuts (with IDs) to local format (with full objects)
   const loadedShortcuts = useMemo(() => {
@@ -138,55 +140,66 @@ export const Shortcut = () => {
     });
 
     return shortcuts;
-  }, [
-    build?.shortcuts,
-    build?.class?.abilities,
-    build?.class?.stigmas,
-    build?.abilities,
-    build?.stigmas,
-  ]);
+  }, [build]);
 
   // Sync loaded shortcuts to local state
   useEffect(() => {
-    setShortcuts(loadedShortcuts);
+    isInitialLoad.current = true;
+    // Use setTimeout to avoid synchronous setState in effect
+    const timeoutId = setTimeout(() => {
+      setShortcuts(loadedShortcuts);
+      // Reset flag after state is set
+      setTimeout(() => {
+        isInitialLoad.current = false;
+      }, 0);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [loadedShortcuts]);
 
-  // Convert local shortcuts to save format and update build
-  const saveShortcuts = (
-    newShortcuts: Record<number, ShortcutSkill | undefined>
-  ) => {
-    const shortcutsToSave: Record<
+  // Save shortcuts to build when they change (but not during initial load)
+  useEffect(() => {
+    if (isInitialLoad.current || !shouldSave) return;
+    
+    const shortcutsToSaveFormatted: Record<
       string,
       {
         type: "ability" | "stigma";
         abilityId?: number;
         stigmaId?: number;
-        buildAbilityId?: number;
-        buildStigmaId?: number;
       }
     > = {};
 
-    Object.entries(newShortcuts).forEach(([slotIdStr, skill]) => {
+    Object.entries(shortcuts).forEach(([slotIdStr, skill]) => {
       if (!skill) return;
 
       if (skill.type === "ability" && skill.ability && skill.buildAbility) {
-        shortcutsToSave[slotIdStr] = {
+        shortcutsToSaveFormatted[slotIdStr] = {
           type: "ability",
           abilityId: skill.ability.id,
-          // Don't save buildAbilityId, we'll find it by abilityId when loading
         };
       } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
-        shortcutsToSave[slotIdStr] = {
+        shortcutsToSaveFormatted[slotIdStr] = {
           type: "stigma",
           stigmaId: skill.stigma.id,
-          // Don't save buildStigmaId, we'll find it by stigmaId when loading
         };
       }
     });
 
     updateShortcuts(
-      Object.keys(shortcutsToSave).length > 0 ? shortcutsToSave : null
+      Object.keys(shortcutsToSaveFormatted).length > 0 ? shortcutsToSaveFormatted : null
     );
+    // Reset flag asynchronously to avoid setState in effect
+    setTimeout(() => {
+      setShouldSave(false);
+    }, 0);
+  }, [shouldSave, shortcuts, updateShortcuts]);
+
+  // Queue shortcuts to be saved (will be saved in useEffect)
+  const queueSaveShortcuts = () => {
+    if (!isInitialLoad.current) {
+      setShouldSave(true);
+    }
   };
 
   const handleDrop = (
@@ -219,28 +232,25 @@ export const Shortcut = () => {
       // Set the skill in the target slot
       newShortcuts[slotId] = skill;
 
-      // Save to build
-      saveShortcuts(newShortcuts);
-
       return newShortcuts;
     });
+    // Queue save after state update
+    queueSaveShortcuts();
   };
 
   const handleClear = (slotId: number) => {
     setShortcuts((prev) => {
       const newShortcuts = { ...prev };
       delete newShortcuts[slotId];
-
-      // Save to build
-      saveShortcuts(newShortcuts);
-
       return newShortcuts;
     });
+    // Queue save after state update
+    queueSaveShortcuts();
   };
 
   const handleRefresh = () => {
     setShortcuts({});
-    saveShortcuts({});
+    queueSaveShortcuts();
   };
 
   return (
