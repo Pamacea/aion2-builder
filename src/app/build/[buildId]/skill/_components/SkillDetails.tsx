@@ -14,6 +14,8 @@ import { SkillCooldown } from "../_client/skill-cooldown";
 import { SkillDesc } from "../_client/skill-desc";
 import { SkillManaCost } from "../_client/skill-mana-cost";
 import { SkillName } from "../_client/skill-name";
+import { SkillRange } from "../_client/skill-range";
+import { SkillTarget } from "../_client/skill-target";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 import { AvailableSpeciality } from "./AvaibleSpeciality";
 
@@ -91,9 +93,11 @@ export const SkillDetails = ({
         />
       )}
 
-      {/* Casting Duration, Cooldown, and Mana Cost */}
+      {/* Casting Duration, Cooldown, Mana Cost, Range, and Target */}
       <div className="flex flex-col gap-2 pt-4 border-t-2 border-background/40">
         <SkillManaCost ability={targetAbility} stigma={targetStigma} />
+        <SkillRange ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
+        <SkillTarget ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
         <SkillCastDuration ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
         <SkillCooldown ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
       </div>
