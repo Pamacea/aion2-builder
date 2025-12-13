@@ -7,7 +7,14 @@ export const buildsData = classesData.map((c) => ({
   extraSP: 0,
   baseSTP: 40,
   extraSTP: 0,
-  abilities: [],
-  passives: [],  
+  abilities: (c.abilities || []).map((ability) => ({
+    abilityName: ability.name,
+    level: 1,
+    activeSpecialtyChoiceIds: [] as number[],
+  })),
+  passives: (c.passives || []).map((passive) => ({
+    passiveName: passive.name,
+    level: 1,
+  })),
   stigmas: [],   
 }));

@@ -42,29 +42,29 @@ export type TagTypeBase = z.infer<typeof TagSchemaBase>;
 export const AbilitySchemaBase = z.object({
   id: z.number(),
   name: z.string(),
-  iconUrl: z.string().optional(),
-  description: z.string().optional(),
-  effect: z.string().optional(),
+  iconUrl: z.string().nullish(),
+  description: z.string().nullish(),
+  effect: z.string().nullish(),
 
-  damageMin: z.number().optional(),
-  damageMinModifier: z.number().optional(),
-  damageMax: z.number().optional(),
-  damageMaxModifier: z.number().optional(),
-  staggerDamage: z.number().optional(),
+  damageMin: z.number().nullish(),
+  damageMinModifier: z.number().nullish(),
+  damageMax: z.number().nullish(),
+  damageMaxModifier: z.number().nullish(),
+  staggerDamage: z.number().nullish(),
 
-  manaCost: z.number().optional(),
-  manaRegen: z.number().optional(),
+  manaCost: z.number().nullish(),
+  manaRegen: z.number().nullish(),
 
-  range: z.number().default(20).optional(),
-  area: z.number().default(4).optional(),
+  range: z.number().default(20).nullish(),
+  area: z.number().default(4).nullish(),
 
   isNontarget: z.boolean().default(false),
   isMobile: z.boolean().default(false),
 
-  castingDuration: z.string().default("Instant Cast").optional(),
-  cooldown: z.string().default("Instant Cast").optional(),
+  castingDuration: z.string().default("Instant Cast").nullish(),
+  cooldown: z.string().default("Instant Cast").nullish(),
 
-  target: z.string().default("Single Target").optional(),
+  target: z.string().default("Single Target").nullish(),
 
   classId: z.number(),
 });
@@ -87,60 +87,60 @@ export type SpecialtyChoiceTypeBase = z.infer<typeof SpecialtyChoiceSchemaBase>;
 export const PassiveSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
-  iconUrl: z.string().optional(),
-  description: z.string().optional(),
-  effect: z.string().optional(),
+  iconUrl: z.string().nullish(),
+  description: z.string().nullish(),
+  effect: z.string().nullish(),
   
   maxLevel: z.number().default(10),
 
   // Stats
-  damageMin: z.number().optional(),
-  damageMinModifier: z.number().optional(),
-  damageMax: z.number().optional(),
-  damageMaxModifier: z.number().optional(),
-  damageBoost: z.number().optional(),
-  damageTolerance: z.number().optional(),
+  damageMin: z.number().nullish(),
+  damageMinModifier: z.number().nullish(),
+  damageMax: z.number().nullish(),
+  damageMaxModifier: z.number().nullish(),
+  damageBoost: z.number().nullish(),
+  damageTolerance: z.number().nullish(),
 
-  healMin: z.number().optional(),
-  healMinModifier: z.number().optional(),
-  healMax: z.number().optional(),
-  healMaxModifier: z.number().optional(),
-  healBoost: z.number().optional(),
-  healBoostModifier: z.number().optional(),
-  incomingHeal: z.number().optional(),
-  incomingHealModifier: z.number().optional(),
-  maxHP: z.number().optional(),
-  maxHPModifier: z.number().optional(),
-  maxMP: z.number().optional(),
-  maxMPModifier: z.number().optional(),
+  healMin: z.number().nullish(),
+  healMinModifier: z.number().nullish(),
+  healMax: z.number().nullish(),
+  healMaxModifier: z.number().nullish(),
+  healBoost: z.number().nullish(),
+  healBoostModifier: z.number().nullish(),
+  incomingHeal: z.number().nullish(),
+  incomingHealModifier: z.number().nullish(),
+  maxHP: z.number().nullish(),
+  maxHPModifier: z.number().nullish(),
+  maxMP: z.number().nullish(),
+  maxMPModifier: z.number().nullish(),
 
-  criticalHitResist: z.number().optional(),
-  criticalHitResistModifier: z.number().optional(),
-  statusEffectResist: z.number().optional(),
-  statusEffectResistModifier: z.number().optional(),
-  impactTypeResist: z.number().optional(),
-  impactTypeResistModifier: z.number().optional(),
+  criticalHitResist: z.number().nullish(),
+  criticalHitResistModifier: z.number().nullish(),
+  statusEffectResist: z.number().nullish(),
+  statusEffectResistModifier: z.number().nullish(),
+  impactTypeResist: z.number().nullish(),
+  impactTypeResistModifier: z.number().nullish(),
 
-  attack: z.number().optional(),
-  attackModifier: z.number().optional(),
-  defense: z.number().optional(),
-  defenseModifier: z.number().optional(),
+  attack: z.number().nullish(),
+  attackModifier: z.number().nullish(),
+  defense: z.number().nullish(),
+  defenseModifier: z.number().nullish(),
 
-  staggerDamage: z.number().optional(),
+  staggerDamage: z.number().nullish(),
 
-  manaCost: z.number().optional(),
-  manaRegen: z.number().optional(),
+  manaCost: z.number().nullish(),
+  manaRegen: z.number().nullish(),
 
-  range: z.number().default(20).optional(),
-  area: z.number().default(4).optional(),
+  range: z.number().default(20).nullish(),
+  area: z.number().default(4).nullish(),
 
   isNontarget: z.boolean().default(false),
   isMobile: z.boolean().default(false),
 
-  castingDuration: z.string().default("Instant Cast").optional(),
-  cooldown: z.string().default("Instant Cast").optional(),
+  castingDuration: z.string().default("Instant Cast").nullish(),
+  cooldown: z.string().default("Instant Cast").nullish(),
 
-  target: z.string().default("Single Target").optional(),
+  target: z.string().default("Single Target").nullish(),
 
   classId: z.number(),
 });
@@ -152,31 +152,31 @@ export type PassiveTypeBase = z.infer<typeof PassiveSchemaBase>;
 export const StigmaSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
-  iconUrl: z.string().optional(),
+  iconUrl: z.string().nullish(),
   maxLevel: z.number().default(20),
-  description: z.string().optional(),
+  description: z.string().nullish(),
 
   // Stats et Coûts
-  damageMin: z.number().optional(),
-  damageMinModifier: z.number().optional(),
-  damageMax: z.number().optional(),
-  damageMaxModifier: z.number().optional(),
+  damageMin: z.number().nullish(),
+  damageMinModifier: z.number().nullish(),
+  damageMax: z.number().nullish(),
+  damageMaxModifier: z.number().nullish(),
 
-  staggerDamage: z.number().optional(),
+  staggerDamage: z.number().nullish(),
 
-  manaCost: z.number().optional(),
-  manaRegen: z.number().optional(),
+  manaCost: z.number().nullish(),
+  manaRegen: z.number().nullish(),
 
-  range: z.number().default(20).optional(),
-  area: z.number().default(4).optional(),
+  range: z.number().default(20).nullish(),
+  area: z.number().default(4).nullish(),
 
   isNontarget: z.boolean().default(false),
   isMobile: z.boolean().default(false),
 
-  castingDuration: z.string().default("Instant Cast").optional(),
-  cooldown: z.string().default("Instant Cast").optional(),
+  castingDuration: z.string().default("Instant Cast").nullish(),
+  cooldown: z.string().default("Instant Cast").nullish(),
 
-  target: z.string().default("Single Target").optional(),
+  target: z.string().default("Single Target").nullish(),
 
   isShared: z.boolean().default(false),
   baseCost: z.number().default(10),
@@ -228,7 +228,7 @@ export type AbilityType = AbilityTypeBase & {
 };
 
 export type SpecialtyChoiceType = SpecialtyChoiceTypeBase & {
-  ability: AbilityType;
+  ability?: AbilityType;
 };
 
 export type PassiveType = PassiveTypeBase & {
@@ -250,7 +250,7 @@ export type BuildAbilityType = {
   level: number;
   maxLevel: number;
   activeSpecialtyChoiceIds: number[];
-  build: BuildType;
+  build?: BuildType;
   ability: AbilityType;
 };
 
@@ -260,7 +260,7 @@ export type BuildPassiveType = {
   passiveId: number;
   level: number;
   maxLevel: number;
-  build: BuildType;
+  build?: BuildType;
   passive: PassiveType;
 };
 
@@ -271,7 +271,7 @@ export type BuildStigmaType = {
   level: number;
   maxLevel: number;
   stigmaCost: number;
-  build: BuildType;
+  build?: BuildType;
   stigma: StigmaType;
 };
 
@@ -307,7 +307,7 @@ export const TagSchema: z.ZodType<TagType> = TagSchemaBase.extend({
 // SpecialtyChoice (references Ability)
 // ---------------------------
 export const SpecialtyChoiceSchema: z.ZodType<SpecialtyChoiceType> = SpecialtyChoiceSchemaBase.extend({
-  ability: z.lazy(() => AbilitySchema),
+  ability: z.lazy(() => AbilitySchema).optional(),
 }) as z.ZodType<SpecialtyChoiceType>;
 
 // ---------------------------
@@ -320,7 +320,7 @@ export const BuildAbilitySchema: z.ZodType<BuildAbilityType> = z.object({
   level: z.number().default(1),
   maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   activeSpecialtyChoiceIds: z.array(z.number()),
-  build: z.lazy(() => BuildSchema),
+  build: z.lazy(() => BuildSchema).optional(),
   ability: z.lazy(() => AbilitySchema),
 }) as z.ZodType<BuildAbilityType>;
 
@@ -344,7 +344,7 @@ export const BuildPassiveSchema: z.ZodType<BuildPassiveType> = z.object({
   passiveId: z.number(),
   level: z.number().default(1),
   maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
-  build: z.lazy(() => BuildSchema),
+  build: z.lazy(() => BuildSchema).optional(),
   passive: z.lazy(() => PassiveSchema),
 }) as z.ZodType<BuildPassiveType>;
 
@@ -367,7 +367,7 @@ export const BuildStigmaSchema: z.ZodType<BuildStigmaType> = z.object({
   level: z.number().default(1),
   maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   stigmaCost: z.number().default(10),
-  build: z.lazy(() => BuildSchema),
+  build: z.lazy(() => BuildSchema).optional(),
   stigma: z.lazy(() => StigmaSchema),
 }) as z.ZodType<BuildStigmaType>;
 

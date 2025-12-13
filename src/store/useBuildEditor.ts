@@ -1,7 +1,7 @@
 "use client";
 
 import { getClassByName } from "@/actions/classActions";
-import { BuildType } from "@/types/schema";
+import { BuildAbilityType, BuildPassiveType, BuildStigmaType, BuildType } from "@/types/schema";
 import { isStarterBuild } from "@/utils/buildUtils";
 import { loadBuildAction, saveBuildAction } from "actions/buildActions";
 import { create } from "zustand";
@@ -15,9 +15,30 @@ type BuildState = {
   setName: (name: string) => void;
   setClassId: (classId: number) => void;
   setClassByName: (className: string) => Promise<void>;
+  
+  // Ability management
   updateAbilityLevel: (abilityId: number, level: number) => void;
+  addAbility: (abilityId: number, level?: number) => void;
+  removeAbility: (abilityId: number) => void;
+  toggleSpecialtyChoice: (abilityId: number, specialtyChoiceId: number) => void;
+  getAbilitiesBySpellTag: (spellTagName: string) => BuildType["abilities"];
+  getAvailableAbilities: () => BuildType["class"]["abilities"];
+  
+  // Passive management
   updatePassiveLevel: (passiveId: number, level: number) => void;
+  addPassive: (passiveId: number, level?: number) => void;
+  removePassive: (passiveId: number) => void;
+  getPassivesBySpellTag: (spellTagName: string) => BuildType["passives"];
+  getAvailablePassives: () => BuildType["class"]["passives"];
+  
+  // Stigma management
   updateStigma: (stigmaId: number, stigmaCost: number) => void;
+  updateStigmaLevel: (stigmaId: number, level: number) => void;
+  addStigma: (stigmaId: number, level?: number, stigmaCost?: number) => void;
+  removeStigma: (stigmaId: number) => void;
+  getStigmasBySpellTag: (spellTagName: string) => BuildType["stigmas"];
+  getAvailableStigmas: () => BuildType["class"]["stigmas"];
+  
   loadBuild: (buildId: number) => Promise<void>;
 };
 
@@ -45,7 +66,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
   const scheduleSave = () => {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(autoSave, 500);
+    saveTimeout = setTimeout(autoSave, 100);
   };
 
   return {
@@ -72,7 +93,15 @@ export const useBuildStore = create<BuildState>((set, get) => {
       }
 
       set((state) => {
-        const updated = { ...state.build!, ...partial };
+        // Deep merge to ensure nested arrays are properly replaced
+        const updated = { 
+          ...state.build!, 
+          ...partial,
+          // Ensure abilities, passives, and stigmas arrays are properly replaced (not merged)
+          ...(partial.abilities !== undefined && { abilities: partial.abilities }),
+          ...(partial.passives !== undefined && { passives: partial.passives }),
+          ...(partial.stigmas !== undefined && { stigmas: partial.stigmas }),
+        };
         scheduleSave();
         return { build: updated };
       });
@@ -126,9 +155,26 @@ export const useBuildStore = create<BuildState>((set, get) => {
     updateAbilityLevel: (abilityId, level) => {
       const build = get().build;
       if (isStarterBuild(build)) return;
-      const abilities = build?.abilities?.map((a) =>
-        a.abilityId === abilityId ? { ...a, level } : a
-      );
+      
+      // Find the ability in class abilities to get specialtyChoices
+      const classAbility = build?.class?.abilities?.find((a) => a.id === abilityId);
+      
+      const abilities = build?.abilities?.map((a) => {
+        if (a.abilityId !== abilityId) return a;
+        
+        // Filter activeSpecialtyChoiceIds to only keep those that are still available at the new level
+        // This ensures specialtyChoices are automatically deactivated when level decreases
+        let filteredActiveSpecialtyChoiceIds: number[] = [];
+        if (classAbility?.specialtyChoices && a.activeSpecialtyChoiceIds.length > 0) {
+          filteredActiveSpecialtyChoiceIds = a.activeSpecialtyChoiceIds.filter((choiceId) => {
+            const specialtyChoice = classAbility.specialtyChoices?.find((sc) => sc.id === choiceId);
+            // Only keep specialtyChoice if level is sufficient
+            return specialtyChoice ? level >= specialtyChoice.unlockLevel : false;
+          });
+        }
+        
+        return { ...a, level, activeSpecialtyChoiceIds: filteredActiveSpecialtyChoiceIds };
+      });
       get().updateBuild({ abilities });
     },
 
@@ -148,6 +194,212 @@ export const useBuildStore = create<BuildState>((set, get) => {
         s.stigmaId === stigmaId ? { ...s, stigmaCost } : s
       );
       get().updateBuild({ stigmas });
+    },
+
+    // ==========================================================
+    // ABILITY MANAGEMENT
+    // ==========================================================
+
+    addAbility: (abilityId, level = 1) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+
+      // Check if ability already exists
+      const existingAbility = build.abilities?.find((a) => a.abilityId === abilityId);
+      if (existingAbility) return;
+
+      // Find the ability in class abilities to get maxLevel
+      const classAbility = build.class.abilities?.find((a) => a.id === abilityId);
+      if (!classAbility) return;
+
+      const newBuildAbility = {
+        id: 0, // Will be set by the server
+        buildId: build.id,
+        abilityId,
+        level,
+        maxLevel: ("maxLevel" in classAbility ? classAbility.maxLevel : 20) as number,
+        activeSpecialtyChoiceIds: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        build: build as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ability: classAbility as any,
+      } as BuildAbilityType;
+
+      const abilities = [...(build.abilities || []), newBuildAbility];
+      get().updateBuild({ abilities });
+    },
+
+    removeAbility: (abilityId) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+      const abilities = build.abilities?.filter((a) => a.abilityId !== abilityId);
+      get().updateBuild({ abilities });
+    },
+
+    toggleSpecialtyChoice: (abilityId, specialtyChoiceId) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+      
+      // Find the ability and its class ability to check unlock level
+      const buildAbility = build.abilities?.find((a) => a.abilityId === abilityId);
+      if (!buildAbility) return;
+      
+      const classAbility = build.class?.abilities?.find((a) => a.id === abilityId);
+      if (!classAbility) return;
+      
+      const specialtyChoice = classAbility.specialtyChoices?.find((sc) => sc.id === specialtyChoiceId);
+      if (!specialtyChoice) return;
+      
+      // Check if trying to activate a locked specialtyChoice (level too low)
+      const isActive = buildAbility.activeSpecialtyChoiceIds.includes(specialtyChoiceId);
+      if (!isActive && buildAbility.level < specialtyChoice.unlockLevel) {
+        // Cannot activate: level too low
+        return;
+      }
+      
+      // If trying to activate and already have 3 active, don't allow
+      if (!isActive && buildAbility.activeSpecialtyChoiceIds.length >= 3) {
+        return;
+      }
+      
+      const abilities = build.abilities?.map((a) => {
+        if (a.abilityId !== abilityId) return a;
+        
+        return {
+          ...a,
+          activeSpecialtyChoiceIds: isActive
+            ? a.activeSpecialtyChoiceIds.filter((id) => id !== specialtyChoiceId)
+            : [...a.activeSpecialtyChoiceIds, specialtyChoiceId],
+        };
+      });
+      get().updateBuild({ abilities });
+    },
+
+    getAbilitiesBySpellTag: (spellTagName) => {
+      const build = get().build;
+      if (!build?.abilities) return [];
+      return build.abilities.filter((buildAbility) =>
+        buildAbility.ability.spellTag?.some((tag) => tag.name === spellTagName)
+      );
+    },
+
+    getAvailableAbilities: () => {
+      const build = get().build;
+      return build?.class?.abilities || [];
+    },
+
+    // ==========================================================
+    // PASSIVE MANAGEMENT
+    // ==========================================================
+
+    addPassive: (passiveId, level = 1) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+
+      // Check if passive already exists
+      const existingPassive = build.passives?.find((p) => p.passiveId === passiveId);
+      if (existingPassive) return;
+
+      // Find the passive in class passives to get maxLevel
+      const classPassive = build.class.passives?.find((p) => p.id === passiveId);
+      if (!classPassive) return;
+
+      const newBuildPassive = {
+        id: 0, // Will be set by the server
+        buildId: build.id,
+        passiveId,
+        level,
+        maxLevel: ("maxLevel" in classPassive ? classPassive.maxLevel : 20) as number,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        build: build as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        passive: classPassive as any,
+      } as BuildPassiveType;
+
+      const passives = [...(build.passives || []), newBuildPassive];
+      get().updateBuild({ passives });
+    },
+
+    removePassive: (passiveId) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+      const passives = build.passives?.filter((p) => p.passiveId !== passiveId);
+      get().updateBuild({ passives });
+    },
+
+    getPassivesBySpellTag: (spellTagName) => {
+      const build = get().build;
+      if (!build?.passives) return [];
+      return build.passives.filter((buildPassive) =>
+        buildPassive.passive.spellTag?.some((tag) => tag.name === spellTagName)
+      );
+    },
+
+    getAvailablePassives: () => {
+      const build = get().build;
+      return build?.class?.passives || [];
+    },
+
+    // ==========================================================
+    // STIGMA MANAGEMENT
+    // ==========================================================
+
+    updateStigmaLevel: (stigmaId, level) => {
+      const build = get().build;
+      if (isStarterBuild(build)) return;
+      const stigmas = build?.stigmas?.map((s) =>
+        s.stigmaId === stigmaId ? { ...s, level } : s
+      );
+      get().updateBuild({ stigmas });
+    },
+
+    addStigma: (stigmaId, level = 1, stigmaCost) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+
+      // Check if stigma already exists
+      const existingStigma = build.stigmas?.find((s) => s.stigmaId === stigmaId);
+      if (existingStigma) return;
+
+      // Find the stigma in class stigmas to get maxLevel and baseCost
+      const classStigma = build.class.stigmas?.find((s) => s.id === stigmaId);
+      if (!classStigma) return;
+
+      const newBuildStigma = {
+        id: 0, // Will be set by the server
+        buildId: build.id,
+        stigmaId,
+        level,
+        maxLevel: ("maxLevel" in classStigma ? classStigma.maxLevel : 20) as number,
+        stigmaCost: stigmaCost ?? ("baseCost" in classStigma ? classStigma.baseCost : 10) ?? 10,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        build: build as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        stigma: classStigma as any,
+      } as BuildStigmaType;
+
+      const stigmas = [...(build.stigmas || []), newBuildStigma];
+      get().updateBuild({ stigmas });
+    },
+
+    removeStigma: (stigmaId) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+      const stigmas = build.stigmas?.filter((s) => s.stigmaId !== stigmaId);
+      get().updateBuild({ stigmas });
+    },
+
+    getStigmasBySpellTag: (spellTagName) => {
+      const build = get().build;
+      if (!build?.stigmas) return [];
+      return build.stigmas.filter((buildStigma) =>
+        buildStigma.stigma.spellTag?.some((tag) => tag.name === spellTagName)
+      );
+    },
+
+    getAvailableStigmas: () => {
+      const build = get().build;
+      return build?.class?.stigmas || [];
     },
   };
 });

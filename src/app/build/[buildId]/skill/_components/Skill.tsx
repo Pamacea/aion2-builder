@@ -1,0 +1,260 @@
+"use client";
+
+import { useBuildStore } from "@/store/useBuildEditor";
+import { useEffect } from "react";
+import { ActiveSkill } from "../_client/active-skill";
+import { MinusButton } from "../_client/minus-button";
+import { PassiveSkill } from "../_client/passive-skill";
+import { PlusButton } from "../_client/plus-button";
+import { ResetSkillButton } from "../_client/reset-skill-button";
+import { StigmaSkill } from "../_client/stigma-skill";
+import { useSelectedSkill } from "../_context/SelectedSkillContext";
+
+export const Skill = () => {
+  const {
+    build,
+    getAvailableAbilities,
+    getAvailablePassives,
+    getAvailableStigmas,
+    updateAbilityLevel,
+    updatePassiveLevel,
+    updateStigmaLevel,
+    addAbility,
+    addPassive,
+    addStigma,
+    removeAbility,
+    removePassive,
+    removeStigma,
+  } = useBuildStore();
+  const { selectedSkill, setSelectedSkill } = useSelectedSkill();
+
+  // Helper to find build ability/passive/stigma
+  const findBuildAbility = (abilityId: number) =>
+    build?.abilities?.find((a) => a.abilityId === abilityId);
+  const findBuildPassive = (passiveId: number) =>
+    build?.passives?.find((p) => p.passiveId === passiveId);
+  const findBuildStigma = (stigmaId: number) =>
+    build?.stigmas?.find((s) => s.stigmaId === stigmaId);
+
+  // Sync selected skill with build updates - simple direct sync
+  useEffect(() => {
+    if (!build || !selectedSkill) return;
+
+    if (selectedSkill.buildAbility) {
+      const updated = findBuildAbility(selectedSkill.buildAbility.abilityId);
+      if (updated) {
+        setSelectedSkill({ buildAbility: updated });
+      } else {
+        setSelectedSkill(null);
+      }
+    } else if (selectedSkill.buildPassive) {
+      const updated = findBuildPassive(selectedSkill.buildPassive.passiveId);
+      if (updated) {
+        setSelectedSkill({ buildPassive: updated });
+      } else {
+        setSelectedSkill(null);
+      }
+    } else if (selectedSkill.buildStigma) {
+      const updated = findBuildStigma(selectedSkill.buildStigma.stigmaId);
+      if (updated) {
+        setSelectedSkill({ buildStigma: updated });
+      } else {
+        setSelectedSkill(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [build?.abilities, build?.passives, build?.stigmas]);
+
+  if (!build) {
+    return <div className="p-4">Loading...</div>;
+  }
+
+  const availableAbilities = getAvailableAbilities() || [];
+  const availablePassives = getAvailablePassives() || [];
+  const availableStigmas = getAvailableStigmas() || [];
+
+  // Get selected skill info for dynamic buttons
+  const selectedBuildAbility = selectedSkill?.buildAbility;
+  const selectedBuildPassive = selectedSkill?.buildPassive;
+  const selectedBuildStigma = selectedSkill?.buildStigma;
+
+  const currentLevel =
+    selectedBuildAbility?.level ||
+    selectedBuildPassive?.level ||
+    selectedBuildStigma?.level ||
+    0;
+  const maxLevel =
+    selectedBuildAbility?.maxLevel ||
+    selectedBuildPassive?.maxLevel ||
+    selectedBuildStigma?.maxLevel ||
+    20;
+  const hasSelectedSkill = !!selectedSkill;
+
+  // Handle level changes
+  const handleIncrement = () => {
+    if (selectedBuildAbility) {
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      if (newLevel > 0 && currentLevel === 0) {
+        addAbility(selectedBuildAbility.abilityId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      } else {
+        updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      }
+    } else if (selectedBuildPassive) {
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      if (newLevel > 0 && currentLevel === 0) {
+        addPassive(selectedBuildPassive.passiveId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      } else {
+        updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      }
+    } else if (selectedBuildStigma) {
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      if (newLevel > 0 && currentLevel === 0) {
+        addStigma(selectedBuildStigma.stigmaId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      } else {
+        updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
+        // The useEffect will handle updating selectedSkill automatically
+      }
+    }
+  };
+
+  const handleDecrement = () => {
+    if (selectedBuildAbility) {
+      if (currentLevel <= 1) {
+        // Remove skill from build if level would go below 1
+        removeAbility(selectedBuildAbility.abilityId);
+        setSelectedSkill(null);
+      } else {
+        // Decrement level (minimum is 1, so we go from 2+ to 1+)
+        const newLevel = Math.max(1, currentLevel - 1);
+        updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
+      }
+    } else if (selectedBuildPassive) {
+      if (currentLevel <= 1) {
+        // Remove skill from build if level would go below 1
+        removePassive(selectedBuildPassive.passiveId);
+        setSelectedSkill(null);
+      } else {
+        // Decrement level (minimum is 1, so we go from 2+ to 1+)
+        const newLevel = Math.max(1, currentLevel - 1);
+        updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
+      }
+    } else if (selectedBuildStigma) {
+      if (currentLevel <= 1) {
+        // Remove skill from build if level would go below 1
+        removeStigma(selectedBuildStigma.stigmaId);
+        setSelectedSkill(null);
+      } else {
+        // Decrement level (minimum is 1, so we go from 2+ to 1+)
+        const newLevel = Math.max(1, currentLevel - 1);
+        updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
+      }
+    }
+  };
+
+  const handleSelectSkill = (
+    type: "ability" | "passive" | "stigma",
+    id: number
+  ) => {
+    if (type === "ability") {
+      const buildAbility = findBuildAbility(id);
+      setSelectedSkill(buildAbility ? { buildAbility } : null);
+    } else if (type === "passive") {
+      const buildPassive = findBuildPassive(id);
+      setSelectedSkill(buildPassive ? { buildPassive } : null);
+    } else if (type === "stigma") {
+      const buildStigma = findBuildStigma(id);
+      setSelectedSkill(buildStigma ? { buildStigma } : null);
+    }
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col gap-4 px-2">
+      {/* Three Categories in Column */}
+      <div className="flex-1 flex flex-col gap-4 overflow-y-auto min-h-0">
+        {/* ACTIVE Category */}
+        <div className="flex flex-col gap-4">
+          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+            ACTIVE
+          </div>
+          <div className="grid grid-cols-3 gap-2 px-2">
+            {availableAbilities.map((ability) => {
+              const buildAbility = findBuildAbility(ability.id);
+              const isSelected = selectedBuildAbility?.abilityId === ability.id;
+              return (
+                <ActiveSkill
+                  key={ability.id}
+                  ability={ability}
+                  buildAbility={buildAbility}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelectSkill("ability", ability.id)}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* PASSIVE Category */}
+        <div className="flex flex-col gap-4">
+          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+            PASSIVE
+          </div>
+          <div className="grid grid-cols-3 gap-2 px-2">
+            {availablePassives.map((passive) => {
+              const buildPassive = findBuildPassive(passive.id);
+              const isSelected = selectedBuildPassive?.passiveId === passive.id;
+              return (
+                <PassiveSkill
+                  key={passive.id}
+                  passive={passive}
+                  buildPassive={buildPassive}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelectSkill("passive", passive.id)}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* STIGMA Category */}
+        <div className="flex flex-col gap-4">
+          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+            STIGMA
+          </div>
+          <div className="grid grid-cols-3 gap-2 px-2">
+            {availableStigmas.map((stigma) => {
+              const buildStigma = findBuildStigma(stigma.id);
+              const isSelected = selectedBuildStigma?.stigmaId === stigma.id;
+              return (
+                <StigmaSkill
+                  key={stigma.id}
+                  stigma={stigma}
+                  buildStigma={buildStigma}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelectSkill("stigma", stigma.id)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Action Buttons */}
+      <div className=" w-full flex items-center justify-between gap-2 pt-2">
+        <ResetSkillButton />
+        <PlusButton
+          onClick={handleIncrement}
+          disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+        />
+        <MinusButton
+          onClick={handleDecrement}
+          disabled={!hasSelectedSkill || currentLevel <= 1}
+        />
+      </div>
+    </div>
+  );
+};

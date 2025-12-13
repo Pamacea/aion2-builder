@@ -16,7 +16,7 @@ export const Header = () => {
   const isStarter = isStarterBuild(build);
 
   return (
-    <header className="w-full h-16  flex items-center justify-center">
+    <header className="w-full h-14  flex items-center justify-center">
       <Bahion />
       {!pathname?.startsWith("/build") && <Navbar />}
       {pathname?.startsWith("/build") && <Buildbar />}

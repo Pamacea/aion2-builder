@@ -3,6 +3,9 @@
 import { useBuildStore } from "@/store/useBuildEditor";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
+import { Skill } from "./_components/Skill";
+import { SkillDetails } from "./_components/SkillDetails";
+import { SelectedSkillProvider } from "./_context/SelectedSkillContext";
 
 export default function BuildSkillPage() {
   const params = useParams();
@@ -21,9 +24,21 @@ export default function BuildSkillPage() {
   if (loading || !build) return <p>Loading...</p>;
 
   return (
-    <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
-      <div className="flex justify-between items-center w-1/2"></div>
-      <div className="w-1/2"></div>
-    </main>
+    <SelectedSkillProvider>
+      <main className="w-full h-[85vh] flex flex-row justify-between">
+        {/* Left: Skill Details */}
+        <div className="w-1/4 h-full overflow-y-auto">
+          <SkillDetails />
+        </div>
+
+        {/* Middle: Shortcut Bar  */}
+        <div className="w-1/3 h-full"></div>
+
+        {/* Right: Skills Grid */}
+        <div className="w-4/16 h-full overflow-hidden">
+          <Skill />
+        </div>
+      </main>
+    </SelectedSkillProvider>
   );
 }

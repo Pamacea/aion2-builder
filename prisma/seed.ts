@@ -237,6 +237,10 @@ async function main() {
   for (const c of classesData) {
     const classRecord = await prisma.class.findUnique({
       where: { name: c.name },
+      include: {
+        abilities: true,
+        passives: true,
+      },
     });
 
     if (!classRecord) {
@@ -254,6 +258,10 @@ async function main() {
     });
 
     if (!existingBuild) {
+      // Get all abilities and passives for this class
+      const classAbilities = classRecord.abilities || [];
+      const classPassives = classRecord.passives || [];
+
       await prisma.build.create({
         data: {
           name: buildName,
@@ -262,12 +270,25 @@ async function main() {
           extraSP: 0,
           baseSTP: 40,
           extraSTP: 0,
-          abilities: { create: [] },
-          passives: { create: [] },
+          abilities: {
+            create: classAbilities.map((ability) => ({
+              abilityId: ability.id,
+              level: 1,
+              maxLevel: ability.maxLevel ?? 20,
+              activeSpecialtyChoiceIds: [],
+            })),
+          },
+          passives: {
+            create: classPassives.map((passive) => ({
+              passiveId: passive.id,
+              level: 1,
+              maxLevel: passive.maxLevel ?? 20,
+            })),
+          },
           stigmas: { create: [] },
         },
       });
-      console.log(`✅ Build "${buildName}" seeded for class "${c.name}"`);
+      console.log(`✅ Build "${buildName}" seeded for class "${c.name}" with ${classAbilities.length} abilities and ${classPassives.length} passives`);
     } else {
       console.log(`⚠️ Build "${buildName}" already exists for class "${c.name}", skipping.`);
     }

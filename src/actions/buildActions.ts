@@ -1,8 +1,8 @@
 "use server";
 
 import { BuildSchema, BuildType } from "@/types/schema";
-import { prisma } from "../lib/prisma";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { prisma } from "../lib/prisma";
 
 export async function loadBuildAction(buildId: number): Promise<BuildType | null> {
   if (!buildId || isNaN(buildId)) {
@@ -30,15 +30,79 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
   const build = await prisma.build.findUnique({
     where: { id },
     include: {
-      class: true,
+      class: {
+        include: {
+          tags: true,
+          abilities: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+          passives: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+          stigmas: {
+            include: {
+              spellTag: true,
+            },
+          },
+        },
+      },
       abilities: {
-        include: { ability: true },
+        include: {
+          ability: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
       },
       passives: {
-        include: { passive: true },
+        include: {
+          passive: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+        },
       },
       stigmas: {
-        include: { stigma: true },
+        include: {
+          stigma: {
+            include: {
+              spellTag: true,
+              classes: {
+                include: {
+                  tags: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
   });
@@ -102,15 +166,79 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
     },
 
     include: {
-      class: true,
+      class: {
+        include: {
+          tags: true,
+          abilities: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+          passives: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+          stigmas: {
+            include: {
+              spellTag: true,
+            },
+          },
+        },
+      },
       abilities: {
-        include: { ability: true },
+        include: {
+          ability: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
       },
       passives: {
-        include: { passive: true },
+        include: {
+          passive: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+        },
       },
       stigmas: {
-        include: { stigma: true },
+        include: {
+          stigma: {
+            include: {
+              spellTag: true,
+              classes: {
+                include: {
+                  tags: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
   });
@@ -128,6 +256,29 @@ export async function updateBuild(
   const updateData: {
     name?: string;
     classId?: number;
+    abilities?: {
+      deleteMany: { buildId: number };
+      create: Array<{
+        abilityId: number;
+        level: number;
+        activeSpecialtyChoiceIds: number[];
+      }>;
+    };
+    passives?: {
+      deleteMany: { buildId: number };
+      create: Array<{
+        passiveId: number;
+        level: number;
+      }>;
+    };
+    stigmas?: {
+      deleteMany: { buildId: number };
+      create: Array<{
+        stigmaId: number;
+        level: number;
+        stigmaCost: number;
+      }>;
+    };
   } = {};
   
   if ('name' in data && data.name !== undefined) {
@@ -138,14 +289,119 @@ export async function updateBuild(
     updateData.classId = (data.class as { id: number }).id;
   }
   
+  // Handle abilities update
+  if ('abilities' in data && data.abilities !== undefined) {
+    updateData.abilities = {
+      deleteMany: { buildId },
+      create: data.abilities.map((a) => ({
+        abilityId: a.abilityId,
+        level: a.level,
+        activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
+      })),
+    };
+  }
+  
+  // Handle passives update
+  if ('passives' in data && data.passives !== undefined) {
+    updateData.passives = {
+      deleteMany: { buildId },
+      create: data.passives.map((p) => ({
+        passiveId: p.passiveId,
+        level: p.level,
+      })),
+    };
+  }
+  
+  // Handle stigmas update
+  if ('stigmas' in data && data.stigmas !== undefined) {
+    updateData.stigmas = {
+      deleteMany: { buildId },
+      create: data.stigmas.map((s) => ({
+        stigmaId: s.stigmaId,
+        level: s.level,
+        stigmaCost: s.stigmaCost ?? 10,
+      })),
+    };
+  }
+  
   const updated = await prisma.build.update({
     where: { id: buildId },
     data: updateData,
     include: {
-      class: true,
-      abilities: { include: { ability: true } },
-      passives: { include: { passive: true } },
-      stigmas: { include: { stigma: true } },
+      class: {
+        include: {
+          tags: true,
+          abilities: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+          passives: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+          stigmas: {
+            include: {
+              spellTag: true,
+            },
+          },
+        },
+      },
+      abilities: {
+        include: {
+          ability: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
+      },
+      passives: {
+        include: {
+          passive: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+        },
+      },
+      stigmas: {
+        include: {
+          stigma: {
+            include: {
+              spellTag: true,
+              classes: {
+                include: {
+                  tags: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -195,15 +451,79 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
     },
 
     include: {
-      class: true,
+      class: {
+        include: {
+          tags: true,
+          abilities: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+          passives: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+          stigmas: {
+            include: {
+              spellTag: true,
+            },
+          },
+        },
+      },
       abilities: {
-        include: { ability: true },
+        include: {
+          ability: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
       },
       passives: {
-        include: { passive: true },
+        include: {
+          passive: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+        },
       },
       stigmas: {
-        include: { stigma: true },
+        include: {
+          stigma: {
+            include: {
+              spellTag: true,
+              classes: {
+                include: {
+                  tags: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
   });
