@@ -132,6 +132,53 @@
           classId: 1,
         },
       ],
+      stigmas: [
+        {
+          name: "Power Burst",
+          iconUrl: "PowerBurst.webp",
+          description: "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m.",
+          
+          damageMin: 788,
+          damageMinModifier: undefined, // Utilise damageMinModifiers à la place
+          damageMinModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
+          damageMax: 871,
+          damageMaxModifier: undefined, // Utilise damageMaxModifiers à la place
+          damageMaxModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
+          staggerDamage: 50,
+          manaCost: 200,
+          manaRegen: 0,
+          range: 20,
+          isNontarget: false,
+          isMobile: false,
+          castingDuration: "Instant Cast",
+          cooldown: "Instant Cast",
+          target: "Single Target",
+          spellTag: ["Earth", "Attack", "Magic"],
+          specialtyChoices: [
+            {
+              description: "+20% Skill Speed",
+              unlockLevel: 5,
+              stigmaId: 1,
+            },
+            {
+              description: "Guaranteed Crit on Hit",
+              unlockLevel: 10,
+              stigmaId: 1,
+            },
+            {
+              description: "75% chance to inflict Knock Back",
+              unlockLevel: 15,
+              stigmaId: 1,
+            },
+            {
+              description: "75% chance to inflict Stun for 3s",
+              unlockLevel: 20,
+              stigmaId: 1,
+            },
+          ],
+          classId: 1,
+        },
+      ],
     },
     {
       name: "chanter",

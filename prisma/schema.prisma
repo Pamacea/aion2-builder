@@ -127,9 +127,13 @@ model SpecialtyChoice {
   description String
   unlockLevel Int // Niveau requis pour débloquer (ex: 8, 12, 16)
 
-  // Relation vers le sort correspondant
-  abilityId Int
-  ability   Ability @relation(fields: [abilityId], references: [id])
+  // Relation vers le sort correspondant (optionnel - soit ability soit stigma)
+  abilityId Int?
+  ability   Ability? @relation(fields: [abilityId], references: [id])
+
+  // Relation vers le stigma correspondant (optionnel - soit ability soit stigma)
+  stigmaId Int?
+  stigma   Stigma? @relation(fields: [stigmaId], references: [id])
 }
 
 // ---------------------------
@@ -256,6 +260,7 @@ model Stigma {
   spellTag SpellTag[]
   classes      Class[] // Classes pouvant équiper ce stigma
   buildStigmas BuildStigma[] // Relation vers les builds
+  specialtyChoices SpecialtyChoice[] // Choix de spécialité pour ce stigma
 }
 
 // ================================================================
@@ -338,4 +343,7 @@ model BuildStigma {
 
   // Coût du stigma pour ce build (peut différer du baseCost)
   stigmaCost Int @default(10)
+
+  // Spécialités actives (référencent SpecialtyChoice.id)
+  activeSpecialtyChoiceIds Int[]
 }

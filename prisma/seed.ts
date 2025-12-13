@@ -147,6 +147,105 @@ async function main() {
       }
     }
 
+    // --- Seed STIGMAS for this class ---
+    if (c.stigmas && c.stigmas.length > 0) {
+      for (const stigma of c.stigmas) {
+        // Get or create SpellTags for this stigma
+        const spellTagNames = stigma.spellTag || [];
+        const existingSpellTags = await prisma.spellTag.findMany({
+          where: { name: { in: spellTagNames } },
+        });
+
+        // Check if stigma already exists
+        const existingStigma = await prisma.stigma.findFirst({
+          where: {
+            name: stigma.name,
+            classes: {
+              some: {
+                id: classRecord.id,
+              },
+            },
+          },
+        });
+
+        // Create or update the stigma
+        const stigmaDataBase = {
+          iconUrl: stigma.iconUrl ?? undefined,
+          description: stigma.description ?? undefined,
+          maxLevel: "maxLevel" in stigma ? stigma.maxLevel : 20,
+          baseCost: "baseCost" in stigma ? stigma.baseCost : 1,
+          baseCostModifier: "baseCostModifier" in stigma ? stigma.baseCostModifier : 2,
+          damageMin: "damageMin" in stigma ? stigma.damageMin : undefined,
+          damageMinModifier: "damageMinModifier" in stigma ? stigma.damageMinModifier : undefined,
+          damageMinModifiers: "damageMinModifiers" in stigma && stigma.damageMinModifiers ? stigma.damageMinModifiers : undefined,
+          damageMax: "damageMax" in stigma ? stigma.damageMax : undefined,
+          damageMaxModifier: "damageMaxModifier" in stigma ? stigma.damageMaxModifier : undefined,
+          damageMaxModifiers: "damageMaxModifiers" in stigma && stigma.damageMaxModifiers ? stigma.damageMaxModifiers : undefined,
+          staggerDamage: "staggerDamage" in stigma ? stigma.staggerDamage : undefined,
+          manaCost: "manaCost" in stigma ? stigma.manaCost : undefined,
+          manaRegen: "manaRegen" in stigma ? stigma.manaRegen : undefined,
+          range: "range" in stigma ? stigma.range : 20,
+          area: "area" in stigma ? stigma.area : 4,
+          isNontarget: "isNontarget" in stigma ? stigma.isNontarget : false,
+          isMobile: "isMobile" in stigma ? stigma.isMobile : false,
+          castingDuration: "castingDuration" in stigma ? stigma.castingDuration : "Instant Cast",
+          cooldown: "cooldown" in stigma ? stigma.cooldown : "Instant Cast",
+          target: "target" in stigma ? stigma.target : "Single Target",
+          isShared: "isShared" in stigma ? stigma.isShared : false,
+          spellTag: {
+            [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
+          },
+          classes: {
+            [existingStigma ? "set" : "connect"]: [{ id: classRecord.id }],
+          },
+        };
+
+        const createdStigma = existingStigma
+          ? await prisma.stigma.update({
+              where: { id: existingStigma.id },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: stigmaDataBase as any,
+            })
+          : await prisma.stigma.create({
+              data: {
+                ...stigmaDataBase,
+                name: stigma.name,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              } as any,
+            });
+
+        // --- Seed SPECIALTY CHOICES for this stigma ---
+        if (stigma.specialtyChoices && stigma.specialtyChoices.length > 0) {
+          for (const specialtyChoice of stigma.specialtyChoices) {
+            // Check if specialty choice already exists
+            const existingSpecialtyChoice = await prisma.specialtyChoice.findFirst({
+              where: {
+                stigmaId: createdStigma.id,
+                unlockLevel: specialtyChoice.unlockLevel,
+              },
+            });
+
+            if (existingSpecialtyChoice) {
+              await prisma.specialtyChoice.update({
+                where: { id: existingSpecialtyChoice.id },
+                data: {
+                  description: specialtyChoice.description,
+                },
+              });
+            } else {
+              await prisma.specialtyChoice.create({
+                data: {
+                  description: specialtyChoice.description,
+                  unlockLevel: specialtyChoice.unlockLevel,
+                  stigmaId: createdStigma.id,
+                },
+              });
+            }
+          }
+        }
+      }
+    }
+
     // --- Seed PASSIVES for this class ---
     if (c.passives && c.passives.length > 0) {
       for (const passive of c.passives) {
