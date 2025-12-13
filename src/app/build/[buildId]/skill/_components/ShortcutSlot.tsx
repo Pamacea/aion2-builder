@@ -119,7 +119,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "" }:
     <div
       ref={ref}
       className={`
-        relative w-14 h-14  border-x-2 border-foreground/30 bg-background/50
+        relative w-14 h-14  border-x-2 border-foreground/30 bg-background/80
         flex items-center justify-center
         transition-all cursor-move
         ${isDragging ? "opacity-50" : ""}
