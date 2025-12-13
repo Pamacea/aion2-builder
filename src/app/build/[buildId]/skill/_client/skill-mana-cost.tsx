@@ -11,8 +11,8 @@ type SkillManaCostProps = {
 export const SkillManaCost = ({ ability, stigma, className = "" }: SkillManaCostProps) => {
   const manaCost = ability?.manaCost ?? stigma?.manaCost;
 
-  // Ne pas afficher si manaCost est null ou undefined
-  if (manaCost === null || manaCost === undefined) {
+  // Ne pas afficher si manaCost est null, undefined ou 0
+  if (manaCost === null || manaCost === undefined || manaCost === 0) {
     return null;
   }
 
