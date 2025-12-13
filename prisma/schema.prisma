@@ -63,24 +63,51 @@ model Tag {
 // ---------------------------
 // 3. Sorts (Abilities)
 // ---------------------------
+
+model SpellTag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  abilities Ability[]
+  passives Passive[]
+  stigmas Stigma[]
+}
+
 model Ability {
   id          Int     @id @default(autoincrement())
   name        String
   iconUrl     String?
   description String?
+  effect      String?
+  baseCost Int @default(1)
+  baseCostModifier Int @default(2)
+
+  maxLevel Int @default(10)
 
   // Stats et Coûts
-  damageMin       Int?
-  damageMax       Int?
-  targetRange     Int?
-  effect          String?
-  type            String? @default("Physical")
-  category        String? @default("Attack")
-  isNontarget     Boolean @default(false)
-  isMobile        Boolean @default(false)
+  damageMin         Int?
+  damageMinModifier Int?
+  damageMax         Int?
+  damageMaxModifier Int?
+
+  staggerDamage Int?
+
+  manaCost  Int?
+  manaRegen Int?
+
+  range Int? @default(20)
+  area  Int? @default(4)
+
+  isNontarget Boolean @default(false)
+  isMobile    Boolean @default(false)
+
   castingDuration String? @default("Instant Cast")
   cooldown        String? @default("Instant Cast")
-  maxLevel        Int     @default(20)
+
+  target String? @default("Single Target")
+
+  // Relation vers les tags  du sort
+  spellTag SpellTag[]
 
   // Relation vers la classe
   classId Int
@@ -112,7 +139,63 @@ model Passive {
   name        String
   iconUrl     String?
   description String?
-  maxLevel    Int     @default(20)
+  effect      String?
+  baseCost Int @default(1)
+  baseCostModifier Int @default(2)
+
+  maxLevel Int @default(10)
+
+  // Stats et Coûts
+  damageMin         Int?
+  damageMinModifier Int?
+  damageMax         Int?
+  damageMaxModifier Int?
+  damageBoost       Int?
+  damageTolerance   Int?
+
+  healMin      Int?
+  healMinModifier Int?
+  healMax      Int?
+  healMaxModifier Int?
+  healBoost    Int?
+  healBoostModifier Int?
+  incomingHeal Int?
+  incomingHealModifier Int?
+  maxHP        Int?
+  maxHPModifier Int?
+  maxMP        Int?
+  maxMPModifier Int?
+
+  criticalHitResist  Int?
+  criticalHitResistModifier Int?
+  statusEffectResist Int?
+  statusEffectResistModifier Int?
+  impactTypeResist   Int?
+  impactTypeResistModifier Int?
+
+  attack  Int?
+  attackModifier Int?
+  defense Int?
+  defenseModifier Int?
+
+  staggerDamage Int?
+
+  manaCost  Int?
+  manaRegen Int?
+
+  range Int? @default(20)
+  area  Int? @default(4)
+
+  isNontarget Boolean @default(false)
+  isMobile    Boolean @default(false)
+
+  castingDuration String? @default("Instant Cast")
+  cooldown        String? @default("Instant Cast")
+
+  target String? @default("Single Target")
+
+  // Relation vers les tags  du sort
+  spellTag SpellTag[]
 
   // Relation vers la classe
   classId Int
@@ -132,10 +215,35 @@ model Stigma {
   maxLevel    Int     @default(20)
   description String?
 
+   // Stats et Coûts
+  damageMin         Int?
+  damageMinModifier Int?
+  damageMax         Int?
+  damageMaxModifier Int?
+
+  staggerDamage Int?
+
+  manaCost  Int?
+  manaRegen Int?
+
+  range Int? @default(20)
+  area  Int? @default(4)
+
+  isNontarget Boolean @default(false)
+  isMobile    Boolean @default(false)
+
+  castingDuration String? @default("Instant Cast")
+  cooldown        String? @default("Instant Cast")
+
+  target String? @default("Single Target")
+
+
   isShared Boolean @default(false) // Partagé entre plusieurs classes
-  baseCost Int     @default(10) // Coût par défaut en Stigma Points (STP)
+  baseCost Int     @default(1) // Coût par défaut en Stigma Points (STP)
+  baseCostModifier Int @default(2)
 
   // Relations
+  spellTag SpellTag[]
   classes      Class[] // Classes pouvant équiper ce stigma
   buildStigmas BuildStigma[] // Relation vers les builds
 }

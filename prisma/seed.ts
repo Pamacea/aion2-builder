@@ -1,7 +1,8 @@
-import { PrismaClient } from "generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { tagsList } from "data/tags";
 import { classesData } from "data/classes";
+import { spellTagsList } from "data/spellTags";
+import { tagsList } from "data/tags";
+import { PrismaClient } from "generated/prisma/client";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -21,6 +22,17 @@ async function main() {
     });
   }
 
+  console.log("🌱 Seeding SPELL TAGS...");
+
+  // --- Seed SPELL TAGS ---
+  for (const spellTag of spellTagsList) {
+   await prisma.spellTag.upsert({
+     where: { name: spellTag },
+     update: {},
+     create: { name: spellTag },
+   });
+ }
+
   console.log("🌱 Seeding CLASSES...");
 
   // --- Seed CLASSES ---
@@ -29,7 +41,7 @@ async function main() {
       where: { name: { in: c.tags.map((t) => t.toLowerCase()) } },
     });
 
-    await prisma.class.upsert({
+    const classRecord = await prisma.class.upsert({
       where: { name: c.name },
       update: {},
       create: {
@@ -43,6 +55,180 @@ async function main() {
         },
       },
     });
+
+    // --- Seed ABILITIES for this class ---
+    if (c.abilities && c.abilities.length > 0) {
+      for (const ability of c.abilities) {
+        // Get or create SpellTags for this ability
+        const spellTagNames = ability.spellTag || [];
+        const existingSpellTags = await prisma.spellTag.findMany({
+          where: { name: { in: spellTagNames } },
+        });
+
+        // Check if ability already exists
+        const existingAbility = await prisma.ability.findFirst({
+          where: {
+            name: ability.name,
+            classId: classRecord.id,
+          },
+        });
+
+        // Create or update the ability
+        const abilityDataBase = {
+          iconUrl: ability.iconUrl ?? undefined,
+          description: ability.description ?? undefined,
+          effect: ability.effect ?? undefined,
+          baseCost: "baseCost" in ability ? ability.baseCost : 1,
+          baseCostModifier: "baseCostModifier" in ability ? ability.baseCostModifier : 2,
+          maxLevel: "maxLevel" in ability ? ability.maxLevel : 10,
+          damageMin: "damageMin" in ability ? ability.damageMin : undefined,
+          damageMinModifier: "damageMinModifier" in ability ? ability.damageMinModifier : undefined,
+          damageMax: "damageMax" in ability ? ability.damageMax : undefined,
+          damageMaxModifier: "damageMaxModifier" in ability ? ability.damageMaxModifier : undefined,
+          staggerDamage: "staggerDamage" in ability ? ability.staggerDamage : undefined,
+          manaCost: "manaCost" in ability ? ability.manaCost : undefined,
+          manaRegen: "manaRegen" in ability ? ability.manaRegen : undefined,
+          range: "range" in ability ? ability.range : 20,
+          isNontarget: "isNontarget" in ability ? ability.isNontarget : false,
+          isMobile: "isMobile" in ability ? ability.isMobile : false,
+          castingDuration: "castingDuration" in ability ? ability.castingDuration : "Instant Cast",
+          cooldown: "cooldown" in ability ? ability.cooldown : "Instant Cast",
+          target: "target" in ability ? ability.target : "Single Target",
+          spellTag: {
+            [existingAbility ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
+          },
+        };
+
+        const createdAbility = existingAbility
+          ? await prisma.ability.update({
+              where: { id: existingAbility.id },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: abilityDataBase as any,
+            })
+          : await prisma.ability.create({
+              data: {
+                ...abilityDataBase,
+                name: ability.name,
+                classId: classRecord.id,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              } as any,
+            });
+
+        // --- Seed SPECIALTY CHOICES for this ability ---
+        if (ability.specialtyChoices && ability.specialtyChoices.length > 0) {
+          for (const specialtyChoice of ability.specialtyChoices) {
+            // Check if specialty choice already exists
+            const existingSpecialtyChoice = await prisma.specialtyChoice.findFirst({
+              where: {
+                abilityId: createdAbility.id,
+                unlockLevel: specialtyChoice.unlockLevel,
+              },
+            });
+
+            if (existingSpecialtyChoice) {
+              await prisma.specialtyChoice.update({
+                where: { id: existingSpecialtyChoice.id },
+                data: {
+                  description: specialtyChoice.description,
+                },
+              });
+            } else {
+              await prisma.specialtyChoice.create({
+                data: {
+                  description: specialtyChoice.description,
+                  unlockLevel: specialtyChoice.unlockLevel,
+                  abilityId: createdAbility.id,
+                },
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // --- Seed PASSIVES for this class ---
+    if (c.passives && c.passives.length > 0) {
+      for (const passive of c.passives) {
+        // Get or create SpellTags for this passive
+        const spellTagNames = passive.spellTag || [];
+        const existingSpellTags = await prisma.spellTag.findMany({
+          where: { name: { in: spellTagNames } },
+        });
+
+        // Check if passive already exists
+        const existingPassive = await prisma.passive.findFirst({
+          where: {
+            name: passive.name,
+            classId: classRecord.id,
+          },
+        });
+
+        // Create or update the passive
+        const passiveDataBase = {
+          iconUrl: passive.iconUrl ?? undefined,
+          description: passive.description ?? undefined,
+          effect: passive.effect ?? undefined,
+          baseCost: "baseCost" in passive ? passive.baseCost : 1,
+          baseCostModifier: "baseCostModifier" in passive ? passive.baseCostModifier : 2,
+          maxLevel: "maxLevel" in passive ? passive.maxLevel : 10,
+          damageMin: "damageMin" in passive ? passive.damageMin : undefined,
+          damageMinModifier: "damageMinModifier" in passive ? passive.damageMinModifier : undefined,
+          damageMax: "damageMax" in passive ? passive.damageMax : undefined,
+          damageMaxModifier: "damageMaxModifier" in passive ? passive.damageMaxModifier : undefined,
+          damageBoost: "damageBoost" in passive ? passive.damageBoost : undefined,
+          damageTolerance: "damageTolerance" in passive ? passive.damageTolerance : undefined,
+          healMin: "healMin" in passive ? passive.healMin : undefined,
+          healMinModifier: "healMinModifier" in passive ? passive.healMinModifier : undefined,
+          healMax: "healMax" in passive ? passive.healMax : undefined,
+          healMaxModifier: "healMaxModifier" in passive ? passive.healMaxModifier : undefined,
+          healBoost: "healBoost" in passive ? passive.healBoost : undefined,
+          healBoostModifier: "healBoostModifier" in passive ? passive.healBoostModifier : undefined,
+          incomingHeal: "incomingHeal" in passive ? passive.incomingHeal : undefined,
+          incomingHealModifier: "incomingHealModifier" in passive ? passive.incomingHealModifier : undefined,
+          maxHP: "maxHP" in passive ? passive.maxHP : undefined,
+          maxHPModifier: "maxHPModifier" in passive ? passive.maxHPModifier : undefined,
+          maxMP: "maxMP" in passive ? passive.maxMP : undefined,
+          maxMPModifier: "maxMPModifier" in passive ? passive.maxMPModifier : undefined,
+          criticalHitResist: "criticalHitResist" in passive ? passive.criticalHitResist : undefined,
+          criticalHitResistModifier: "criticalHitResistModifier" in passive ? passive.criticalHitResistModifier : undefined,
+          statusEffectResist: "statusEffectResist" in passive ? passive.statusEffectResist : undefined,
+          statusEffectResistModifier: "statusEffectResistModifier" in passive ? passive.statusEffectResistModifier : undefined,
+          impactTypeResist: "impactTypeResist" in passive ? passive.impactTypeResist : undefined,
+          impactTypeResistModifier: "impactTypeResistModifier" in passive ? passive.impactTypeResistModifier : undefined,
+          attack: "attack" in passive ? passive.attack : undefined,
+          attackModifier: "attackModifier" in passive ? passive.attackModifier : undefined,
+          defense: "defense" in passive ? passive.defense : undefined,
+          defenseModifier: "defenseModifier" in passive ? passive.defenseModifier : undefined,
+          staggerDamage: "staggerDamage" in passive ? passive.staggerDamage : undefined,
+          manaCost: "manaCost" in passive ? passive.manaCost : undefined,
+          manaRegen: "manaRegen" in passive ? passive.manaRegen : undefined,
+          range: "range" in passive ? passive.range : 20,
+          isNontarget: passive.isNontarget ?? false,
+          isMobile: passive.isMobile ?? false,
+          castingDuration: passive.castingDuration ?? "Instant Cast",
+          cooldown: passive.cooldown ?? "Instant Cast",
+          target: passive.target ?? "Single Target",
+          spellTag: {
+            [existingPassive ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
+          },
+        };
+
+        await (existingPassive
+          ? prisma.passive.update({
+              where: { id: existingPassive.id },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: passiveDataBase as any,
+            })
+          : prisma.passive.create({
+              data: {
+                ...passiveDataBase,
+                name: passive.name,
+                classId: classRecord.id,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              } as any,
+            }));
+      }
+    }
   }
 
   console.log("🌱 Seeding BUILDS...");

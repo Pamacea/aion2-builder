@@ -61,6 +61,77 @@
       description:
         "Primary healer with potent recovery, barriers, and group-saving utility.",
       tags: ["distance", "heal", "buff"],
+      abilities : [
+        {
+          name: "Earth's Retribution",
+          iconUrl: "EarthsRetribution.webp",
+          description: "Deals Earth Damage to a target within 20m and restores 110MP.",
+          effect: "Deals x Earth Damage to a target within 20m and restores 110MP.",
+          
+          damageMin: 371,
+          damageMinModifier: 18,
+          damageMax: 390,
+          damageMaxModifier: 18,
+          staggerDamage: 100,
+          manaCost: 0,
+          manaRegen: 0,
+          range: 20,
+          isNontarget: false,
+          isMobile: false,
+          castingDuration: "Instant Cast",
+          cooldown: "Instant Cast",
+          target: "Single Target",
+          spellTag: ["Earth", "Attack", "Magic"],
+          specialtyChoices: [
+            {
+              description: "+20% MP restored",
+              unlockLevel: 4,
+              abilityId: 1,
+            },
+            {
+              description: " +15% [Discharge] Chain Skill",
+              unlockLevel: 8,
+              abilityId: 1,
+            },
+            {
+              description: "+50% Multi-hit on hit",
+              unlockLevel: 12,
+              abilityId: 1,
+            },
+            {
+              description: "-7s [Bolt] cooldown on Landing [Discharge]",
+              unlockLevel: 16,
+              abilityId: 1,
+            },
+            {
+              description: "Change [Discharge] to AoE Skill",
+              unlockLevel: 16,
+              abilityId: 1,
+            },
+          ],
+          classId: 1,
+        },
+      ],
+      passives: [
+        {
+          name: "Warm Benediction",
+          iconUrl: "WarmBenediction.webp",
+          description: "Increase the caster's ax HP by x% and MAX MP by x.",
+          effect: "Increase the caster's ax HP by x% and MAX MP by x.",
+
+          maxHP: 6,
+          maxHPModifier: 1,
+          maxMP: 7,
+          maxMPModifier: 2,
+          isNontarget: false,
+          isMobile: false,
+          castingDuration: "Instant Cast",
+          cooldown: "Instant Cast",
+          target: "Caster",
+          spellTag: ["Magic", "Buff"],
+          classId: 1,
+        },
+      ],
     },
     {
       name: "chanter",

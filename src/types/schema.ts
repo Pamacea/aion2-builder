@@ -4,7 +4,18 @@ import { z } from "zod";
 // I. Modèles de Base (Forward Declarations for Circular Dependencies)
 // ================================================================
 
-// Declare the base Zod types before their complex definitions
+// ---------------------------
+// 1. SpellTag
+// ---------------------------
+export const SpellTagSchemaBase = z.object({
+  id: z.number(),
+  name: z.string(),
+});
+export type SpellTagTypeBase = z.infer<typeof SpellTagSchemaBase>;
+
+// ---------------------------
+// 2. Class
+// ---------------------------
 export const ClassSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
@@ -15,37 +26,166 @@ export const ClassSchemaBase = z.object({
 });
 export type ClassTypeBase = z.infer<typeof ClassSchemaBase>;
 
+// ---------------------------
+// 3. Tag (Catégories de Classes)
+// ---------------------------
 export const TagSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
 });
 export type TagTypeBase = z.infer<typeof TagSchemaBase>;
 
+// ---------------------------
+// 4. Ability (Sorts)
+// Les champs 'optional()' et 'default()' sont basés sur le schéma Prisma.
+// ---------------------------
 export const AbilitySchemaBase = z.object({
   id: z.number(),
   name: z.string(),
   iconUrl: z.string().optional(),
   description: z.string().optional(),
-  damageMin: z.number().optional(),
-  damageMax: z.number().optional(),
-  targetRange: z.number().optional(),
   effect: z.string().optional(),
-  type: z.string().default("Physical"),
-  category: z.string().default("Attack"),
+
+  damageMin: z.number().optional(),
+  damageMinModifier: z.number().optional(),
+  damageMax: z.number().optional(),
+  damageMaxModifier: z.number().optional(),
+  staggerDamage: z.number().optional(),
+
+  manaCost: z.number().optional(),
+  manaRegen: z.number().optional(),
+
+  range: z.number().default(20).optional(),
+  area: z.number().default(4).optional(),
+
   isNontarget: z.boolean().default(false),
   isMobile: z.boolean().default(false),
-  castingDuration: z.string().default("Instant Cast"),
-  cooldown: z.string().default("Instant Cast"),
-  maxLevel: z.number().default(20),
+
+  castingDuration: z.string().default("Instant Cast").optional(),
+  cooldown: z.string().default("Instant Cast").optional(),
+
+  target: z.string().default("Single Target").optional(),
+
   classId: z.number(),
 });
 export type AbilityTypeBase = z.infer<typeof AbilitySchemaBase>;
 
+// ---------------------------
+// 5. SpecialtyChoice
+// ---------------------------
+export const SpecialtyChoiceSchemaBase = z.object({
+  id: z.number(),
+  description: z.string(),
+  unlockLevel: z.number(),
+  abilityId: z.number(),
+});
+export type SpecialtyChoiceTypeBase = z.infer<typeof SpecialtyChoiceSchemaBase>;
 
-// ================================================================
-// II. Modèles du Builder (Forward Declarations)
-// ================================================================
+// ---------------------------
+// 6. Passive
+// ---------------------------
+export const PassiveSchemaBase = z.object({
+  id: z.number(),
+  name: z.string(),
+  iconUrl: z.string().optional(),
+  description: z.string().optional(),
+  effect: z.string().optional(),
+  
+  maxLevel: z.number().default(10),
 
+  // Stats
+  damageMin: z.number().optional(),
+  damageMinModifier: z.number().optional(),
+  damageMax: z.number().optional(),
+  damageMaxModifier: z.number().optional(),
+  damageBoost: z.number().optional(),
+  damageTolerance: z.number().optional(),
+
+  healMin: z.number().optional(),
+  healMinModifier: z.number().optional(),
+  healMax: z.number().optional(),
+  healMaxModifier: z.number().optional(),
+  healBoost: z.number().optional(),
+  healBoostModifier: z.number().optional(),
+  incomingHeal: z.number().optional(),
+  incomingHealModifier: z.number().optional(),
+  maxHP: z.number().optional(),
+  maxHPModifier: z.number().optional(),
+  maxMP: z.number().optional(),
+  maxMPModifier: z.number().optional(),
+
+  criticalHitResist: z.number().optional(),
+  criticalHitResistModifier: z.number().optional(),
+  statusEffectResist: z.number().optional(),
+  statusEffectResistModifier: z.number().optional(),
+  impactTypeResist: z.number().optional(),
+  impactTypeResistModifier: z.number().optional(),
+
+  attack: z.number().optional(),
+  attackModifier: z.number().optional(),
+  defense: z.number().optional(),
+  defenseModifier: z.number().optional(),
+
+  staggerDamage: z.number().optional(),
+
+  manaCost: z.number().optional(),
+  manaRegen: z.number().optional(),
+
+  range: z.number().default(20).optional(),
+  area: z.number().default(4).optional(),
+
+  isNontarget: z.boolean().default(false),
+  isMobile: z.boolean().default(false),
+
+  castingDuration: z.string().default("Instant Cast").optional(),
+  cooldown: z.string().default("Instant Cast").optional(),
+
+  target: z.string().default("Single Target").optional(),
+
+  classId: z.number(),
+});
+export type PassiveTypeBase = z.infer<typeof PassiveSchemaBase>;
+
+// ---------------------------
+// 7. Stigma
+// ---------------------------
+export const StigmaSchemaBase = z.object({
+  id: z.number(),
+  name: z.string(),
+  iconUrl: z.string().optional(),
+  maxLevel: z.number().default(20),
+  description: z.string().optional(),
+
+  // Stats et Coûts
+  damageMin: z.number().optional(),
+  damageMinModifier: z.number().optional(),
+  damageMax: z.number().optional(),
+  damageMaxModifier: z.number().optional(),
+
+  staggerDamage: z.number().optional(),
+
+  manaCost: z.number().optional(),
+  manaRegen: z.number().optional(),
+
+  range: z.number().default(20).optional(),
+  area: z.number().default(4).optional(),
+
+  isNontarget: z.boolean().default(false),
+  isMobile: z.boolean().default(false),
+
+  castingDuration: z.string().default("Instant Cast").optional(),
+  cooldown: z.string().default("Instant Cast").optional(),
+
+  target: z.string().default("Single Target").optional(),
+
+  isShared: z.boolean().default(false),
+  baseCost: z.number().default(10),
+});
+export type StigmaTypeBase = z.infer<typeof StigmaSchemaBase>;
+
+// ---------------------------
+// 8. Build
+// ---------------------------
 export const BuildSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
@@ -57,9 +197,17 @@ export const BuildSchemaBase = z.object({
 });
 export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 
+
 // ================================================================
-// Forward type declarations for circular references
+// II. Forward type declarations for circular references
 // ================================================================
+
+export type SpellTagType = SpellTagTypeBase & {
+  abilities?: AbilityType[];
+  passives?: PassiveType[];
+  stigmas?: StigmaType[];
+};
+
 export type ClassType = ClassTypeBase & {
   tags?: TagType[];
   abilities?: AbilityType[];
@@ -73,16 +221,26 @@ export type TagType = TagTypeBase & {
 };
 
 export type AbilityType = AbilityTypeBase & {
+  class: ClassType;
+  spellTag?: SpellTagType[];
   specialtyChoices?: SpecialtyChoiceType[];
   buildAbilities?: BuildAbilityType[];
 };
 
-export type SpecialtyChoiceType = {
-  id: number;
-  description: string;
-  unlockLevel: number;
-  abilityId: number;
+export type SpecialtyChoiceType = SpecialtyChoiceTypeBase & {
   ability: AbilityType;
+};
+
+export type PassiveType = PassiveTypeBase & {
+  class: ClassType;
+  spellTag?: SpellTagType[];
+  buildPassives?: BuildPassiveType[];
+};
+
+export type StigmaType = StigmaTypeBase & {
+  spellTag?: SpellTagType[];
+  classes?: ClassType[];
+  buildStigmas?: BuildStigmaType[];
 };
 
 export type BuildAbilityType = {
@@ -90,6 +248,7 @@ export type BuildAbilityType = {
   buildId: number;
   abilityId: number;
   level: number;
+  maxLevel: number;
   activeSpecialtyChoiceIds: number[];
   build: BuildType;
   ability: AbilityType;
@@ -100,39 +259,20 @@ export type BuildPassiveType = {
   buildId: number;
   passiveId: number;
   level: number;
+  maxLevel: number;
   build: BuildType;
   passive: PassiveType;
-};
-
-export type PassiveType = {
-  id: number;
-  name: string;
-  iconUrl?: string;
-  description?: string;
-  maxLevel: number;
-  classId: number;
-  buildPassives?: BuildPassiveType[];
 };
 
 export type BuildStigmaType = {
   id: number;
   buildId: number;
   stigmaId: number;
+  level: number;
+  maxLevel: number;
   stigmaCost: number;
   build: BuildType;
   stigma: StigmaType;
-};
-
-export type StigmaType = {
-  id: number;
-  name: string;
-  iconUrl?: string;
-  description?: string;
-  level: number;
-  isShared: boolean;
-  baseCost: number;
-  classes?: ClassType[];
-  buildStigmas?: BuildStigmaType[];
 };
 
 export type BuildType = BuildTypeBase & {
@@ -148,6 +288,15 @@ export type BuildType = BuildTypeBase & {
 // ================================================================
 
 // ---------------------------
+// SpellTag (references Ability, Passive, Stigma)
+// ---------------------------
+export const SpellTagSchema: z.ZodType<SpellTagType> = SpellTagSchemaBase.extend({
+  abilities: z.lazy(() => z.array(AbilitySchema)).optional(),
+  passives: z.lazy(() => z.array(PassiveSchema)).optional(),
+  stigmas: z.lazy(() => z.array(StigmaSchema)).optional(),
+}) as z.ZodType<SpellTagType>;
+
+// ---------------------------
 // Tag (references Class)
 // ---------------------------
 export const TagSchema: z.ZodType<TagType> = TagSchemaBase.extend({
@@ -157,11 +306,7 @@ export const TagSchema: z.ZodType<TagType> = TagSchemaBase.extend({
 // ---------------------------
 // SpecialtyChoice (references Ability)
 // ---------------------------
-export const SpecialtyChoiceSchema: z.ZodType<SpecialtyChoiceType> = z.object({
-  id: z.number(),
-  description: z.string(),
-  unlockLevel: z.number(),
-  abilityId: z.number(),
+export const SpecialtyChoiceSchema: z.ZodType<SpecialtyChoiceType> = SpecialtyChoiceSchemaBase.extend({
   ability: z.lazy(() => AbilitySchema),
 }) as z.ZodType<SpecialtyChoiceType>;
 
@@ -173,18 +318,22 @@ export const BuildAbilitySchema: z.ZodType<BuildAbilityType> = z.object({
   buildId: z.number(),
   abilityId: z.number(),
   level: z.number().default(1),
+  maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   activeSpecialtyChoiceIds: z.array(z.number()),
   build: z.lazy(() => BuildSchema),
   ability: z.lazy(() => AbilitySchema),
 }) as z.ZodType<BuildAbilityType>;
 
 // ---------------------------
-// Ability (references SpecialtyChoice and BuildAbility)
+// Ability (references SpecialtyChoice, BuildAbility, SpellTag, Class)
 // ---------------------------
 export const AbilitySchema: z.ZodType<AbilityType> = AbilitySchemaBase.extend({
+  class: z.lazy(() => ClassSchema),
+  spellTag: z.array(SpellTagSchema).optional(), // Ajouté
   specialtyChoices: z.array(SpecialtyChoiceSchema).optional(),
   buildAbilities: z.lazy(() => z.array(BuildAbilitySchema)).optional(),
 }) as z.ZodType<AbilityType>;
+
 
 // ---------------------------
 // BuildPassive (references Build and Passive)
@@ -194,20 +343,17 @@ export const BuildPassiveSchema: z.ZodType<BuildPassiveType> = z.object({
   buildId: z.number(),
   passiveId: z.number(),
   level: z.number().default(1),
+  maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   build: z.lazy(() => BuildSchema),
   passive: z.lazy(() => PassiveSchema),
 }) as z.ZodType<BuildPassiveType>;
 
 // ---------------------------
-// Passive (references BuildPassive)
+// Passive (references BuildPassive, SpellTag, Class)
 // ---------------------------
-export const PassiveSchema: z.ZodType<PassiveType> = z.object({
-  id: z.number(),
-  name: z.string(),
-  iconUrl: z.string().optional(),
-  description: z.string().optional(),
-  maxLevel: z.number().default(10),
-  classId: z.number(),
+export const PassiveSchema: z.ZodType<PassiveType> = PassiveSchemaBase.extend({
+  class: z.lazy(() => ClassSchema),
+  spellTag: z.array(SpellTagSchema).optional(), // Ajouté
   buildPassives: z.lazy(() => z.array(BuildPassiveSchema)).optional(),
 }) as z.ZodType<PassiveType>;
 
@@ -218,22 +364,18 @@ export const BuildStigmaSchema: z.ZodType<BuildStigmaType> = z.object({
   id: z.number(),
   buildId: z.number(),
   stigmaId: z.number(),
+  level: z.number().default(1),
+  maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   stigmaCost: z.number().default(10),
   build: z.lazy(() => BuildSchema),
   stigma: z.lazy(() => StigmaSchema),
 }) as z.ZodType<BuildStigmaType>;
 
 // ---------------------------
-// Stigma (references Class and BuildStigma)
+// Stigma (references Class, BuildStigma, SpellTag)
 // ---------------------------
-export const StigmaSchema: z.ZodType<StigmaType> = z.object({
-  id: z.number(),
-  name: z.string(),
-  iconUrl: z.string().optional(),
-  description: z.string().optional(),
-  level: z.number().default(1),
-  isShared: z.boolean().default(false),
-  baseCost: z.number().default(10),
+export const StigmaSchema: z.ZodType<StigmaType> = StigmaSchemaBase.extend({
+  spellTag: z.array(SpellTagSchema).optional(), // Ajouté
   classes: z.array(z.lazy(() => ClassSchema)).optional(),
   buildStigmas: z.lazy(() => z.array(BuildStigmaSchema)).optional(),
 }) as z.ZodType<StigmaType>;
