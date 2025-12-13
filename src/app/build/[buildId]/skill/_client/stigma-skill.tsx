@@ -54,15 +54,16 @@ export const StigmaSkill = ({
     }
   }, [currentLevel, isSelectedForShortcut, isInBuild, setSelectedSkill]);
 
-  const selected = onSelect ? isSelected : localSelected;
-
   // Reset click tracking when selection changes or when details are shown
   useEffect(() => {
     if (!isSelectedForShortcut) {
       // If details are already shown, we can directly select for shortcut on next click
+      const selected = onSelect ? isSelected : localSelected;
       hasClickedOnceRef.current = selected;
     }
-  }, [isSelectedForShortcut, selected]);
+  }, [isSelectedForShortcut, isSelected, localSelected, onSelect]);
+
+  const selected = onSelect ? isSelected : localSelected;
 
   const [{ isDragging }, drag] = useDrag({
     type: "skill",

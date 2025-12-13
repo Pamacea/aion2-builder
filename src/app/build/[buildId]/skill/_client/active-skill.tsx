@@ -34,15 +34,16 @@ export const ActiveSkill = ({
     selectedSkill.ability?.id === ability.id && 
     selectedSkill.buildAbility?.id === buildAbility?.id;
 
-  const selected = onSelect ? isSelected : localSelected;
-
   // Reset click tracking when selection changes or when details are shown
   useEffect(() => {
     if (!isSelectedForShortcut) {
       // If details are already shown, we can directly select for shortcut on next click
+      const selected = onSelect ? isSelected : localSelected;
       hasClickedOnceRef.current = selected;
     }
-  }, [isSelectedForShortcut, selected]);
+  }, [isSelectedForShortcut, isSelected, localSelected, onSelect]);
+
+  const selected = onSelect ? isSelected : localSelected;
 
   // Deselect skill automatically if level drops to 0
   useEffect(() => {
