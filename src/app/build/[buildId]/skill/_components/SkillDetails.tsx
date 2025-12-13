@@ -71,7 +71,14 @@ export const SkillDetails = ({
       <SkillTag ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
 
       {/* Description */}
-      <SkillDesc ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
+      <SkillDesc
+        ability={targetAbility}
+        passive={targetPassive}
+        stigma={targetStigma}
+        buildAbility={buildAbility}
+        buildPassive={buildPassive}
+        buildStigma={buildStigma}
+      />
 
       {/* Specialty Choices (only for abilities) */}
       {targetAbility && (

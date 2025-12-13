@@ -78,7 +78,6 @@ model Ability {
   name        String
   iconUrl     String?
   description String?
-  effect      String?
   baseCost Int @default(1)
   baseCostModifier Int @default(2)
 
@@ -86,9 +85,11 @@ model Ability {
 
   // Stats et Coûts
   damageMin         Int?
-  damageMinModifier Int?
+  damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
+  damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
   damageMax         Int?
-  damageMaxModifier Int?
+  damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
+  damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
 
   staggerDamage Int?
 
@@ -139,7 +140,6 @@ model Passive {
   name        String
   iconUrl     String?
   description String?
-  effect      String?
   baseCost Int @default(1)
   baseCostModifier Int @default(2)
 
@@ -147,24 +147,32 @@ model Passive {
 
   // Stats et Coûts
   damageMin         Int?
-  damageMinModifier Int?
+  damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
+  damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
   damageMax         Int?
-  damageMaxModifier Int?
+  damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
+  damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
   damageBoost       Int?
   damageTolerance   Int?
 
   healMin      Int?
   healMinModifier Int?
+  healMinModifiers Json? // Tableau de modifiers par niveau
   healMax      Int?
   healMaxModifier Int?
+  healMaxModifiers Json? // Tableau de modifiers par niveau
   healBoost    Int?
   healBoostModifier Int?
+  healBoostModifiers Int? // Tableau de modifiers par niveau
   incomingHeal Int?
   incomingHealModifier Int?
+  incomingHealModifiers Int? // Tableau de modifiers par niveau
   maxHP        Int?
   maxHPModifier Int?
+  maxHPModifiers Json? // Tableau de modifiers par niveau
   maxMP        Int?
   maxMPModifier Int?
+  maxMPModifiers Json? // Tableau de modifiers par niveau
 
   criticalHitResist  Int?
   criticalHitResistModifier Int?
@@ -217,9 +225,11 @@ model Stigma {
 
    // Stats et Coûts
   damageMin         Int?
-  damageMinModifier Int?
+  damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
+  damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
   damageMax         Int?
-  damageMaxModifier Int?
+  damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
+  damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
 
   staggerDamage Int?
 

@@ -65,13 +65,14 @@
         {
           name: "Earth's Retribution",
           iconUrl: "EarthsRetribution.webp",
-          description: "Deals Earth Damage to a target within 20m and restores 110MP.",
-          effect: "Deals x Earth Damage to a target within 20m and restores 110MP.",
+          description: "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m and restores 110MP.",
           
           damageMin: 371,
-          damageMinModifier: 18,
+          damageMinModifier: undefined, // Utilise damageMinModifiers à la place
+          damageMinModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
           damageMax: 390,
-          damageMaxModifier: 18,
+          damageMaxModifier: undefined, // Utilise damageMaxModifiers à la place
+          damageMaxModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
           staggerDamage: 100,
           manaCost: 0,
           manaRegen: 0,
@@ -116,8 +117,7 @@
         {
           name: "Warm Benediction",
           iconUrl: "WarmBenediction.webp",
-          description: "Increase the caster's ax HP by x% and MAX MP by x.",
-          effect: "Increase the caster's ax HP by x% and MAX MP by x.",
+          description: "Increase the caster's max HP by {{MAX_HP_PERCENTAGE}}% and MAX MP by {{MAX_MP_FLAT}}.",
 
           maxHP: 6,
           maxHPModifier: 1,

@@ -44,12 +44,19 @@ export const AbilitySchemaBase = z.object({
   name: z.string(),
   iconUrl: z.string().nullish(),
   description: z.string().nullish(),
-  effect: z.string().nullish(),
 
   damageMin: z.number().nullish(),
   damageMinModifier: z.number().nullish(),
+  damageMinModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   damageMax: z.number().nullish(),
   damageMaxModifier: z.number().nullish(),
+  damageMaxModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   staggerDamage: z.number().nullish(),
 
   manaCost: z.number().nullish(),
@@ -89,30 +96,53 @@ export const PassiveSchemaBase = z.object({
   name: z.string(),
   iconUrl: z.string().nullish(),
   description: z.string().nullish(),
-  effect: z.string().nullish(),
   
   maxLevel: z.number().default(10),
 
   // Stats
   damageMin: z.number().nullish(),
   damageMinModifier: z.number().nullish(),
+  damageMinModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   damageMax: z.number().nullish(),
   damageMaxModifier: z.number().nullish(),
+  damageMaxModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   damageBoost: z.number().nullish(),
   damageTolerance: z.number().nullish(),
 
   healMin: z.number().nullish(),
   healMinModifier: z.number().nullish(),
+  healMinModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   healMax: z.number().nullish(),
   healMaxModifier: z.number().nullish(),
+  healMaxModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   healBoost: z.number().nullish(),
   healBoostModifier: z.number().nullish(),
   incomingHeal: z.number().nullish(),
   incomingHealModifier: z.number().nullish(),
   maxHP: z.number().nullish(),
   maxHPModifier: z.number().nullish(),
+  maxHPModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   maxMP: z.number().nullish(),
   maxMPModifier: z.number().nullish(),
+  maxMPModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
 
   criticalHitResist: z.number().nullish(),
   criticalHitResistModifier: z.number().nullish(),
@@ -159,8 +189,16 @@ export const StigmaSchemaBase = z.object({
   // Stats et Coûts
   damageMin: z.number().nullish(),
   damageMinModifier: z.number().nullish(),
+  damageMinModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
   damageMax: z.number().nullish(),
   damageMaxModifier: z.number().nullish(),
+  damageMaxModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(), // Tableau de modifiers par niveau (JSON de Prisma)
 
   staggerDamage: z.number().nullish(),
 
