@@ -179,3 +179,19 @@ html, body {
   height: 0px;     /* empêche la barre horizontale */
 }
 
+/* Force dark background for sonner toasts */
+[data-sonner-toast],
+[data-sonner-toast][data-styled="true"],
+[data-sonner-toast] > div {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Center toast vertically */
+[data-sonner-toaster] {
+  top: 85% !important;
+  right: 3.5% !important;
+  bottom: auto !important;
+}
+

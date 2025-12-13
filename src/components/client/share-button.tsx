@@ -1,12 +1,38 @@
 import Image from "next/image";
-import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 
 export const ShareButton = () => {
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    toast.success('Link copied to clipboard');
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+      await navigator.clipboard.writeText(url);
+      toast.success('Lien copié', {
+        description: 'Le lien du build a été copié dans le presse-papiers',
+        duration: 3000,
+        classNames: {
+          description: 'text-sm !text-foreground',
+          toast: '!bg-background/90 !text-foreground !border-y-2 !border-primary !rounded-none',
+        },
+        style: {
+          background: 'hsl(var(--background))',
+          color: 'hsl(var(--foreground))',
+        },
+      });
+    } catch {
+      toast.error('Erreur', {
+        description: 'Impossible de copier le lien',
+        duration: 3000,
+        classNames: {
+          description: 'text-sm text-foreground/80',
+          toast: '!bg-background !text-foreground',
+        },
+        style: {
+          background: 'hsl(var(--background))',
+          color: 'hsl(var(--foreground))',
+        },
+      });
+    }
   };
 
   return (
