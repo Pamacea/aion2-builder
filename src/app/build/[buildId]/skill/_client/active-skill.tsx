@@ -3,7 +3,7 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
 
@@ -33,6 +33,13 @@ export const ActiveSkill = ({
     selectedSkill.ability?.id === ability.id && 
     selectedSkill.buildAbility?.id === buildAbility?.id;
 
+  // Deselect skill automatically if level drops to 0
+  useEffect(() => {
+    if (isSelectedForShortcut && currentLevel === 0 && isInBuild) {
+      setSelectedSkill(null);
+    }
+  }, [currentLevel, isSelectedForShortcut, isInBuild, setSelectedSkill]);
+
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: {
@@ -42,20 +49,25 @@ export const ActiveSkill = ({
         buildAbility,
       },
     },
-    canDrag: () => isInBuild,
+    canDrag: () => isInBuild && currentLevel > 0, // Cannot drag if level is 0 (locked)
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
   const handleClick = () => {
-    // Handle left click for selection (only if not dragging)
-    if (!isDragging && isInBuild) {
-      setSelectedSkill({
-        type: "ability",
-        ability,
-        buildAbility,
-      });
+    // Handle left click for selection (only if not dragging and not locked)
+    if (!isDragging && isInBuild && currentLevel > 0) {
+      // Toggle selection: if already selected, deselect it
+      if (isSelectedForShortcut) {
+        setSelectedSkill(null);
+      } else {
+        setSelectedSkill({
+          type: "ability",
+          ability,
+          buildAbility,
+        });
+      }
     }
     
     // Also handle the original onSelect if provided
@@ -68,13 +80,18 @@ export const ActiveSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Handle right click for selection
-    if (isInBuild) {
-      setSelectedSkill({
-        type: "ability",
-        ability,
-        buildAbility,
-      });
+    // Handle right click for selection - toggle behavior (only if not locked)
+    if (isInBuild && currentLevel > 0) {
+      // Toggle selection: if already selected, deselect it
+      if (isSelectedForShortcut) {
+        setSelectedSkill(null);
+      } else {
+        setSelectedSkill({
+          type: "ability",
+          ability,
+          buildAbility,
+        });
+      }
     }
   };
 
@@ -101,6 +118,8 @@ export const ActiveSkill = ({
         width={48}
         height={48}
         className={`w-full h-full rounded-md object-cover border-2 ${
+          currentLevel === 0 ? "grayscale opacity-50" : ""
+        } ${
           selected
             ? "border-yellow-500"
             : isInBuild
@@ -108,8 +127,20 @@ export const ActiveSkill = ({
               : "border-yellow-600/30"
         }`}
       />
-      {/* Level badge */}
-      {isInBuild && (
+      {/* Lock icon when level is 0 */}
+      {currentLevel === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Image
+            src="/icons/lock-logo.webp"
+            alt="Lock Icon"
+            width={24}
+            height={24}
+            className="opacity-80"
+          />
+        </div>
+      )}
+      {/* Level badge - only show if level > 0 */}
+      {isInBuild && currentLevel > 0 && (
         <div className="absolute bottom-1 right-1 text-foreground text-xs font-bold pointer-events-none leading-none">
           Lv.{currentLevel}
         </div>

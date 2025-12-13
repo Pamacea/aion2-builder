@@ -15,6 +15,7 @@ import { SkillDesc } from "../_client/skill-desc";
 import { SkillManaCost } from "../_client/skill-mana-cost";
 import { SkillName } from "../_client/skill-name";
 import { SkillRange } from "../_client/skill-range";
+import { SkillStaggerDamage } from "../_client/skill-stagger-damage";
 import { SkillTarget } from "../_client/skill-target";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 import { AvailableSpeciality } from "./AvaibleSpeciality";
@@ -82,6 +83,13 @@ export const SkillDetails = ({
         buildAbility={buildAbility}
         buildPassive={buildPassive}
         buildStigma={buildStigma}
+      />
+
+      {/* Stagger Damage */}
+      <SkillStaggerDamage
+        ability={targetAbility}
+        passive={targetPassive}
+        stigma={targetStigma}
       />
 
       {/* Specialty Choices (only for abilities) */}

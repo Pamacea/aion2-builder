@@ -65,7 +65,7 @@ const isSameSkill = (
 };
 
 export const Shortcut = () => {
-  const { build, updateShortcuts } = useBuildStore();
+  const { build, updateShortcuts, addStigma } = useBuildStore();
   const [shortcuts, setShortcuts] = useState<
     Record<number, ShortcutSkill | undefined>
   >({});
@@ -170,11 +170,44 @@ export const Shortcut = () => {
   }, [build]);
 
   // Sync loaded shortcuts to local state and ensure first ability is in slot 11
+  // Also update shortcuts that have skills without buildAbility/buildStigma
   useEffect(() => {
     isInitialLoad.current = true;
     // Use setTimeout to avoid synchronous setState in effect
     const timeoutId = setTimeout(() => {
       const updatedShortcuts = { ...loadedShortcuts };
+      
+      // Update shortcuts that have skills without buildAbility/buildStigma
+      // (skills that were added to shortcuts before being added to build)
+      Object.keys(updatedShortcuts).forEach((key) => {
+        const slotId = Number(key);
+        const skill = updatedShortcuts[slotId];
+        if (!skill) return;
+
+        if (skill.type === "ability" && skill.ability && !skill.buildAbility) {
+          // Find buildAbility for this ability
+          const buildAbility = build?.abilities?.find(
+            (ba) => ba.abilityId === skill.ability?.id
+          );
+          if (buildAbility) {
+            updatedShortcuts[slotId] = {
+              ...skill,
+              buildAbility,
+            };
+          }
+        } else if (skill.type === "stigma" && skill.stigma && !skill.buildStigma) {
+          // Find buildStigma for this stigma
+          const buildStigma = build?.stigmas?.find(
+            (bs) => bs.stigmaId === skill.stigma?.id
+          );
+          if (buildStigma) {
+            updatedShortcuts[slotId] = {
+              ...skill,
+              buildStigma,
+            };
+          }
+        }
+      });
       
       // Ensure first ability is always in slot 11
       if (firstAbility) {
@@ -200,7 +233,7 @@ export const Shortcut = () => {
     }, 0);
     
     return () => clearTimeout(timeoutId);
-  }, [loadedShortcuts, firstAbility]);
+  }, [loadedShortcuts, firstAbility, build?.abilities, build?.stigmas]);
 
   // Save shortcuts to build when they change (but not during initial load)
   useEffect(() => {
@@ -218,6 +251,7 @@ export const Shortcut = () => {
     Object.entries(shortcuts).forEach(([slotIdStr, skill]) => {
       if (!skill) return;
 
+      // Only save skills that are in the build (have buildAbility or buildStigma)
       if (skill.type === "ability" && skill.ability && skill.buildAbility) {
         shortcutsToSaveFormatted[slotIdStr] = {
           type: "ability",
@@ -229,6 +263,8 @@ export const Shortcut = () => {
           stigmaId: skill.stigma.id,
         };
       }
+      // If skill doesn't have buildAbility/buildStigma, it won't be saved
+      // It will be added to the build and then saved on next update
     });
 
     updateShortcuts(
@@ -289,6 +325,20 @@ export const Shortcut = () => {
       if (isStigmaOnlySlot(slotId) && skill && skill.type !== "stigma") {
         // Don't allow dropping abilities in stigma-only slots
         return prev;
+      }
+
+      // If trying to drop a stigma in non-stigma-only slots, prevent it
+      if (!isStigmaOnlySlot(slotId) && skill && skill.type === "stigma") {
+        // Don't allow dropping stigmas in non-stigma-only slots
+        return prev;
+      }
+
+      // If dropping a stigma that's not in the build, add it to the build first
+      if (skill && skill.type === "stigma" && skill.stigma && !skill.buildStigma) {
+        // Add stigma to build with level 0
+        addStigma(skill.stigma.id, 0);
+        // Note: The build will be updated and the shortcut will be reloaded
+        // For now, we'll still place it in the slot, but it will need buildStigma on next render
       }
 
       // If the skill is being moved from another slot, clear the source slot

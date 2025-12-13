@@ -71,6 +71,8 @@ export const PassiveSkill = ({
         width={48}
         height={48}
         className={`w-full h-full rounded-md object-cover border-2 ${
+          currentLevel === 0 ? "grayscale opacity-50" : ""
+        } ${
           selected
             ? "border-yellow-500"
             : isInBuild
@@ -78,8 +80,20 @@ export const PassiveSkill = ({
               : "border-yellow-600/30"
         }`}
       />
-      {/* Level badge */}
-      {isInBuild && (
+      {/* Lock icon when level is 0 */}
+      {currentLevel === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Image
+            src="/icons/lock-logo.webp"
+            alt="Lock Icon"
+            width={24}
+            height={24}
+            className="opacity-80"
+          />
+        </div>
+      )}
+      {/* Level badge - only show if level > 0 */}
+      {isInBuild && currentLevel > 0 && (
         <div className="absolute bottom-1 right-1 text-foreground text-xs font-bold pointer-events-none leading-none">
           Lv.{currentLevel}
         </div>

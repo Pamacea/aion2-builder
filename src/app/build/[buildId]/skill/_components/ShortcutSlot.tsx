@@ -1,6 +1,7 @@
 "use client";
 
 import { ABILITY_PATH } from "@/constants/paths";
+import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType, BuildPassiveType, BuildStigmaType, PassiveType, StigmaType } from "@/types/schema";
 import Image from "next/image";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
@@ -26,6 +27,7 @@ type ShortcutSlotProps = {
 
 export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
+  const { build } = useBuildStore();
   
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
@@ -53,10 +55,10 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
         }
         return false;
       }
-      // Only accept ability and stigma, reject passive
+      // Non-stigma-only slots can only accept abilities (not stigmas)
       const skillToDrop = item?.skill;
       if (skillToDrop && "type" in skillToDrop) {
-        return skillToDrop.type === "ability" || skillToDrop.type === "stigma";
+        return skillToDrop.type === "ability";
       }
       return false;
     },
@@ -68,9 +70,16 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
       const sourceSlotId = item?.slotId; // If present, this means the drag came from another slot
       
       if (skillToDrop && "type" in skillToDrop) {
-        // Only allow ability and stigma, not passive
-        if (skillToDrop.type === "ability" || skillToDrop.type === "stigma") {
-          onDrop(slotId, skillToDrop, sourceSlotId);
+        // Stigma-only slots can only accept stigmas
+        if (isStigmaOnly) {
+          if (skillToDrop.type === "stigma") {
+            onDrop(slotId, skillToDrop, sourceSlotId);
+          }
+        } else {
+          // Non-stigma-only slots can only accept abilities
+          if (skillToDrop.type === "ability") {
+            onDrop(slotId, skillToDrop, sourceSlotId);
+          }
         }
       }
     },
@@ -89,13 +98,19 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     if (!skill) return null;
     
     if (skill.ability) {
-      return `${ABILITY_PATH}${skill.ability.class?.name || "default"}/${skill.ability.iconUrl || "default-icon.webp"}`;
+      const className = skill.ability.class?.name || build?.class?.name;
+      if (!className) return null;
+      return `${ABILITY_PATH}${className}/${skill.ability.iconUrl || "default-icon.webp"}`;
     }
     if (skill.passive) {
-      return `${ABILITY_PATH}${skill.passive.class?.name || "default"}/${skill.passive.iconUrl || "default-icon.webp"}`;
+      const className = skill.passive.class?.name || build?.class?.name;
+      if (!className) return null;
+      return `${ABILITY_PATH}${className}/${skill.passive.iconUrl || "default-icon.webp"}`;
     }
     if (skill.stigma) {
-      const className = skill.stigma.classes?.[0]?.name || "default";
+      // Use build class name first, then stigma classes, never use "default"
+      const className = build?.class?.name || skill.stigma.classes?.[0]?.name;
+      if (!className) return null;
       return `${ABILITY_PATH}${className}/${skill.stigma.iconUrl || "default-icon.webp"}`;
     }
     return null;
@@ -106,14 +121,8 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     return skill.ability?.name || skill.passive?.name || skill.stigma?.name || "";
   };
 
-  const getLevel = () => {
-    if (!skill) return null;
-    return skill.buildAbility?.level || skill.buildPassive?.level || skill.buildStigma?.level || null;
-  };
-
   const iconSrc = getIconSrc();
   const skillName = getSkillName();
-  const level = getLevel();
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
@@ -130,9 +139,17 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     }
     
     // If there's a selected skill, place it in this slot
-    if (selectedSkill && (selectedSkill.type === "ability" || selectedSkill.type === "stigma")) {
-      onDrop(slotId, selectedSkill);
-      setSelectedSkill(null); // Clear selection after placing
+    if (selectedSkill) {
+      // Stigma-only slots can only accept stigmas
+      if (isStigmaOnly && selectedSkill.type === "stigma") {
+        onDrop(slotId, selectedSkill);
+        setSelectedSkill(null); // Clear selection after placing
+      }
+      // Non-stigma-only slots can only accept abilities
+      else if (!isStigmaOnly && selectedSkill.type === "ability") {
+        onDrop(slotId, selectedSkill);
+        setSelectedSkill(null); // Clear selection after placing
+      }
     }
   };
 
@@ -143,6 +160,10 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     }
     // Stigma-only slots can only accept stigmas via click
     if (isStigmaOnly && selectedSkill && selectedSkill.type !== "stigma") {
+      return;
+    }
+    // Non-stigma-only slots can only accept abilities via click
+    if (!isStigmaOnly && selectedSkill && selectedSkill.type === "stigma") {
       return;
     }
     // Only handle click if we're not dragging and there's a selected skill
@@ -162,7 +183,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
         transition-all cursor-move
         ${isDragging ? "opacity-50" : ""}
         ${isOver ? "border-orange-500 bg-orange-500/20" : ""}
-        ${skill ? "border-yellow-500/50" : "border-foreground/30"}
+        ${skill ? "border-foreground/80" : "border-foreground/30"}
         ${className}
       `}
       onDoubleClick={() => skill && onClear(slotId)}
@@ -171,20 +192,13 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
       title={skillName || "Empty slot - Drag a skill here"}
     >
       {iconSrc ? (
-        <>
-          <Image
-            src={iconSrc}
-            alt={skillName}
-            width={48}
-            height={48}
-            className="w-full h-full rounded-md object-cover"
-          />
-          {level !== null && level > 0 && (
-            <div className="absolute bottom-0.5 right-1.5 text-xs font-bold text-foreground pointer-events-none">
-              Lv.{level}
-            </div>
-          )}
-        </>
+        <Image
+          src={iconSrc}
+          alt={skillName}
+          width={48}
+          height={48}
+          className="w-full h-full rounded-md object-cover"
+        />
       ) : (
         <div className="text-foreground/20 text-xs">+</div>
       )}
