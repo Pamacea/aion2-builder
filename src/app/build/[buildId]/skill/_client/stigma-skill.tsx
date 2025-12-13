@@ -4,7 +4,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
 
@@ -26,6 +26,7 @@ export const StigmaSkill = ({
   const { build } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
+  const hasClickedOnceRef = useRef(false);
 
   // Get class name from build first, then from stigma classes, never use "default"
   const classNameForPath = build?.class?.name || stigma.classes?.[0]?.name;
@@ -53,6 +54,16 @@ export const StigmaSkill = ({
     }
   }, [currentLevel, isSelectedForShortcut, isInBuild, setSelectedSkill]);
 
+  const selected = onSelect ? isSelected : localSelected;
+
+  // Reset click tracking when selection changes or when details are shown
+  useEffect(() => {
+    if (!isSelectedForShortcut) {
+      // If details are already shown, we can directly select for shortcut on next click
+      hasClickedOnceRef.current = selected;
+    }
+  }, [isSelectedForShortcut, selected]);
+
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: {
@@ -74,27 +85,51 @@ export const StigmaSkill = ({
   });
 
   const handleClick = () => {
-    // Handle left click for selection (only if not dragging and not locked)
+    // Handle left click (only if not dragging and not locked)
     // Allow selection if not in build (for shortcut placement)
     // But prevent selection if in build with level 0 (locked)
     if (!isDragging && (!isInBuild || currentLevel > 0)) {
-      // Toggle selection: if already selected, deselect it
+      // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
+        hasClickedOnceRef.current = selected; // Keep track of details state
       } else {
-        setSelectedSkill({
-          type: "stigma",
-          stigma,
-          buildStigma,
-        });
+        // If details are already shown, directly select for shortcut
+        if (selected) {
+          setSelectedSkill({
+            type: "stigma",
+            stigma,
+            buildStigma,
+          });
+          hasClickedOnceRef.current = false;
+        } else {
+          // First click: show details only, don't select for shortcut
+          if (!hasClickedOnceRef.current) {
+            hasClickedOnceRef.current = true;
+            // Show details via onSelect
+            if (onSelect) {
+              onSelect();
+            } else {
+              setLocalSelected(!localSelected);
+            }
+          } else {
+            // Second click: select for shortcut
+            setSelectedSkill({
+              type: "stigma",
+              stigma,
+              buildStigma,
+            });
+            hasClickedOnceRef.current = false;
+          }
+        }
       }
-    }
-
-    // Also handle the original onSelect if provided
-    if (onSelect) {
-      onSelect();
     } else {
-      setLocalSelected(!localSelected);
+      // If not in build or locked, just show details
+      if (onSelect) {
+        onSelect();
+      } else {
+        setLocalSelected(!localSelected);
+      }
     }
   };
 
@@ -107,17 +142,17 @@ export const StigmaSkill = ({
       // Toggle selection: if already selected, deselect it
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
+        hasClickedOnceRef.current = selected; // Keep track of details state
       } else {
         setSelectedSkill({
           type: "stigma",
           stigma,
           buildStigma,
         });
+        hasClickedOnceRef.current = false;
       }
     }
   };
-
-  const selected = onSelect ? isSelected : localSelected;
 
   // Create ref callback for drag
   const dragRef = (node: HTMLDivElement | null) => {

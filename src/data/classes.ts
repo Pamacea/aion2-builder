@@ -86,7 +86,7 @@
           specialtyChoices: [
             {
               description: "+20% MP restored",
-              unlockLevel: 4,
+              unlockLevel: 8,
               abilityId: 1,
             },
             {
@@ -96,12 +96,12 @@
             },
             {
               description: "+50% Multi-hit on hit",
-              unlockLevel: 12,
+              unlockLevel: 8,
               abilityId: 1,
             },
             {
               description: "-7s [Bolt] cooldown on Landing [Discharge]",
-              unlockLevel: 16,
+              unlockLevel: 12,
               abilityId: 1,
             },
             {

@@ -3,7 +3,7 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
 
@@ -24,6 +24,7 @@ export const ActiveSkill = ({
 }: ActiveSkillProps) => {
   const [localSelected, setLocalSelected] = useState(isSelected);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
+  const hasClickedOnceRef = useRef(false);
 
   const currentLevel = buildAbility?.level ?? 0;
   const isInBuild = buildAbility !== undefined;
@@ -32,6 +33,16 @@ export const ActiveSkill = ({
   const isSelectedForShortcut = selectedSkill?.type === "ability" && 
     selectedSkill.ability?.id === ability.id && 
     selectedSkill.buildAbility?.id === buildAbility?.id;
+
+  const selected = onSelect ? isSelected : localSelected;
+
+  // Reset click tracking when selection changes or when details are shown
+  useEffect(() => {
+    if (!isSelectedForShortcut) {
+      // If details are already shown, we can directly select for shortcut on next click
+      hasClickedOnceRef.current = selected;
+    }
+  }, [isSelectedForShortcut, selected]);
 
   // Deselect skill automatically if level drops to 0
   useEffect(() => {
@@ -56,25 +67,49 @@ export const ActiveSkill = ({
   });
 
   const handleClick = () => {
-    // Handle left click for selection (only if not dragging and not locked)
+    // Handle left click (only if not dragging and not locked)
     if (!isDragging && isInBuild && currentLevel > 0) {
-      // Toggle selection: if already selected, deselect it
+      // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
+        hasClickedOnceRef.current = selected; // Keep track of details state
       } else {
-        setSelectedSkill({
-          type: "ability",
-          ability,
-          buildAbility,
-        });
+        // If details are already shown, directly select for shortcut
+        if (selected) {
+          setSelectedSkill({
+            type: "ability",
+            ability,
+            buildAbility,
+          });
+          hasClickedOnceRef.current = false;
+        } else {
+          // First click: show details only, don't select for shortcut
+          if (!hasClickedOnceRef.current) {
+            hasClickedOnceRef.current = true;
+            // Show details via onSelect
+            if (onSelect) {
+              onSelect();
+            } else {
+              setLocalSelected(!localSelected);
+            }
+          } else {
+            // Second click: select for shortcut
+            setSelectedSkill({
+              type: "ability",
+              ability,
+              buildAbility,
+            });
+            hasClickedOnceRef.current = false;
+          }
+        }
       }
-    }
-    
-    // Also handle the original onSelect if provided
-    if (onSelect) {
-      onSelect();
     } else {
-      setLocalSelected(!localSelected);
+      // If not in build or locked, just show details
+      if (onSelect) {
+        onSelect();
+      } else {
+        setLocalSelected(!localSelected);
+      }
     }
   };
 
@@ -85,17 +120,17 @@ export const ActiveSkill = ({
       // Toggle selection: if already selected, deselect it
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
+        hasClickedOnceRef.current = selected; // Keep track of details state
       } else {
         setSelectedSkill({
           type: "ability",
           ability,
           buildAbility,
         });
+        hasClickedOnceRef.current = false;
       }
     }
   };
-
-  const selected = onSelect ? isSelected : localSelected;
 
   // Create ref callback for drag
   const dragRef = (node: HTMLDivElement | null) => {
