@@ -41,14 +41,14 @@ export const ResetSkillButton = () => {
 
     if (selectedSkill.buildAbility) {
       const abilityId = selectedSkill.buildAbility.abilityId;
-      // Reset to level 1 (minimum level) - this will automatically filter specialtyChoices
-      updateAbilityLevel(abilityId, 1);
+      // Reset to level 0 (minimum level) - this will automatically filter specialtyChoices
+      updateAbilityLevel(abilityId, 0);
     } else if (selectedSkill.buildPassive) {
       const passiveId = selectedSkill.buildPassive.passiveId;
-      updatePassiveLevel(passiveId, 1);
+      updatePassiveLevel(passiveId, 0);
     } else if (selectedSkill.buildStigma) {
       const stigmaId = selectedSkill.buildStigma.stigmaId;
-      updateStigmaLevel(stigmaId, 1);
+      updateStigmaLevel(stigmaId, 0);
     }
   };
 

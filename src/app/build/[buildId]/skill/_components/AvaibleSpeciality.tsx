@@ -53,11 +53,15 @@ export const AvailableSpeciality = ({
       <h4 className="text-sm font-semibold text-foreground pb-2">Speciality Choices</h4>
       {sortedSpecialtyChoices.map((specialtyChoice) => {
         const isActive = activeIds.includes(specialtyChoice.id);
-        // Check if locked by level (unlockLevel > currentLevel)
-        const isLockedByLevel = abilityLevel !== undefined && abilityLevel < specialtyChoice.unlockLevel;
+        // If ability is not in build (no buildAbility), always lock specialty choices
+        // If level is 0, always lock specialty choices
+        // Otherwise, check if level is below unlock level
+        const isLockedByNotInBuild = !buildAbility;
+        const isLockedByLevel = abilityLevel !== undefined && (abilityLevel === 0 || abilityLevel < specialtyChoice.unlockLevel);
         // Check if locked by max reached (already have 3 active and this one is not active)
         const isLockedByMax = !isActive && !canActivateMore;
-        const isLocked = isLockedByLevel || isLockedByMax;
+        // Specialty choice is locked if not in build, level is 0, level is too low, or max reached
+        const isLocked = isLockedByNotInBuild || isLockedByLevel || isLockedByMax;
         
         return (
           <div

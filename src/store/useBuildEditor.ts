@@ -134,7 +134,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       if (!build) return;
 
       // Update the build with the new class data
-      // Only include the base class properties (exclude nested arrays to avoid circular refs)
+      // Include abilities, passives, and stigmas so they're available for the skill page
       const classData = {
         id: newClass.id,
         name: newClass.name,
@@ -143,6 +143,9 @@ export const useBuildStore = create<BuildState>((set, get) => {
         characterUrl: newClass.characterUrl,
         description: newClass.description,
         tags: newClass.tags,
+        abilities: newClass.abilities || [],
+        passives: newClass.passives || [],
+        stigmas: newClass.stigmas || [],
       };
 
       // Clear abilities, passives, and stigmas since they're class-specific
@@ -203,7 +206,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // ABILITY MANAGEMENT
     // ==========================================================
 
-    addAbility: (abilityId, level = 1) => {
+    addAbility: (abilityId, level = 0) => {
       const build = get().build;
       if (isStarterBuild(build) || !build) return;
 
@@ -253,10 +256,10 @@ export const useBuildStore = create<BuildState>((set, get) => {
       const specialtyChoice = classAbility.specialtyChoices?.find((sc) => sc.id === specialtyChoiceId);
       if (!specialtyChoice) return;
       
-      // Check if trying to activate a locked specialtyChoice (level too low)
+      // Check if trying to activate a locked specialtyChoice (level is 0 or too low)
       const isActive = buildAbility.activeSpecialtyChoiceIds.includes(specialtyChoiceId);
-      if (!isActive && buildAbility.level < specialtyChoice.unlockLevel) {
-        // Cannot activate: level too low
+      if (!isActive && (buildAbility.level === 0 || buildAbility.level < specialtyChoice.unlockLevel)) {
+        // Cannot activate: level is 0 or too low
         return;
       }
       
@@ -295,7 +298,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // PASSIVE MANAGEMENT
     // ==========================================================
 
-    addPassive: (passiveId, level = 1) => {
+    addPassive: (passiveId, level = 0) => {
       const build = get().build;
       if (isStarterBuild(build) || !build) return;
 
@@ -356,7 +359,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       get().updateBuild({ stigmas });
     },
 
-    addStigma: (stigmaId, level = 1, stigmaCost) => {
+    addStigma: (stigmaId, level = 0, stigmaCost) => {
       const build = get().build;
       if (isStarterBuild(build) || !build) return;
 

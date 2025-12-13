@@ -27,6 +27,7 @@ export default function BuildSkillPage() {
 
   if (loading || !build) return <p>Loading...</p>;
 
+
   return (
     <DndProvider backend={HTML5Backend}>
       <SelectedSkillProvider>

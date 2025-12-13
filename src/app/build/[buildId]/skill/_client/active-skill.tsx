@@ -109,7 +109,7 @@ export const ActiveSkill = ({
         }`}
       />
       {/* Level badge */}
-      {currentLevel > 0 && (
+      {isInBuild && (
         <div className="absolute bottom-1 right-1 text-foreground text-xs font-bold pointer-events-none leading-none">
           Lv.{currentLevel}
         </div>

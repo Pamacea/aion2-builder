@@ -1,12 +1,15 @@
 "use client";
 
-import { BuildAbilityType, BuildPassiveType, BuildStigmaType } from "@/types/schema";
+import { AbilityType, BuildAbilityType, BuildPassiveType, BuildStigmaType, PassiveType, StigmaType } from "@/types/schema";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type SelectedSkill = {
   buildAbility?: BuildAbilityType;
   buildPassive?: BuildPassiveType;
   buildStigma?: BuildStigmaType;
+  ability?: AbilityType;
+  passive?: PassiveType;
+  stigma?: StigmaType;
 } | null;
 
 type SelectedSkillContextType = {

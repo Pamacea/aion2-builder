@@ -18,9 +18,11 @@ export const SpecialtyChoice = ({
   isMaxReached = false,
   className = "",
 }: SpecialtyChoiceProps) => {
+  // Lock specialty choice if level is undefined (not in build), level is 0, or below unlock level
   const isUnlocked =
-    currentLevel !== undefined && currentLevel >= specialtyChoice.unlockLevel;
-  const isLockedByLevel = !isUnlocked && currentLevel !== undefined;
+    currentLevel !== undefined && currentLevel > 0 && currentLevel >= specialtyChoice.unlockLevel;
+  // Lock if level is undefined (not in build), level is 0, or level is too low
+  const isLockedByLevel = currentLevel === undefined || (currentLevel !== undefined && currentLevel === 0) || (!isUnlocked && currentLevel !== undefined);
   const isLocked = isLockedByLevel || (!isActive && isMaxReached);
 
   return (
@@ -29,8 +31,8 @@ export const SpecialtyChoice = ({
         isActive
           ? "border-yellow-600 bg-yellow-600/10"
           : isLocked
-            ? "border-muted bg-muted/30 opacity-60"
-            : "bg-background/50"
+            ? "border-muted bg-muted/50"
+            : "bg-muted/50"
       } ${className}`}
     >
       <div className="flex gap-4 ">

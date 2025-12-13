@@ -45,9 +45,10 @@ export const SkillDetails = ({
   const buildPassive = selectedSkill?.buildPassive || propBuildPassive;
   const buildStigma = selectedSkill?.buildStigma || propBuildStigma;
   // Determine which skill type we're displaying
-  const targetAbility = buildAbility?.ability || ability;
-  const targetPassive = buildPassive?.passive || passive;
-  const targetStigma = buildStigma?.stigma || stigma;
+  // If skill is selected from context but not in build, use the direct ability/passive/stigma
+  const targetAbility = buildAbility?.ability || selectedSkill?.ability || ability;
+  const targetPassive = buildPassive?.passive || selectedSkill?.passive || passive;
+  const targetStigma = buildStigma?.stigma || selectedSkill?.stigma || stigma;
 
   // If no skill is provided, show empty state
   if (!targetAbility && !targetPassive && !targetStigma) {

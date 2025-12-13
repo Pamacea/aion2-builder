@@ -40,6 +40,7 @@ export const Skill = () => {
   useEffect(() => {
     if (!build || !selectedSkill) return;
 
+    // If skill is already in build, update it
     if (selectedSkill.buildAbility) {
       const updated = findBuildAbility(selectedSkill.buildAbility.abilityId);
       if (updated) {
@@ -61,6 +62,26 @@ export const Skill = () => {
       } else {
         setSelectedSkill(null);
       }
+    } 
+    // If skill is selected but not in build yet, check if it was just added
+    else if (selectedSkill.ability) {
+      const buildAbility = findBuildAbility(selectedSkill.ability.id);
+      if (buildAbility) {
+        // Skill was just added to build, update selectedSkill
+        setSelectedSkill({ buildAbility });
+      }
+    } else if (selectedSkill.passive) {
+      const buildPassive = findBuildPassive(selectedSkill.passive.id);
+      if (buildPassive) {
+        // Skill was just added to build, update selectedSkill
+        setSelectedSkill({ buildPassive });
+      }
+    } else if (selectedSkill.stigma) {
+      const buildStigma = findBuildStigma(selectedSkill.stigma.id);
+      if (buildStigma) {
+        // Skill was just added to build, update selectedSkill
+        setSelectedSkill({ buildStigma });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [build?.abilities, build?.passives, build?.stigmas]);
@@ -77,6 +98,10 @@ export const Skill = () => {
   const selectedBuildAbility = selectedSkill?.buildAbility;
   const selectedBuildPassive = selectedSkill?.buildPassive;
   const selectedBuildStigma = selectedSkill?.buildStigma;
+  // Also get the direct ability/passive/stigma if not in build yet
+  const selectedAbility = selectedSkill?.ability;
+  const selectedPassive = selectedSkill?.passive;
+  const selectedStigma = selectedSkill?.stigma;
 
   const currentLevel =
     selectedBuildAbility?.level ||
@@ -87,6 +112,8 @@ export const Skill = () => {
     selectedBuildAbility?.maxLevel ||
     selectedBuildPassive?.maxLevel ||
     selectedBuildStigma?.maxLevel ||
+    (selectedPassive && "maxLevel" in selectedPassive ? selectedPassive.maxLevel : undefined) ||
+    (selectedStigma && "maxLevel" in selectedStigma ? selectedStigma.maxLevel : undefined) ||
     20;
   const hasSelectedSkill = !!selectedSkill;
 
@@ -94,63 +121,60 @@ export const Skill = () => {
   const handleIncrement = () => {
     if (selectedBuildAbility) {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
-      if (newLevel > 0 && currentLevel === 0) {
-        addAbility(selectedBuildAbility.abilityId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      } else {
-        updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      }
+      updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
+      // The useEffect will handle updating selectedSkill automatically
+    } else if (selectedAbility) {
+      // Ability is selected but not in build yet
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      addAbility(selectedAbility.id, newLevel);
     } else if (selectedBuildPassive) {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
-      if (newLevel > 0 && currentLevel === 0) {
-        addPassive(selectedBuildPassive.passiveId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      } else {
-        updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      }
+      updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
+      // The useEffect will handle updating selectedSkill automatically
+    } else if (selectedPassive) {
+      // Passive is selected but not in build yet
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      addPassive(selectedPassive.id, newLevel);
     } else if (selectedBuildStigma) {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
-      if (newLevel > 0 && currentLevel === 0) {
-        addStigma(selectedBuildStigma.stigmaId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      } else {
-        updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
-        // The useEffect will handle updating selectedSkill automatically
-      }
+      updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
+      // The useEffect will handle updating selectedSkill automatically
+    } else if (selectedStigma) {
+      // Stigma is selected but not in build yet
+      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      addStigma(selectedStigma.id, newLevel);
     }
   };
 
   const handleDecrement = () => {
     if (selectedBuildAbility) {
-      if (currentLevel <= 1) {
-        // Remove skill from build if level would go below 1
+      if (currentLevel <= 0) {
+        // Remove skill from build if level would go below 0
         removeAbility(selectedBuildAbility.abilityId);
         setSelectedSkill(null);
       } else {
-        // Decrement level (minimum is 1, so we go from 2+ to 1+)
-        const newLevel = Math.max(1, currentLevel - 1);
+        // Decrement level (minimum is 0)
+        const newLevel = Math.max(0, currentLevel - 1);
         updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
       }
     } else if (selectedBuildPassive) {
-      if (currentLevel <= 1) {
-        // Remove skill from build if level would go below 1
+      if (currentLevel <= 0) {
+        // Remove skill from build if level would go below 0
         removePassive(selectedBuildPassive.passiveId);
         setSelectedSkill(null);
       } else {
-        // Decrement level (minimum is 1, so we go from 2+ to 1+)
-        const newLevel = Math.max(1, currentLevel - 1);
+        // Decrement level (minimum is 0)
+        const newLevel = Math.max(0, currentLevel - 1);
         updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
       }
     } else if (selectedBuildStigma) {
-      if (currentLevel <= 1) {
-        // Remove skill from build if level would go below 1
+      if (currentLevel <= 0) {
+        // Remove skill from build if level would go below 0
         removeStigma(selectedBuildStigma.stigmaId);
         setSelectedSkill(null);
       } else {
-        // Decrement level (minimum is 1, so we go from 2+ to 1+)
-        const newLevel = Math.max(1, currentLevel - 1);
+        // Decrement level (minimum is 0)
+        const newLevel = Math.max(0, currentLevel - 1);
         updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
       }
     }
@@ -162,13 +186,16 @@ export const Skill = () => {
   ) => {
     if (type === "ability") {
       const buildAbility = findBuildAbility(id);
-      setSelectedSkill(buildAbility ? { buildAbility } : null);
+      const ability = availableAbilities.find((a) => a.id === id);
+      setSelectedSkill(buildAbility ? { buildAbility } : ability ? { ability } : null);
     } else if (type === "passive") {
       const buildPassive = findBuildPassive(id);
-      setSelectedSkill(buildPassive ? { buildPassive } : null);
+      const passive = availablePassives.find((p) => p.id === id);
+      setSelectedSkill(buildPassive ? { buildPassive } : passive ? { passive } : null);
     } else if (type === "stigma") {
       const buildStigma = findBuildStigma(id);
-      setSelectedSkill(buildStigma ? { buildStigma } : null);
+      const stigma = availableStigmas.find((s) => s.id === id);
+      setSelectedSkill(buildStigma ? { buildStigma } : stigma ? { stigma } : null);
     }
   };
 
