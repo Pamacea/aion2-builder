@@ -4,6 +4,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
 import Image from "next/image";
 import { useState } from "react";
+import { DragSourceMonitor, useDrag } from "react-dnd";
 
 type PassiveSkillProps = {
   passive: PassiveType;
@@ -25,6 +26,21 @@ export const PassiveSkill = ({
   const currentLevel = buildPassive?.level ?? 0;
   const isInBuild = buildPassive !== undefined;
 
+  const [{ isDragging }, drag] = useDrag({
+    type: "skill",
+    item: {
+      skill: {
+        type: "passive" as const,
+        passive,
+        buildPassive,
+      },
+    },
+    canDrag: () => isInBuild,
+    collect: (monitor: DragSourceMonitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
   const handleSelect = () => {
     if (onSelect) {
       onSelect();
@@ -35,9 +51,17 @@ export const PassiveSkill = ({
 
   const selected = onSelect ? isSelected : localSelected;
 
+  // Create ref callback for drag
+  const dragRef = (node: HTMLDivElement | null) => {
+    drag(node);
+  };
+
   return (
     <div
-      className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14`}
+      ref={dragRef}
+      className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
+        isDragging ? "opacity-50" : ""
+      } ${isInBuild ? "cursor-move" : ""}`}
       onClick={handleSelect}
     >
       {/* Icon with gold border */}

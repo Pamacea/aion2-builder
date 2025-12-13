@@ -12,6 +12,7 @@ import { SkillTag } from "../_client/skil-tag";
 import { SkillCastDuration } from "../_client/skill-cast-duration";
 import { SkillCooldown } from "../_client/skill-cooldown";
 import { SkillDesc } from "../_client/skill-desc";
+import { SkillManaCost } from "../_client/skill-mana-cost";
 import { SkillName } from "../_client/skill-name";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 import { AvailableSpeciality } from "./AvaibleSpeciality";
@@ -56,7 +57,7 @@ export const SkillDetails = ({
   }
 
   return (
-    <div className={`flex flex-col px-2 gap-4 h-full ${className}`}>
+    <div className={`flex flex-col justify-between px-2 gap-4 h-full ${className}`}>
       {/* Skill Name with Level */}
       <div className="flex items-baseline gap-2">
         <SkillName ability={targetAbility} passive={targetPassive} />
@@ -90,8 +91,9 @@ export const SkillDetails = ({
         />
       )}
 
-      {/* Casting Duration and Cooldown */}
+      {/* Casting Duration, Cooldown, and Mana Cost */}
       <div className="flex flex-col gap-2 pt-4 border-t-2 border-background/40">
+        <SkillManaCost ability={targetAbility} stigma={targetStigma} />
         <SkillCastDuration ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
         <SkillCooldown ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
       </div>

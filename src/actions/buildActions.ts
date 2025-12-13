@@ -256,6 +256,7 @@ export async function updateBuild(
   const updateData: {
     name?: string;
     classId?: number;
+    shortcuts?: any;
     abilities?: {
       deleteMany: { buildId: number };
       create: Array<{
@@ -287,6 +288,11 @@ export async function updateBuild(
   
   if ('class' in data && data.class && typeof data.class === 'object' && 'id' in data.class) {
     updateData.classId = (data.class as { id: number }).id;
+  }
+  
+  // Handle shortcuts update
+  if ('shortcuts' in data && data.shortcuts !== undefined) {
+    updateData.shortcuts = data.shortcuts as any;
   }
   
   // Handle abilities update

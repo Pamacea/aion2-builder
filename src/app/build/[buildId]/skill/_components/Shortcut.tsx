@@ -1,0 +1,347 @@
+"use client";
+
+import { useBuildStore } from "@/store/useBuildEditor";
+import {
+  AbilityType,
+  BuildAbilityType,
+  BuildPassiveType,
+  BuildStigmaType,
+  PassiveType,
+  StigmaType,
+} from "@/types/schema";
+import { useEffect, useMemo, useState } from "react";
+import { ShortcutSlot } from "./ShortcutSlot";
+import { ResetShortcutButton } from "../_client/reset-shortcut-button";
+
+type ShortcutSkill = {
+  type: "ability" | "passive" | "stigma";
+  ability?: AbilityType;
+  passive?: PassiveType;
+  stigma?: StigmaType;
+  buildAbility?: BuildAbilityType;
+  buildPassive?: BuildPassiveType;
+  buildStigma?: BuildStigmaType;
+};
+
+// Structure: 20 slots (4x5) pour "Cast" à gauche, 10 slots (2x5) au milieu, 5 slots (1x5) à droite, 12 slots en bas
+const LEFT_SLOTS_COUNT = 20; // 4x5 grid
+const MIDDLE_SLOTS_COUNT = 10; // 2x5 grid
+const RIGHT_SLOTS_COUNT = 5; // 1x5 grid
+const BOTTOM_SLOTS_COUNT = 12; // 1x12 row
+
+// Helper function to check if two skills are the same
+const isSameSkill = (
+  skill1: ShortcutSkill | undefined,
+  skill2: ShortcutSkill | undefined
+): boolean => {
+  if (!skill1 || !skill2) return false;
+  if (skill1.type !== skill2.type) return false;
+
+  if (skill1.type === "ability" && skill2.type === "ability") {
+    return (
+      skill1.ability?.id === skill2.ability?.id &&
+      skill1.buildAbility?.id === skill2.buildAbility?.id
+    );
+  }
+
+  if (skill1.type === "stigma" && skill2.type === "stigma") {
+    return (
+      skill1.stigma?.id === skill2.stigma?.id &&
+      skill1.buildStigma?.id === skill2.buildStigma?.id
+    );
+  }
+
+  return false;
+};
+
+export const Shortcut = () => {
+  const { build, updateShortcuts } = useBuildStore();
+  const [shortcuts, setShortcuts] = useState<
+    Record<number, ShortcutSkill | undefined>
+  >({});
+
+  // Convert saved shortcuts (with IDs) to local format (with full objects)
+  const loadedShortcuts = useMemo(() => {
+    if (!build?.shortcuts) {
+      return {};
+    }
+
+    const shortcuts: Record<number, ShortcutSkill | undefined> = {};
+
+    Object.entries(build.shortcuts).forEach(([slotIdStr, shortcutData]) => {
+      const slotId = Number(slotIdStr);
+      if (!shortcutData || typeof shortcutData !== "object") return;
+
+      const shortcut = shortcutData as {
+        type: "ability" | "stigma";
+        abilityId?: number;
+        stigmaId?: number;
+      };
+
+      if (shortcut.type === "ability" && shortcut.abilityId) {
+        const ability = build.class?.abilities?.find(
+          (a) => a.id === shortcut.abilityId
+        );
+        // Find buildAbility by abilityId (not by buildAbility.id which might change)
+        const buildAbility = build.abilities?.find(
+          (ba) => ba.abilityId === shortcut.abilityId
+        );
+
+        if (!ability) {
+          console.warn(
+            `Ability with id ${shortcut.abilityId} not found in class abilities`
+          );
+        }
+        if (!buildAbility) {
+          console.warn(
+            `BuildAbility with abilityId ${shortcut.abilityId} not found. Available abilityIds:`,
+            build.abilities?.map((ba) => ba.abilityId)
+          );
+        }
+
+        if (ability && buildAbility) {
+          shortcuts[slotId] = {
+            type: "ability",
+            ability,
+            buildAbility,
+          };
+        }
+      } else if (shortcut.type === "stigma" && shortcut.stigmaId) {
+        const stigma = build.class?.stigmas?.find(
+          (s) => s.id === shortcut.stigmaId
+        );
+        // Find buildStigma by stigmaId (not by buildStigma.id which might change)
+        const buildStigma = build.stigmas?.find(
+          (bs) => bs.stigmaId === shortcut.stigmaId
+        );
+
+        if (!stigma) {
+          console.warn(
+            `Stigma with id ${shortcut.stigmaId} not found in class stigmas`
+          );
+        }
+        if (!buildStigma) {
+          console.warn(
+            `BuildStigma with stigmaId ${shortcut.stigmaId} not found. Available stigmaIds:`,
+            build.stigmas?.map((bs) => bs.stigmaId)
+          );
+        }
+
+        if (stigma && buildStigma) {
+          shortcuts[slotId] = {
+            type: "stigma",
+            stigma,
+            buildStigma,
+          };
+        }
+      }
+    });
+
+    return shortcuts;
+  }, [
+    build?.shortcuts,
+    build?.class?.abilities,
+    build?.class?.stigmas,
+    build?.abilities,
+    build?.stigmas,
+  ]);
+
+  // Sync loaded shortcuts to local state
+  useEffect(() => {
+    setShortcuts(loadedShortcuts);
+  }, [loadedShortcuts]);
+
+  // Convert local shortcuts to save format and update build
+  const saveShortcuts = (
+    newShortcuts: Record<number, ShortcutSkill | undefined>
+  ) => {
+    const shortcutsToSave: Record<
+      string,
+      {
+        type: "ability" | "stigma";
+        abilityId?: number;
+        stigmaId?: number;
+        buildAbilityId?: number;
+        buildStigmaId?: number;
+      }
+    > = {};
+
+    Object.entries(newShortcuts).forEach(([slotIdStr, skill]) => {
+      if (!skill) return;
+
+      if (skill.type === "ability" && skill.ability && skill.buildAbility) {
+        shortcutsToSave[slotIdStr] = {
+          type: "ability",
+          abilityId: skill.ability.id,
+          // Don't save buildAbilityId, we'll find it by abilityId when loading
+        };
+      } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
+        shortcutsToSave[slotIdStr] = {
+          type: "stigma",
+          stigmaId: skill.stigma.id,
+          // Don't save buildStigmaId, we'll find it by stigmaId when loading
+        };
+      }
+    });
+
+    updateShortcuts(
+      Object.keys(shortcutsToSave).length > 0 ? shortcutsToSave : null
+    );
+  };
+
+  const handleDrop = (
+    slotId: number,
+    skill: ShortcutSkill | undefined,
+    sourceSlotId?: number
+  ) => {
+    setShortcuts((prev) => {
+      const newShortcuts = { ...prev };
+
+      // If the skill is being moved from another slot, clear the source slot
+      if (sourceSlotId !== undefined && sourceSlotId !== slotId) {
+        delete newShortcuts[sourceSlotId];
+      }
+
+      // Remove the skill from any other slot if it exists (to prevent duplicates)
+      if (skill) {
+        Object.keys(newShortcuts).forEach((key) => {
+          const existingSlotId = Number(key);
+          // Skip the source slot (already handled above) and the target slot
+          if (existingSlotId !== sourceSlotId && existingSlotId !== slotId) {
+            const existingSkill = newShortcuts[existingSlotId];
+            if (isSameSkill(existingSkill, skill)) {
+              delete newShortcuts[existingSlotId];
+            }
+          }
+        });
+      }
+
+      // Set the skill in the target slot
+      newShortcuts[slotId] = skill;
+
+      // Save to build
+      saveShortcuts(newShortcuts);
+
+      return newShortcuts;
+    });
+  };
+
+  const handleClear = (slotId: number) => {
+    setShortcuts((prev) => {
+      const newShortcuts = { ...prev };
+      delete newShortcuts[slotId];
+
+      // Save to build
+      saveShortcuts(newShortcuts);
+
+      return newShortcuts;
+    });
+  };
+
+  const handleRefresh = () => {
+    setShortcuts({});
+    saveShortcuts({});
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col justify-end gap-4 ">
+      {/* Header with Refresh Button - at the bottom */}
+      <div className="flex items-center justify-between">
+        <ResetShortcutButton onClick={handleRefresh} />
+      </div>
+      {/* Main Content: U-shaped layout */}
+      <div className="flex flex-col gap-6">
+        {/* Top Row: Left, Middle and Right blocks */}
+        <div className="flex justify-between">
+          {/* Left: Cast Slots (4x5) */}
+          <div className="flex flex-col gap-2">
+            <div className="text-sm font-semibold text-foreground/80 px-2">
+              1
+            </div>
+            <div className="grid grid-cols-4 grid-rows-5 gap-2.5">
+              {Array.from({ length: LEFT_SLOTS_COUNT }).map((_, index) => {
+                const slotId = index;
+                return (
+                  <ShortcutSlot
+                    key={slotId}
+                    slotId={slotId}
+                    skill={shortcuts[slotId]}
+                    onDrop={handleDrop}
+                    onClear={handleClear}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="w-29"></div>
+
+          {/* Middle: Additional Slots (2x5) */}
+          <div className="flex flex-col gap-2">
+            <div className="text-sm font-semibold text-foreground/80 px-2">
+              A
+            </div>
+            <div className="grid grid-cols-2 grid-rows-5 gap-2.5">
+              {Array.from({ length: MIDDLE_SLOTS_COUNT }).map((_, index) => {
+                const slotId = LEFT_SLOTS_COUNT + BOTTOM_SLOTS_COUNT + index;
+                return (
+                  <ShortcutSlot
+                    key={slotId}
+                    slotId={slotId}
+                    skill={shortcuts[slotId]}
+                    onDrop={handleDrop}
+                    onClear={handleClear}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right: Additional Slots (1x5) */}
+          <div className="flex flex-col gap-2">
+            <div className="text-sm font-semibold text-foreground/80 px-2">
+              RC
+            </div>
+            <div className="grid grid-cols-1 grid-rows-5 gap-2.5">
+              {Array.from({ length: RIGHT_SLOTS_COUNT }).map((_, index) => {
+                const slotId =
+                  LEFT_SLOTS_COUNT +
+                  BOTTOM_SLOTS_COUNT +
+                  MIDDLE_SLOTS_COUNT +
+                  index;
+                return (
+                  <ShortcutSlot
+                    key={slotId}
+                    slotId={slotId}
+                    skill={shortcuts[slotId]}
+                    onDrop={handleDrop}
+                    onClear={handleClear}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom: Main Bar (12 slots) - aligns with top blocks */}
+        <div className="flex flex-col gap-2">
+          {/* Use same gap as top blocks for proper alignment */}
+          <div className="grid grid-cols-12 gap-2">
+            {Array.from({ length: BOTTOM_SLOTS_COUNT }).map((_, index) => {
+              const slotId = LEFT_SLOTS_COUNT + index;
+              return (
+                <ShortcutSlot
+                  key={slotId}
+                  slotId={slotId}
+                  skill={shortcuts[slotId]}
+                  onDrop={handleDrop}
+                  onClear={handleClear}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

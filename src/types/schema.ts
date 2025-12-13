@@ -232,6 +232,13 @@ export const BuildSchemaBase = z.object({
   extraSP: z.number().default(0),
   baseSTP: z.number().default(40),
   extraSTP: z.number().default(0),
+  shortcuts: z.record(z.string(), z.object({
+    type: z.enum(["ability", "stigma"]),
+    abilityId: z.number().optional(),
+    stigmaId: z.number().optional(),
+    buildAbilityId: z.number().optional(),
+    buildStigmaId: z.number().optional(),
+  })).nullish(),
 });
 export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 
@@ -318,6 +325,13 @@ export type BuildType = BuildTypeBase & {
   abilities?: BuildAbilityType[];
   passives?: BuildPassiveType[];
   stigmas?: BuildStigmaType[];
+  shortcuts?: Record<string, {
+    type: "ability" | "stigma";
+    abilityId?: number;
+    stigmaId?: number;
+    buildAbilityId?: number;
+    buildStigmaId?: number;
+  }> | null;
 };
 
 

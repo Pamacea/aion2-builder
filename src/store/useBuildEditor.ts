@@ -39,6 +39,9 @@ type BuildState = {
   getStigmasBySpellTag: (spellTagName: string) => BuildType["stigmas"];
   getAvailableStigmas: () => BuildType["class"]["stigmas"];
   
+  // Shortcuts management
+  updateShortcuts: (shortcuts: BuildType["shortcuts"]) => void;
+  
   loadBuild: (buildId: number) => Promise<void>;
 };
 
@@ -400,6 +403,16 @@ export const useBuildStore = create<BuildState>((set, get) => {
     getAvailableStigmas: () => {
       const build = get().build;
       return build?.class?.stigmas || [];
+    },
+
+    // ==========================================================
+    // SHORTCUTS MANAGEMENT
+    // ==========================================================
+
+    updateShortcuts: (shortcuts) => {
+      const build = get().build;
+      if (isStarterBuild(build)) return;
+      get().updateBuild({ shortcuts });
     },
   };
 });

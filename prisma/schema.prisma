@@ -281,6 +281,9 @@ model Build {
   baseSTP  Int @default(40) // Points de base
   extraSTP Int @default(0) // Points supplémentaires farmables
 
+  // Shortcuts (barre de raccourcis) - JSON: { slotId: { type, abilityId/stigmaId, buildAbilityId/buildStigmaId } }
+  shortcuts Json?
+
   // Relations détaillées
   abilities BuildAbility[]
   passives  BuildPassive[]
