@@ -57,6 +57,7 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
           stigmas: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
             },
           },
         },
@@ -95,6 +96,7 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
           stigma: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
               classes: {
                 include: {
                   tags: true,
@@ -193,6 +195,7 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
           stigmas: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
             },
           },
         },
@@ -231,6 +234,7 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
           stigma: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
               classes: {
                 include: {
                   tags: true,
@@ -256,7 +260,7 @@ export async function updateBuild(
   const updateData: {
     name?: string;
     classId?: number;
-    shortcuts?: any;
+    shortcuts?: Record<string, unknown> | null;
     abilities?: {
       deleteMany: { buildId: number };
       create: Array<{
@@ -292,7 +296,7 @@ export async function updateBuild(
   
   // Handle shortcuts update
   if ('shortcuts' in data && data.shortcuts !== undefined) {
-    updateData.shortcuts = data.shortcuts as any;
+    updateData.shortcuts = data.shortcuts as BuildType["shortcuts"];
   }
   
   // Handle abilities update
@@ -332,7 +336,7 @@ export async function updateBuild(
   
   const updated = await prisma.build.update({
     where: { id: buildId },
-    data: updateData,
+    data: updateData as Parameters<typeof prisma.build.update>[0]['data'],
     include: {
       class: {
         include: {
@@ -361,6 +365,7 @@ export async function updateBuild(
           stigmas: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
             },
           },
         },
@@ -399,6 +404,7 @@ export async function updateBuild(
           stigma: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
               classes: {
                 include: {
                   tags: true,
@@ -484,6 +490,7 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
           stigmas: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
             },
           },
         },
@@ -522,6 +529,7 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
           stigma: {
             include: {
               spellTag: true,
+              specialtyChoices: true,
               classes: {
                 include: {
                   tags: true,

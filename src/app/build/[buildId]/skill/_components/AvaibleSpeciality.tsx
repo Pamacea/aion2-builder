@@ -60,8 +60,10 @@ export const AvailableSpeciality = ({
         const isLockedByLevel = abilityLevel !== undefined && (abilityLevel === 0 || abilityLevel < specialtyChoice.unlockLevel);
         // Check if locked by max reached (already have 3 active and this one is not active)
         const isLockedByMax = !isActive && !canActivateMore;
-        // Specialty choice is locked if not in build, level is 0, level is too low, or max reached
-        const isLocked = isLockedByNotInBuild || isLockedByLevel || isLockedByMax;
+        // Check if trying to activate 3rd specialty choice - requires level 20
+        const isLockedByThirdSlot = !isActive && activeIds.length >= 2 && (abilityLevel === undefined || abilityLevel < 20);
+        // Specialty choice is locked if not in build, level is 0, level is too low, max reached, or trying to activate 3rd without level 20
+        const isLocked = isLockedByNotInBuild || isLockedByLevel || isLockedByMax || isLockedByThirdSlot;
         
         return (
           <div

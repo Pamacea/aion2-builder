@@ -19,6 +19,7 @@ import { SkillStaggerDamage } from "../_client/skill-stagger-damage";
 import { SkillTarget } from "../_client/skill-target";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 import { AvailableSpeciality } from "./AvaibleSpeciality";
+import { AvailableSpecialityStigma } from "./AvaibleSpecialityStigma";
 
 type SkillDetailsProps = {
   buildAbility?: BuildAbilityType;
@@ -64,10 +65,12 @@ export const SkillDetails = ({
     <div className={`flex flex-col justify-between px-2 gap-4 h-full ${className}`}>
       {/* Skill Name with Level */}
       <div className="flex items-baseline gap-2">
-        <SkillName ability={targetAbility} passive={targetPassive} />
+        <SkillName ability={targetAbility} passive={targetPassive} stigma={targetStigma} />
         {(buildAbility || buildPassive || buildStigma) && (
           <span className="text-sm font-semibold text-foreground/50">
-            Lv.{(buildAbility?.level || buildPassive?.level || buildStigma?.level || 0)}
+            {(buildAbility?.level || buildPassive?.level || buildStigma?.level || 0) === 0
+              ? "Locked"
+              : `Lv.${buildAbility?.level || buildPassive?.level || buildStigma?.level || 0}`}
           </span>
         )}
       </div>
@@ -99,6 +102,16 @@ export const SkillDetails = ({
           ability={targetAbility}
           currentLevel={buildAbility?.level}
           activeSpecialtyChoiceIds={buildAbility?.activeSpecialtyChoiceIds}
+        />
+      )}
+
+      {/* Specialty Choices (only for stigmas) */}
+      {targetStigma && (
+        <AvailableSpecialityStigma
+          buildStigma={buildStigma}
+          stigma={targetStigma}
+          currentLevel={buildStigma?.level}
+          activeSpecialtyChoiceIds={buildStigma?.activeSpecialtyChoiceIds}
         />
       )}
 

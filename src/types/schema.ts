@@ -84,7 +84,8 @@ export const SpecialtyChoiceSchemaBase = z.object({
   id: z.number(),
   description: z.string(),
   unlockLevel: z.number(),
-  abilityId: z.number(),
+  abilityId: z.number().nullish(),
+  stigmaId: z.number().nullish(),
 });
 export type SpecialtyChoiceTypeBase = z.infer<typeof SpecialtyChoiceSchemaBase>;
 
@@ -274,6 +275,7 @@ export type AbilityType = AbilityTypeBase & {
 
 export type SpecialtyChoiceType = SpecialtyChoiceTypeBase & {
   ability?: AbilityType;
+  stigma?: StigmaType;
 };
 
 export type PassiveType = PassiveTypeBase & {
@@ -286,6 +288,7 @@ export type StigmaType = StigmaTypeBase & {
   spellTag?: SpellTagType[];
   classes?: ClassType[];
   buildStigmas?: BuildStigmaType[];
+  specialtyChoices?: SpecialtyChoiceType[];
 };
 
 export type BuildAbilityType = {
@@ -316,6 +319,7 @@ export type BuildStigmaType = {
   level: number;
   maxLevel: number;
   stigmaCost: number;
+  activeSpecialtyChoiceIds: number[];
   build?: BuildType;
   stigma: StigmaType;
 };
@@ -360,6 +364,7 @@ export const TagSchema: z.ZodType<TagType> = TagSchemaBase.extend({
 // ---------------------------
 export const SpecialtyChoiceSchema: z.ZodType<SpecialtyChoiceType> = SpecialtyChoiceSchemaBase.extend({
   ability: z.lazy(() => AbilitySchema).optional(),
+  stigma: z.lazy(() => StigmaSchema).optional(),
 }) as z.ZodType<SpecialtyChoiceType>;
 
 // ---------------------------
@@ -419,6 +424,7 @@ export const BuildStigmaSchema: z.ZodType<BuildStigmaType> = z.object({
   level: z.number().default(1),
   maxLevel: z.number().default(20), // Ajouté: Correspond au schéma Prisma
   stigmaCost: z.number().default(10),
+  activeSpecialtyChoiceIds: z.array(z.number()).default([]),
   build: z.lazy(() => BuildSchema).optional(),
   stigma: z.lazy(() => StigmaSchema),
 }) as z.ZodType<BuildStigmaType>;
@@ -430,6 +436,7 @@ export const StigmaSchema: z.ZodType<StigmaType> = StigmaSchemaBase.extend({
   spellTag: z.array(SpellTagSchema).optional(), // Ajouté
   classes: z.array(z.lazy(() => ClassSchema)).optional(),
   buildStigmas: z.lazy(() => z.array(BuildStigmaSchema)).optional(),
+  specialtyChoices: z.array(SpecialtyChoiceSchema).optional(),
 }) as z.ZodType<StigmaType>;
 
 // ---------------------------

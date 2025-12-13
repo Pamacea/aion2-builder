@@ -36,6 +36,7 @@ type BuildState = {
   updateStigmaLevel: (stigmaId: number, level: number) => void;
   addStigma: (stigmaId: number, level?: number, stigmaCost?: number) => void;
   removeStigma: (stigmaId: number) => void;
+  toggleSpecialtyChoiceStigma: (stigmaId: number, specialtyChoiceId: number) => void;
   getStigmasBySpellTag: (spellTagName: string) => BuildType["stigmas"];
   getAvailableStigmas: () => BuildType["class"]["stigmas"];
   
@@ -263,6 +264,14 @@ export const useBuildStore = create<BuildState>((set, get) => {
         return;
       }
       
+      // If trying to activate the 3rd specialty choice, require level 20
+      if (!isActive && buildAbility.activeSpecialtyChoiceIds.length >= 2) {
+        // Trying to activate 3rd specialty choice - require level 20
+        if (buildAbility.level < 20) {
+          return;
+        }
+      }
+      
       // If trying to activate and already have 3 active, don't allow
       if (!isActive && buildAbility.activeSpecialtyChoiceIds.length >= 3) {
         return;
@@ -378,6 +387,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
         level,
         maxLevel: ("maxLevel" in classStigma ? classStigma.maxLevel : 20) as number,
         stigmaCost: stigmaCost ?? ("baseCost" in classStigma ? classStigma.baseCost : 10) ?? 10,
+        activeSpecialtyChoiceIds: [],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         build: build as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -392,6 +402,47 @@ export const useBuildStore = create<BuildState>((set, get) => {
       const build = get().build;
       if (isStarterBuild(build) || !build) return;
       const stigmas = build.stigmas?.filter((s) => s.stigmaId !== stigmaId);
+      get().updateBuild({ stigmas });
+    },
+
+    toggleSpecialtyChoiceStigma: (stigmaId, specialtyChoiceId) => {
+      const build = get().build;
+      if (isStarterBuild(build) || !build) return;
+      
+      // Find the stigma and its class stigma to check unlock level
+      const buildStigma = build.stigmas?.find((s) => s.stigmaId === stigmaId);
+      if (!buildStigma) return;
+      
+      const classStigma = build.class?.stigmas?.find((s) => s.id === stigmaId);
+      if (!classStigma) return;
+      
+      const specialtyChoice = classStigma.specialtyChoices?.find((sc) => sc.id === specialtyChoiceId);
+      if (!specialtyChoice) return;
+      
+      // Check if trying to activate a locked specialtyChoice (level is 0 or too low)
+      const isActive = buildStigma.activeSpecialtyChoiceIds.includes(specialtyChoiceId);
+      if (!isActive && (buildStigma.level === 0 || buildStigma.level < specialtyChoice.unlockLevel)) {
+        // Cannot activate: level is 0 or too low
+        return;
+      }
+      
+      const stigmas = build.stigmas?.map((s) => {
+        if (s.stigmaId !== stigmaId) return s;
+        
+        if (isActive) {
+          // Deactivate: remove from active list
+          return {
+            ...s,
+            activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds.filter((id) => id !== specialtyChoiceId),
+          };
+        } else {
+          // Activate: add to active list (no limit for stigmas)
+          return {
+            ...s,
+            activeSpecialtyChoiceIds: [...s.activeSpecialtyChoiceIds, specialtyChoiceId],
+          };
+        }
+      });
       get().updateBuild({ stigmas });
     },
 
