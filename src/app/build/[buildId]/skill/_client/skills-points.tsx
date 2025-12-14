@@ -21,7 +21,7 @@ function calculateSkillCost(
 
   while (currentLevel <= level) {
     // Calculate how many levels in this cost tier (4 levels per tier)
-    const levelsInTier = Math.min(4, level - currentLevel + 1);
+    const levelsInTier = Math.min(5, level - currentLevel + 1);
     totalCost += currentCost * levelsInTier;
 
     currentLevel += levelsInTier;

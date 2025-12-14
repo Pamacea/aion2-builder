@@ -11,6 +11,7 @@ import { SkillLevelModifier } from "../_client/skill-level-modifier";
 import { SkillsPoints } from "../_client/skills-points";
 import { StigmaSkill } from "../_client/stigma-skill";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
+import { getEffectiveMaxLevel } from "../_utils/levelLimits";
 
 export const Skill = () => {
   const {
@@ -143,10 +144,15 @@ export const Skill = () => {
     selectedBuildPassive?.level ||
     selectedBuildStigma?.level ||
     0;
-  const maxLevel =
+  
+  // Get actual maxLevel from the skill
+  const actualMaxLevel =
     selectedBuildAbility?.maxLevel ||
     selectedBuildPassive?.maxLevel ||
     selectedBuildStigma?.maxLevel ||
+    (selectedAbility && "maxLevel" in selectedAbility
+      ? selectedAbility.maxLevel
+      : undefined) ||
     (selectedPassive && "maxLevel" in selectedPassive
       ? selectedPassive.maxLevel
       : undefined) ||
@@ -154,6 +160,17 @@ export const Skill = () => {
       ? selectedStigma.maxLevel
       : undefined) ||
     20;
+  
+  // Determine skill type for effective max level calculation
+  const skillType = selectedBuildAbility || selectedAbility
+    ? "ability"
+    : selectedBuildPassive || selectedPassive
+      ? "passive"
+      : "stigma";
+  
+  // Apply effective max level (10 for abilities/passives, full maxLevel for stigmas)
+  const maxLevel = getEffectiveMaxLevel(skillType, actualMaxLevel);
+  
   const hasSelectedSkill = !!selectedSkill;
 
   // Handle level changes
