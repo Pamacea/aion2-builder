@@ -3,10 +3,11 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { StarterBuildMessage } from "../_components/starterBuildMessage";
+import { CLASSES } from "../_utils/constants";
 
 export const ClassSelect = () => {
   const { build, setClassByName } = useBuildStore();
-  const classes = ["gladiator","templar","ranger","assassin","chanter","sorcerer","elementalist","cleric"];
 
   if (!build) return null;
 
@@ -24,18 +25,14 @@ export const ClassSelect = () => {
           <SelectValue placeholder="Select a class" />
         </SelectTrigger>
         <SelectContent className="uppercase">
-          {classes.map((cls) => (
+          {CLASSES.map((cls) => (
             <SelectItem key={cls} value={cls}>
               {cls.charAt(0).toUpperCase() + cls.slice(1)}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {isStarter && (
-        <p className="text-sm text-muted-foreground">
-          Starter builds cannot be modified. Create a new build to customize.
-        </p>
-      )}
+      {isStarter && <StarterBuildMessage />}
     </section>
   );
 };

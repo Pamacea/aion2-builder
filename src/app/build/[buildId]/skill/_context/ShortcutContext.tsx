@@ -1,27 +1,16 @@
 "use client";
 
-import { AbilityType, BuildAbilityType, BuildPassiveType, BuildStigmaType, PassiveType, StigmaType } from "@/types/schema";
+import { ShortcutContextType, ShortcutSkill } from "@/types/shortcut.type";
 import { createContext, ReactNode, useContext, useState } from "react";
 
-type ShortcutSkill = {
-  type: "ability" | "passive" | "stigma";
-  ability?: AbilityType;
-  passive?: PassiveType;
-  stigma?: StigmaType;
-  buildAbility?: BuildAbilityType;
-  buildPassive?: BuildPassiveType;
-  buildStigma?: BuildStigmaType;
-};
-
-type ShortcutContextType = {
-  selectedSkill: ShortcutSkill | null;
-  setSelectedSkill: (skill: ShortcutSkill | null) => void;
-};
-
-const ShortcutContext = createContext<ShortcutContextType | undefined>(undefined);
+const ShortcutContext = createContext<ShortcutContextType | undefined>(
+  undefined
+);
 
 export const ShortcutProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedSkill, setSelectedSkill] = useState<ShortcutSkill | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<ShortcutSkill | null>(
+    null
+  );
 
   return (
     <ShortcutContext.Provider value={{ selectedSkill, setSelectedSkill }}>
@@ -37,4 +26,3 @@ export const useShortcutContext = () => {
   }
   return context;
 };
-

@@ -3,10 +3,10 @@
 import { useBuildStore } from "@/store/useBuildEditor";
 import { useEffect } from "react";
 import { ActiveSkill } from "../_client/active-skill";
-import { MinusButton } from "../_client/minus-button";
+import { MinusButton } from "../_client/buttons/minus-button";
+import { PlusButton } from "../_client/buttons/plus-button";
+import { ResetSkillButton } from "../_client/buttons/reset-skill-button";
 import { PassiveSkill } from "../_client/passive-skill";
-import { PlusButton } from "../_client/plus-button";
-import { ResetSkillButton } from "../_client/reset-skill-button";
 import { SkillLevelModifier } from "../_client/skill-level-modifier";
 import { SkillsPoints } from "../_client/skills-points";
 import { StigmaSkill } from "../_client/stigma-skill";

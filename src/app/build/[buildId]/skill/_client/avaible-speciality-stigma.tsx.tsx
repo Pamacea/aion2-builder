@@ -3,7 +3,7 @@
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
 import { useEffect, useMemo } from "react";
-import { SpecialtyChoice } from "../_client/speciality-choice";
+import { SpecialtyChoice } from "./speciality-choice";
 
 type AvailableSpecialityStigmaProps = {
   buildStigma?: BuildStigmaType;

@@ -1,35 +1,15 @@
 "use client";
 
-import { getClassTags } from "@/actions/classActions";
-import { useBuildStore } from "@/store/useBuildEditor";
-import { TagTypeBase } from "@/types/schema";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { TagsList } from "@/app/classes/[slug]/_components/tagsList";
+import { useBuildLoader } from "../_utils/useBuildLoader";
 import { BuildName } from "./_client/build-name";
 import { ProfilelassBanner } from "./_client/class-banner";
 import { ClassSelect } from "./_client/class-select";
-import { TagsList } from "@/app/classes/[slug]/_components/tagsList";
+import { useClassTags } from "./_utils/useClassTags";
 
 export default function BuildProfilePage() {
-  const params = useParams();
-  const buildId = params?.buildId as string;
-  const { build, loadBuild, loading } = useBuildStore();
-  const [classTags, setClassTags] = useState<TagTypeBase[]>([]);
-
-  useEffect(() => {
-    if (buildId) {
-      const numericBuildId = Number(buildId);
-      if (!isNaN(numericBuildId)) {
-        loadBuild(numericBuildId);
-      }
-    }
-  }, [buildId, loadBuild]);
-
-  useEffect(() => {
-    if (build?.class?.name) {
-      getClassTags(build.class.name).then(setClassTags);
-    }
-  }, [build?.class?.name]);
+  const { build, loading } = useBuildLoader();
+  const classTags = useClassTags();
 
   if (loading || !build) return <p>Loading...</p>;
 

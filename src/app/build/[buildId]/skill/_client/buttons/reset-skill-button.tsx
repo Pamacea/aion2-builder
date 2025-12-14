@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useBuildStore } from "@/store/useBuildEditor";
-import Image from "next/image";
 import { useEffect } from "react";
-import { useSelectedSkill } from "../_context/SelectedSkillContext";
+import { useSelectedSkill } from "../../_context/SelectedSkillContext";
+import { IconButton } from "../../_utils/iconButton";
 
 type ResetSkillButtonProps = {
   disabled?: boolean;
@@ -59,18 +58,13 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
   const hasSelectedSkill = !!selectedSkill;
 
   return (
-    <Button
+    <IconButton
+      icon="/icons/reset-logo.webp"
+      alt="Reset Icon"
       onClick={handleReset}
       disabled={!hasSelectedSkill || disabled}
       className="h-full bg-background/80 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <Image 
-        src="/icons/reset-logo.webp" 
-        alt="Reset Icon" 
-        width={25} 
-        height={25}
-        className="object-contain"
-      />
-    </Button>
+      iconSize={25}
+    />
   );
 };

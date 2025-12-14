@@ -1,68 +1,18 @@
 "use client";
 
 import { useBuildStore } from "@/store/useBuildEditor";
-import {
-  AbilityType,
-  BuildAbilityType,
-  BuildPassiveType,
-  BuildStigmaType,
-  PassiveType,
-  StigmaType,
-} from "@/types/schema";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ResetShortcutButton } from "../_client/reset-shortcut-button";
-import { ShortcutSlot } from "./ShortcutSlot";
-
-type ShortcutSkill = {
-  type: "ability" | "passive" | "stigma";
-  ability?: AbilityType;
-  passive?: PassiveType;
-  stigma?: StigmaType;
-  buildAbility?: BuildAbilityType;
-  buildPassive?: BuildPassiveType;
-  buildStigma?: BuildStigmaType;
-};
-
-// Structure: 20 slots (4x5) pour "Cast" à gauche, 10 slots (2x5) au milieu, 5 slots (1x5) à droite, 12 slots en bas
-const LEFT_SLOTS_COUNT = 20; // 4x5 grid
-const MIDDLE_SLOTS_COUNT = 10; // 2x5 grid
-const RIGHT_SLOTS_COUNT = 5; // 1x5 grid
-const BOTTOM_SLOTS_COUNT = 12; // 1x12 row
-// Slot 11 (index 10) of Main Bar is reserved for the first ability
-const RESERVED_SLOT_ID = LEFT_SLOTS_COUNT + 10; // Slot 30 (index 10 of Main Bar)
-// Slots 5-8 (indices 4-7) of Main Bar are reserved for stigmas only
-const STIGMA_SLOT_START = LEFT_SLOTS_COUNT + 4; // Slot 24 (index 4 of Main Bar)
-const STIGMA_SLOT_END = LEFT_SLOTS_COUNT + 7; // Slot 27 (index 7 of Main Bar)
-
-// Helper function to check if a slot is reserved for stigmas
-const isStigmaOnlySlot = (slotId: number): boolean => {
-  return slotId >= STIGMA_SLOT_START && slotId <= STIGMA_SLOT_END;
-};
-
-// Helper function to check if two skills are the same
-const isSameSkill = (
-  skill1: ShortcutSkill | undefined,
-  skill2: ShortcutSkill | undefined
-): boolean => {
-  if (!skill1 || !skill2) return false;
-  if (skill1.type !== skill2.type) return false;
-
-  if (skill1.type === "ability" && skill2.type === "ability") {
-    return (
-      skill1.ability?.id === skill2.ability?.id &&
-      skill1.buildAbility?.id === skill2.buildAbility?.id
-    );
-  }
-
-  if (skill1.type === "stigma" && skill2.type === "stigma") {
-    return (
-      skill1.stigma?.id === skill2.stigma?.id &&
-      skill1.buildStigma?.id === skill2.buildStigma?.id
-    );
-  }
-
-  return false;
-};
+import { ResetShortcutButton } from "../_client/buttons/reset-shortcut-button";
+import { ShortcutSlot } from "../_client/shortcut-slot";
+import { ShortcutSkill } from "@/types/shortcut.type";
+import {
+  BOTTOM_SLOTS_COUNT,
+  LEFT_SLOTS_COUNT,
+  MIDDLE_SLOTS_COUNT,
+  RESERVED_SLOT_ID,
+  RIGHT_SLOTS_COUNT,
+} from "../_utils/constants";
+import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
 
 export const Shortcut = () => {
   const { build, updateShortcuts, addStigma } = useBuildStore();
@@ -176,7 +126,7 @@ export const Shortcut = () => {
     // Use setTimeout to avoid synchronous setState in effect
     const timeoutId = setTimeout(() => {
       const updatedShortcuts = { ...loadedShortcuts };
-      
+
       // Update shortcuts that have skills without buildAbility/buildStigma
       // (skills that were added to shortcuts before being added to build)
       Object.keys(updatedShortcuts).forEach((key) => {
@@ -195,7 +145,11 @@ export const Shortcut = () => {
               buildAbility,
             };
           }
-        } else if (skill.type === "stigma" && skill.stigma && !skill.buildStigma) {
+        } else if (
+          skill.type === "stigma" &&
+          skill.stigma &&
+          !skill.buildStigma
+        ) {
           // Find buildStigma for this stigma
           const buildStigma = build?.stigmas?.find(
             (bs) => bs.stigmaId === skill.stigma?.id
@@ -208,7 +162,7 @@ export const Shortcut = () => {
           }
         }
       });
-      
+
       // Ensure first ability is always in slot 11
       if (firstAbility) {
         // Remove first ability from any other slot
@@ -224,21 +178,21 @@ export const Shortcut = () => {
         // Place first ability in slot 11
         updatedShortcuts[RESERVED_SLOT_ID] = firstAbility;
       }
-      
+
       setShortcuts(updatedShortcuts);
       // Reset flag after state is set
       setTimeout(() => {
         isInitialLoad.current = false;
       }, 0);
     }, 0);
-    
+
     return () => clearTimeout(timeoutId);
   }, [loadedShortcuts, firstAbility, build?.abilities, build?.stigmas]);
 
   // Save shortcuts to build when they change (but not during initial load)
   useEffect(() => {
     if (isInitialLoad.current || !shouldSave) return;
-    
+
     const shortcutsToSaveFormatted: Record<
       string,
       {
@@ -268,7 +222,9 @@ export const Shortcut = () => {
     });
 
     updateShortcuts(
-      Object.keys(shortcutsToSaveFormatted).length > 0 ? shortcutsToSaveFormatted : null
+      Object.keys(shortcutsToSaveFormatted).length > 0
+        ? shortcutsToSaveFormatted
+        : null
     );
     // Reset flag asynchronously to avoid setState in effect
     setTimeout(() => {
@@ -292,7 +248,8 @@ export const Shortcut = () => {
       const newShortcuts = { ...prev };
 
       // Check if the skill being dropped is the first ability
-      const isFirstAbility = firstAbility && skill && isSameSkill(skill, firstAbility);
+      const isFirstAbility =
+        firstAbility && skill && isSameSkill(skill, firstAbility);
 
       // If trying to drop the first ability anywhere except slot 11, force it to slot 11
       if (isFirstAbility && slotId !== RESERVED_SLOT_ID) {
@@ -334,7 +291,12 @@ export const Shortcut = () => {
       }
 
       // If dropping a stigma that's not in the build, add it to the build first
-      if (skill && skill.type === "stigma" && skill.stigma && !skill.buildStigma) {
+      if (
+        skill &&
+        skill.type === "stigma" &&
+        skill.stigma &&
+        !skill.buildStigma
+      ) {
         // Add stigma to build with level 0
         addStigma(skill.stigma.id, 0);
         // Note: The build will be updated and the shortcut will be reloaded
@@ -351,7 +313,11 @@ export const Shortcut = () => {
         Object.keys(newShortcuts).forEach((key) => {
           const existingSlotId = Number(key);
           // Skip the source slot (already handled above), the target slot, and reserved slot
-          if (existingSlotId !== sourceSlotId && existingSlotId !== slotId && existingSlotId !== RESERVED_SLOT_ID) {
+          if (
+            existingSlotId !== sourceSlotId &&
+            existingSlotId !== slotId &&
+            existingSlotId !== RESERVED_SLOT_ID
+          ) {
             const existingSkill = newShortcuts[existingSlotId];
             if (isSameSkill(existingSkill, skill)) {
               delete newShortcuts[existingSlotId];

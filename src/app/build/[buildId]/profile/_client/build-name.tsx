@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { StarterBuildMessage } from "../_components/starterBuildMessage";
 
 export const BuildName = () => {
   const { build, updateBuild } = useBuildStore();
@@ -21,11 +22,7 @@ export const BuildName = () => {
         disabled={isStarter}
         className="w-full text-3xl disabled:opacity-50 disabled:cursor-not-allowed"
       />
-      {isStarter && (
-        <p className="text-sm text-muted-foreground">
-          Starter builds cannot be modified. Create a new build to customize.
-        </p>
-      )}
+      {isStarter && <StarterBuildMessage />}
     </section>
   );
 };

@@ -9,6 +9,8 @@ import {
   PassiveType,
   StigmaType,
 } from "@/types/schema";
+import { AvailableSpeciality } from "../_client/avaible-speciality";
+import { AvailableSpecialityStigma } from "../_client/avaible-speciality-stigma.tsx";
 import { ChainSkill } from "../_client/chain-skill";
 import { SkillTag } from "../_client/skil-tag";
 import { SkillCastDuration } from "../_client/skill-cast-duration";
@@ -20,8 +22,6 @@ import { SkillRange } from "../_client/skill-range";
 import { SkillStaggerDamage } from "../_client/skill-stagger-damage";
 import { SkillTarget } from "../_client/skill-target";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
-import { AvailableSpeciality } from "./AvaibleSpeciality";
-import { AvailableSpecialityStigma } from "./AvaibleSpecialityStigma";
 
 type SkillDetailsProps = {
   buildAbility?: BuildAbilityType;

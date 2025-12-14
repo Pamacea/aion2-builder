@@ -2,7 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
-import { SpecialtyChoice } from "../_client/speciality-choice";
+import { SpecialtyChoice } from "./speciality-choice";
 
 type AvailableSpecialityProps = {
   buildAbility?: BuildAbilityType;
