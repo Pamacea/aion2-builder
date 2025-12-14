@@ -15,7 +15,7 @@ export const BuildCard = ({ build }: BuildCardProps) => {
   const bannerUrl = build.class?.bannerUrl || "default-banner.webp";
 
   return (
-    <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all">
+    <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all hover:scale-110">
       {/* Banner Background */}
       <div className="relative h-48 w-full">
         <Image

@@ -28,7 +28,7 @@ export function CreateYourBuildButton({ starterBuildId }: { starterBuildId: numb
     <button
       onClick={handleCreate}
       disabled={!starterBuildId || isCreating}
-      className="py-4 flex justify-center text-md uppercase bg-background/60 text-foreground font-bold rounded-md hover:bg-primary transition border-2 border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isCreating ? "Creating..." : "create your build"}
     </button>
