@@ -213,12 +213,16 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
       abilities: {
         create: starterBuild.abilities?.map((a) => ({
           abilityId: a.abilityId,
-          level: a.level,
-          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
+          level: 0, // New builds start at level 0, not copying starter build levels
+          activeSpecialtyChoiceIds: [],
         })) ?? [],
       },
       passives: {
-        create: starterBuild.passives?.map(mapBuildPassiveData) ?? [],
+        create: starterBuild.passives?.map((p) => ({
+          passiveId: p.passiveId,
+          level: 0, // New builds start at level 0, not copying starter build levels
+          maxLevel: p.maxLevel,
+        })) ?? [],
       },
       stigmas: {
         create: starterBuild.stigmas?.map((s) => ({

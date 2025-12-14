@@ -43,11 +43,34 @@ export const SkillsPoints = () => {
       return { totalSP: 0, totalSTP: 0, maxSP: 0, maxSTP: 0 };
     }
 
+    // Collect all chain skill IDs (abilities and stigmas that are chain skills)
+    const chainSkillAbilityIds = new Set<number>();
+    const chainSkillStigmaIds = new Set<number>();
+
+    // Find all chain skill ability IDs from selectedChainSkillIds
+    build.abilities?.forEach((buildAbility) => {
+      buildAbility.selectedChainSkillIds?.forEach((chainSkillId) => {
+        chainSkillAbilityIds.add(chainSkillId);
+      });
+    });
+
+    // Find all chain skill stigma IDs from selectedChainSkillIds
+    build.stigmas?.forEach((buildStigma) => {
+      buildStigma.selectedChainSkillIds?.forEach((chainSkillId) => {
+        chainSkillStigmaIds.add(chainSkillId);
+      });
+    });
+
     let spUsed = 0;
     let stpUsed = 0;
 
-    // Calculate SP for abilities
+    // Calculate SP for abilities (exclude chain skills)
     build.abilities?.forEach((buildAbility) => {
+      // Skip if this ability is a chain skill (referenced in another ability's selectedChainSkillIds)
+      if (chainSkillAbilityIds.has(buildAbility.abilityId)) {
+        return;
+      }
+
       const ability = buildAbility.ability;
       if (ability && buildAbility.level > 0) {
         const cost = calculateSkillCost(
@@ -72,8 +95,13 @@ export const SkillsPoints = () => {
       }
     });
 
-    // Calculate STP for stigmas
+    // Calculate STP for stigmas (exclude chain skills)
     build.stigmas?.forEach((buildStigma) => {
+      // Skip if this stigma is a chain skill (referenced in another stigma's selectedChainSkillIds)
+      if (chainSkillStigmaIds.has(buildStigma.stigmaId)) {
+        return;
+      }
+
       const stigma = buildStigma.stigma;
       if (stigma && buildStigma.level > 0) {
         const cost = calculateSkillCost(
