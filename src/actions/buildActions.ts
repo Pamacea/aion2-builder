@@ -202,6 +202,12 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
   if (!starterBuild) return null;
 
   const className = starterBuild.class.name.charAt(0).toUpperCase() + starterBuild.class.name.slice(1);
+  
+  // Find the first ability (smallest abilityId) - this is the auto attack
+  const firstAbilityId = starterBuild.class?.abilities
+    ? Math.min(...starterBuild.class.abilities.map(a => a.id))
+    : null;
+  
   const newBuild = await prisma.build.create({
     data: {
       name: `Custom - ${className} Build`,
@@ -213,7 +219,7 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
       abilities: {
         create: starterBuild.abilities?.map((a) => ({
           abilityId: a.abilityId,
-          level: 0, // New builds start at level 0, not copying starter build levels
+          level: a.abilityId === firstAbilityId ? 1 : 0, // First ability (auto attack) always starts at level 1
           activeSpecialtyChoiceIds: [],
         })) ?? [],
       },
@@ -273,6 +279,11 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
   const sourceBuild = await getBuildById(sourceBuildId);
   if (!sourceBuild) return null;
 
+  // Find the first ability (smallest abilityId) - this is the auto attack
+  const firstAbilityId = sourceBuild.class?.abilities
+    ? Math.min(...sourceBuild.class.abilities.map(a => a.id))
+    : null;
+
   const newBuild = await prisma.build.create({
     data: {
       name: `${sourceBuild.name} (Copy)`,
@@ -284,7 +295,7 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
       abilities: {
         create: sourceBuild.abilities?.map((a) => ({
           abilityId: a.abilityId,
-          level: a.level,
+          level: a.abilityId === firstAbilityId ? 1 : a.level, // First ability (auto attack) always starts at level 1
           activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
         })) ?? [],
       },

@@ -41,26 +41,32 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const [{ isOver }, drop] = useDrop({
     accept: "skill",
     canDrop: (item: { skill?: ShortcutSlotProps["skill"]; slotId?: number }) => {
-      // Reserved slots can only accept the reserved skill
-      if (isReserved) {
-        // The reserved slot logic is handled in handleDrop, so we allow drop here
-        // but handleDrop will redirect if needed
-        return true;
-      }
-      // Stigma-only slots can only accept stigmas
-      if (isStigmaOnly) {
-        const skillToDrop = item?.skill;
-        if (skillToDrop && "type" in skillToDrop) {
-          return skillToDrop.type === "stigma";
-        }
+      const skillToDrop = item?.skill;
+      
+      // If no skill to drop, cannot drop
+      if (!skillToDrop) {
         return false;
       }
-      // Non-stigma-only slots can only accept abilities (not stigmas)
-      const skillToDrop = item?.skill;
-      if (skillToDrop && "type" in skillToDrop) {
-        return skillToDrop.type === "ability";
+      
+      // Check if skillToDrop has a type property
+      if (!("type" in skillToDrop)) {
+        return false;
       }
-      return false;
+      
+      // Reserved slots can only accept the reserved skill
+      // The reserved slot logic is handled in handleDrop, so we allow drop here
+      // but handleDrop will redirect if needed
+      if (isReserved) {
+        return true;
+      }
+      
+      // Stigma-only slots can only accept stigmas
+      if (isStigmaOnly) {
+        return skillToDrop.type === "stigma";
+      }
+      
+      // Non-stigma-only slots can only accept abilities (not stigmas)
+      return skillToDrop.type === "ability";
     },
     drop: (item: { skill?: ShortcutSlotProps["skill"]; slotId?: number }) => {
       // The item from skill components has the structure: { skill: { type, ability/passive/stigma, buildAbility/buildPassive/buildStigma } }
@@ -69,18 +75,28 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
       const skillToDrop = item?.skill;
       const sourceSlotId = item?.slotId; // If present, this means the drag came from another slot
       
-      if (skillToDrop && "type" in skillToDrop) {
-        // Stigma-only slots can only accept stigmas
-        if (isStigmaOnly) {
-          if (skillToDrop.type === "stigma") {
-            onDrop(slotId, skillToDrop, sourceSlotId);
-          }
-        } else {
-          // Non-stigma-only slots can only accept abilities
-          if (skillToDrop.type === "ability") {
-            onDrop(slotId, skillToDrop, sourceSlotId);
-          }
+      // If no skill to drop, do nothing
+      if (!skillToDrop || !("type" in skillToDrop)) {
+        return;
+      }
+      
+      // Stigma-only slots can only accept stigmas
+      if (isStigmaOnly) {
+        if (skillToDrop.type === "stigma") {
+          onDrop(slotId, skillToDrop, sourceSlotId);
         }
+        return;
+      }
+      
+      // Reserved slots: handled in handleDrop
+      if (isReserved) {
+        onDrop(slotId, skillToDrop, sourceSlotId);
+        return;
+      }
+      
+      // Non-stigma-only, non-reserved slots can only accept abilities
+      if (skillToDrop.type === "ability") {
+        onDrop(slotId, skillToDrop, sourceSlotId);
       }
     },
     collect: (monitor: DropTargetMonitor) => ({
@@ -155,6 +171,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
 
   const handleClick = (e: React.MouseEvent) => {
     // Cannot place skills in reserved slot via click (only the reserved skill can be there)
+    // This is handled by handleDrop, so we just prevent the click
     if (isReserved) {
       return;
     }

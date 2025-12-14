@@ -103,16 +103,23 @@ export const Shortcut = () => {
   }, [build]);
 
   // Get the first ability from build (reserved for slot 11)
+  // The first ability is determined by the smallest abilityId in the class
   const firstAbility = useMemo(() => {
-    if (!build?.abilities || build.abilities.length === 0) return null;
-    const firstBuildAbility = build.abilities[0];
-    const firstAbility = build.class?.abilities?.find(
-      (a) => a.id === firstBuildAbility.abilityId
+    if (!build?.class?.abilities || build.class.abilities.length === 0) return null;
+    
+    // Find the ability with the smallest ID (first ability of the class)
+    const sortedAbilities = [...build.class.abilities].sort((a, b) => a.id - b.id);
+    const firstClassAbility = sortedAbilities[0];
+    
+    // Find the corresponding buildAbility
+    const firstBuildAbility = build.abilities?.find(
+      (ba) => ba.abilityId === firstClassAbility.id
     );
-    if (firstAbility && firstBuildAbility) {
+    
+    if (firstClassAbility && firstBuildAbility) {
       return {
         type: "ability" as const,
-        ability: firstAbility,
+        ability: firstClassAbility,
         buildAbility: firstBuildAbility,
       };
     }

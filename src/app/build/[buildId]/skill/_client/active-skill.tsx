@@ -184,19 +184,14 @@ export const ActiveSkill = ({
       {/* Selection indicator for shortcut */}
       {isSelectedForShortcut && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-6 h-6 bg-orange-500/80 rounded-full flex items-center justify-center border-2 border-orange-300">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4 text-white"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.894 7.48-9.817a.75.75 0 011.05-.143z"
-                clipRule="evenodd"
-              />
-            </svg>
+          <div className="w-full h-full bg-background/50 flex items-center justify-center border-2 border-foreground/50">
+            <Image
+              src="/icons/skill-selected-icon.webp"
+              alt="Selected Icon"
+              width={32}
+              height={32}
+              className="opacity-80"
+            />
           </div>
         </div>
       )}
