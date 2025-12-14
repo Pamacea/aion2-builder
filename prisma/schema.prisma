@@ -107,6 +107,9 @@ model Ability {
 
   target String? @default("Single Target")
 
+  // Conditions du sort (ex: ["Nontarget Skill", "Mobile"])
+  condition String[] @default([])
+
   // Relation vers les tags  du sort
   spellTag SpellTag[]
 
@@ -131,6 +134,9 @@ model ChainSkill {
   parentAbilityId Int   // Ability parente
   chainAbilityId   Int   // Ability chain skill
   
+  // Conditions spécifiques pour cette relation chain skill (ex: ["Nontarget Skill", "Mobile"])
+  condition String[] @default([])
+  
   parentAbility Ability @relation("AbilityParentSkills", fields: [parentAbilityId], references: [id], onDelete: Cascade)
   chainAbility  Ability @relation("AbilityChainSkills", fields: [chainAbilityId], references: [id], onDelete: Cascade)
   
@@ -145,6 +151,9 @@ model ChainSkillStigma {
   id            Int     @id @default(autoincrement())
   parentStigmaId Int   // Stigma parent
   chainStigmaId   Int   // Stigma chain skill
+  
+  // Conditions spécifiques pour cette relation chain skill (ex: ["Nontarget Skill", "Mobile"])
+  condition String[] @default([])
   
   parentStigma Stigma @relation("StigmaParentSkills", fields: [parentStigmaId], references: [id], onDelete: Cascade)
   chainStigma  Stigma @relation("StigmaChainSkills", fields: [chainStigmaId], references: [id], onDelete: Cascade)
@@ -285,6 +294,8 @@ model Stigma {
 
   target String? @default("Single Target")
 
+  // Conditions du stigma (ex: ["Nontarget Skill", "Mobile"])
+  condition String[] @default([])
 
   isShared Boolean @default(false) // Partagé entre plusieurs classes
   baseCost Int     @default(1) // Coût par défaut en Stigma Points (STP)

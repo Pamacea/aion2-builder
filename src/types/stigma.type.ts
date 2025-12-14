@@ -44,6 +44,8 @@ export const StigmaSchemaBase = z.object({
 
   target: z.string().default("Single Target").nullish(),
 
+  condition: z.array(z.string()).default([]),
+
   isShared: z.boolean().default(false),
   baseCost: z.number().default(10),
   baseCostModifier: z.number().default(2),
@@ -57,6 +59,7 @@ export type ChainSkillStigmaType = {
   id: number;
   parentStigmaId: number;
   chainStigmaId: number;
+  condition: string[];
   parentStigma?: StigmaType;
   chainStigma: StigmaType;
 };

@@ -41,6 +41,8 @@ export const AbilitySchemaBase = z.object({
 
   target: z.string().default("Single Target").nullish(),
 
+  condition: z.array(z.string()).default([]),
+
   baseCost: z.number().default(1),
   baseCostModifier: z.number().default(2),
   maxLevel: z.number().default(20),
@@ -56,6 +58,7 @@ export type ChainSkillType = {
   id: number;
   parentAbilityId: number;
   chainAbilityId: number;
+  condition: string[];
   parentAbility?: AbilityType;
   chainAbility: AbilityType;
 };

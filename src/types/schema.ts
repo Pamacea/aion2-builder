@@ -73,6 +73,7 @@ export const ChainSkillSchema: z.ZodType<ChainSkillType> = z.object({
   id: z.number(),
   parentAbilityId: z.number(),
   chainAbilityId: z.number(),
+  condition: z.array(z.string()).default([]),
   parentAbility: z.lazy(() => AbilitySchema).optional(),
   chainAbility: z.lazy(() => AbilitySchema),
 }) as z.ZodType<ChainSkillType>;
@@ -85,6 +86,7 @@ export const ChainSkillStigmaSchema: z.ZodType<ChainSkillStigmaType> = z.object(
     id: z.number(),
     parentStigmaId: z.number(),
     chainStigmaId: z.number(),
+    condition: z.array(z.string()).default([]),
     parentStigma: z.lazy(() => StigmaSchema).optional(),
     chainStigma: z.lazy(() => StigmaSchema),
   }
