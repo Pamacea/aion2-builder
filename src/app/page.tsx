@@ -1,5 +1,5 @@
-import { DiscoverClass } from "@/components/Discover/discover-class";
-import { DiscoverHead } from "@/components/Discover/discover-head";
+import { DiscoverClass } from "@/components/client/discover-class";
+import { DiscoverHead } from "@/components/client/discover-head";
 
 export default function Home() {
   return (

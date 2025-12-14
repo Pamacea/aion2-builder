@@ -1,6 +1,4 @@
-import { ProfileButton } from "../client/profile-button";
-import { SkillButton } from "../client/skill-button";
-import { SphereButton } from "../client/sphere-button";
+import { ProfileButton, SkillButton, SphereButton } from "../client/buttons";
 
 export const Buildbar = () => {
   return (

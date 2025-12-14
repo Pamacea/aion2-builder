@@ -1,13 +1,12 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { CreateButton } from "./client/create-button";
-import { Bahion } from "./Header/Bahion";
-import { Navbar } from "./Header/Navbar";
-import { ShareButton } from "./client/share-button";
-import { Buildbar } from "./Header/BuildBar";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { usePathname } from "next/navigation";
+import { CreateButton, ShareButton } from "./client/buttons";
+import { Bahion } from "./Header/Bahion";
+import { Buildbar } from "./Header/buildBar";
+import { Navbar } from "./Header/navBar";
 
 export const Header = () => {
   const pathname = usePathname();

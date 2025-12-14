@@ -1,6 +1,4 @@
-import { ClassButton } from "../client/class-button";
-import { HomeButton } from "../client/home-button";
-import { MoreBuildButton } from "../client/more-build-button";
+import { ClassButton, HomeButton, MoreBuildButton } from "../client/buttons";
 
 export const Navbar = () => {
   return (

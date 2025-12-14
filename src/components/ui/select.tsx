@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { DropDownButton } from "../client/dropdown-button";
+import { DropDownButton } from "../client/buttons";
 
 function Select({
   ...props
@@ -181,5 +181,6 @@ export {
   SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 };
+
