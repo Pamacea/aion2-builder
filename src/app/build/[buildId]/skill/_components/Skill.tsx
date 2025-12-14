@@ -276,7 +276,7 @@ export const Skill = () => {
           <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
             ACTIVE
           </div>
-          <div className="grid grid-cols-3 gap-2 px-2">
+          <div className="grid grid-cols-5 gap-2 px-2">
             {availableAbilities.map((ability) => {
               const buildAbility = findBuildAbility(ability.id);
               const isSelected = selectedBuildAbility?.abilityId === ability.id;
@@ -298,7 +298,7 @@ export const Skill = () => {
           <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
             PASSIVE
           </div>
-          <div className="grid grid-cols-3 gap-2 px-2">
+          <div className="grid grid-cols-5 gap-2 px-2">
             {availablePassives.map((passive) => {
               const buildPassive = findBuildPassive(passive.id);
               const isSelected = selectedBuildPassive?.passiveId === passive.id;
@@ -320,7 +320,7 @@ export const Skill = () => {
           <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
             STIGMA
           </div>
-          <div className="grid grid-cols-3 gap-2 px-2">
+          <div className="grid grid-cols-5 gap-2 px-2">
             {availableStigmas.map((stigma) => {
               const buildStigma = findBuildStigma(stigma.id);
               const isSelected = selectedBuildStigma?.stigmaId === stigma.id;

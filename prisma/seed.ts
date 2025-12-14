@@ -86,12 +86,57 @@ async function main() {
           damageMax: "damageMax" in ability ? ability.damageMax : undefined,
           damageMaxModifier: "damageMaxModifier" in ability ? ability.damageMaxModifier : undefined,
           damageMaxModifiers: "damageMaxModifiers" in ability && ability.damageMaxModifiers ? ability.damageMaxModifiers : undefined,
+          damageBoost: "damageBoost" in ability ? ability.damageBoost : undefined,
+          damageBoostModifier: "damageBoostModifier" in ability ? ability.damageBoostModifier : undefined,
+          damageBoostModifiers: "damageBoostModifiers" in ability && ability.damageBoostModifiers ? ability.damageBoostModifiers : undefined,
+          damageTolerance: "damageTolerance" in ability ? ability.damageTolerance : undefined,
+          damageToleranceModifier: "damageToleranceModifier" in ability ? ability.damageToleranceModifier : undefined,
+          damageToleranceModifiers: "damageToleranceModifiers" in ability && ability.damageToleranceModifiers ? ability.damageToleranceModifiers : undefined,
+          healMin: "healMin" in ability ? ability.healMin : undefined,
+          healMinModifier: "healMinModifier" in ability ? ability.healMinModifier : undefined,
+          healMinModifiers: "healMinModifiers" in ability && ability.healMinModifiers ? ability.healMinModifiers : undefined,
+          healMax: "healMax" in ability ? ability.healMax : undefined,
+          healMaxModifier: "healMaxModifier" in ability ? ability.healMaxModifier : undefined,
+          healMaxModifiers: "healMaxModifiers" in ability && ability.healMaxModifiers ? ability.healMaxModifiers : undefined,
+          healBoost: "healBoost" in ability ? ability.healBoost : undefined,
+          healBoostModifier: "healBoostModifier" in ability ? ability.healBoostModifier : undefined,
+          healBoostModifiers: "healBoostModifiers" in ability && ability.healBoostModifiers ? ability.healBoostModifiers : undefined,
+          incomingHeal: "incomingHeal" in ability ? ability.incomingHeal : undefined,
+          incomingHealModifier: "incomingHealModifier" in ability ? ability.incomingHealModifier : undefined,
+          incomingHealModifiers: "incomingHealModifiers" in ability && ability.incomingHealModifiers ? ability.incomingHealModifiers : undefined,
+          minMP: "minMP" in ability ? ability.minMP : undefined,
+          minMPModifier: "minMPModifier" in ability ? ability.minMPModifier : undefined,
+          minMPModifiers: "minMPModifiers" in ability && ability.minMPModifiers ? ability.minMPModifiers : undefined,
+          maxHP: "maxHP" in ability ? ability.maxHP : undefined,
+          maxHPModifier: "maxHPModifier" in ability ? ability.maxHPModifier : undefined,
+          maxHPModifiers: "maxHPModifiers" in ability && ability.maxHPModifiers ? ability.maxHPModifiers : undefined,
+          minHP: "minHP" in ability ? ability.minHP : undefined,
+          minHPModifier: "minHPModifier" in ability ? ability.minHPModifier : undefined,
+          minHPModifiers: "minHPModifiers" in ability && ability.minHPModifiers ? ability.minHPModifiers : undefined,
+          maxMP: "maxMP" in ability ? ability.maxMP : undefined,
+          maxMPModifier: "maxMPModifier" in ability ? ability.maxMPModifier : undefined,
+          maxMPModifiers: "maxMPModifiers" in ability && ability.maxMPModifiers ? ability.maxMPModifiers : undefined,
+          criticalHitResist: "criticalHitResist" in ability ? ability.criticalHitResist : undefined,
+          criticalHitResistModifier: "criticalHitResistModifier" in ability ? ability.criticalHitResistModifier : undefined,
+          statusEffectResist: "statusEffectResist" in ability ? ability.statusEffectResist : undefined,
+          statusEffectResistModifier: "statusEffectResistModifier" in ability ? ability.statusEffectResistModifier : undefined,
+          impactTypeResist: "impactTypeResist" in ability ? ability.impactTypeResist : undefined,
+          impactTypeResistModifier: "impactTypeResistModifier" in ability ? ability.impactTypeResistModifier : undefined,
+          attack: "attack" in ability ? ability.attack : undefined,
+          attackModifier: "attackModifier" in ability ? ability.attackModifier : undefined,
+          defense: "defense" in ability ? ability.defense : undefined,
+          defenseModifier: "defenseModifier" in ability ? ability.defenseModifier : undefined,
+          blockDamage: "blockDamage" in ability ? ability.blockDamage : undefined,
+          blockDamageModifier: "blockDamageModifier" in ability ? ability.blockDamageModifier : undefined,
+          blockDamageModifiers: "blockDamageModifiers" in ability && ability.blockDamageModifiers ? ability.blockDamageModifiers : undefined,
+          damagePerSecond: "damagePerSecond" in ability ? ability.damagePerSecond : undefined,
+          damagePerSecondModifier: "damagePerSecondModifier" in ability ? ability.damagePerSecondModifier : undefined,
+          damagePerSecondModifiers: "damagePerSecondModifiers" in ability && ability.damagePerSecondModifiers ? ability.damagePerSecondModifiers : undefined,
           staggerDamage: "staggerDamage" in ability ? ability.staggerDamage : undefined,
           manaCost: "manaCost" in ability ? ability.manaCost : undefined,
           manaRegen: "manaRegen" in ability ? ability.manaRegen : undefined,
           range: "range" in ability ? ability.range : 20,
-          isNontarget: "isNontarget" in ability ? ability.isNontarget : false,
-          isMobile: "isMobile" in ability ? ability.isMobile : false,
+          area: "area" in ability ? ability.area : 4,
           castingDuration: "castingDuration" in ability ? ability.castingDuration : "Instant Cast",
           cooldown: "cooldown" in ability ? ability.cooldown : "Instant Cast",
           target: "target" in ability ? ability.target : "Single Target",
@@ -118,31 +163,22 @@ async function main() {
 
         // --- Seed SPECIALTY CHOICES for this ability ---
         if (ability.specialtyChoices && ability.specialtyChoices.length > 0) {
+          // Delete all existing specialty choices for this ability first
+          await prisma.specialtyChoice.deleteMany({
+            where: {
+              abilityId: createdAbility.id,
+            },
+          });
+
+          // Create all specialty choices
           for (const specialtyChoice of ability.specialtyChoices) {
-            // Check if specialty choice already exists
-            const existingSpecialtyChoice = await prisma.specialtyChoice.findFirst({
-              where: {
-                abilityId: createdAbility.id,
+            await prisma.specialtyChoice.create({
+              data: {
+                description: specialtyChoice.description,
                 unlockLevel: specialtyChoice.unlockLevel,
+                abilityId: createdAbility.id,
               },
             });
-
-            if (existingSpecialtyChoice) {
-              await prisma.specialtyChoice.update({
-                where: { id: existingSpecialtyChoice.id },
-                data: {
-                  description: specialtyChoice.description,
-                },
-              });
-            } else {
-              await prisma.specialtyChoice.create({
-                data: {
-                  description: specialtyChoice.description,
-                  unlockLevel: specialtyChoice.unlockLevel,
-                  abilityId: createdAbility.id,
-                },
-              });
-            }
           }
         }
       }
@@ -232,18 +268,61 @@ async function main() {
           damageMax: "damageMax" in stigma ? stigma.damageMax : undefined,
           damageMaxModifier: "damageMaxModifier" in stigma ? stigma.damageMaxModifier : undefined,
           damageMaxModifiers: "damageMaxModifiers" in stigma && stigma.damageMaxModifiers ? stigma.damageMaxModifiers : undefined,
+          damageBoost: "damageBoost" in stigma ? stigma.damageBoost : undefined,
+          damageBoostModifier: "damageBoostModifier" in stigma ? stigma.damageBoostModifier : undefined,
+          damageBoostModifiers: "damageBoostModifiers" in stigma && stigma.damageBoostModifiers ? stigma.damageBoostModifiers : undefined,
+          damageTolerance: "damageTolerance" in stigma ? stigma.damageTolerance : undefined,
+          damageToleranceModifier: "damageToleranceModifier" in stigma ? stigma.damageToleranceModifier : undefined,
+          damageToleranceModifiers: "damageToleranceModifiers" in stigma && stigma.damageToleranceModifiers ? stigma.damageToleranceModifiers : undefined,
+          healMin: "healMin" in stigma ? stigma.healMin : undefined,
+          healMinModifier: "healMinModifier" in stigma ? stigma.healMinModifier : undefined,
+          healMinModifiers: "healMinModifiers" in stigma && stigma.healMinModifiers ? stigma.healMinModifiers : undefined,
+          healMax: "healMax" in stigma ? stigma.healMax : undefined,
+          healMaxModifier: "healMaxModifier" in stigma ? stigma.healMaxModifier : undefined,
+          healMaxModifiers: "healMaxModifiers" in stigma && stigma.healMaxModifiers ? stigma.healMaxModifiers : undefined,
+          healBoost: "healBoost" in stigma ? stigma.healBoost : undefined,
+          healBoostModifier: "healBoostModifier" in stigma ? stigma.healBoostModifier : undefined,
+          healBoostModifiers: "healBoostModifiers" in stigma && stigma.healBoostModifiers ? stigma.healBoostModifiers : undefined,
+          incomingHeal: "incomingHeal" in stigma ? stigma.incomingHeal : undefined,
+          incomingHealModifier: "incomingHealModifier" in stigma ? stigma.incomingHealModifier : undefined,
+          incomingHealModifiers: "incomingHealModifiers" in stigma && stigma.incomingHealModifiers ? stigma.incomingHealModifiers : undefined,
+          minMP: "minMP" in stigma ? stigma.minMP : undefined,
+          minMPModifier: "minMPModifier" in stigma ? stigma.minMPModifier : undefined,
+          minMPModifiers: "minMPModifiers" in stigma && stigma.minMPModifiers ? stigma.minMPModifiers : undefined,
+          maxHP: "maxHP" in stigma ? stigma.maxHP : undefined,
+          maxHPModifier: "maxHPModifier" in stigma ? stigma.maxHPModifier : undefined,
+          maxHPModifiers: "maxHPModifiers" in stigma && stigma.maxHPModifiers ? stigma.maxHPModifiers : undefined,
+          minHP: "minHP" in stigma ? stigma.minHP : undefined,
+          minHPModifier: "minHPModifier" in stigma ? stigma.minHPModifier : undefined,
+          minHPModifiers: "minHPModifiers" in stigma && stigma.minHPModifiers ? stigma.minHPModifiers : undefined,
+          maxMP: "maxMP" in stigma ? stigma.maxMP : undefined,
+          maxMPModifier: "maxMPModifier" in stigma ? stigma.maxMPModifier : undefined,
+          maxMPModifiers: "maxMPModifiers" in stigma && stigma.maxMPModifiers ? stigma.maxMPModifiers : undefined,
+          criticalHitResist: "criticalHitResist" in stigma ? stigma.criticalHitResist : undefined,
+          criticalHitResistModifier: "criticalHitResistModifier" in stigma ? stigma.criticalHitResistModifier : undefined,
+          statusEffectResist: "statusEffectResist" in stigma ? stigma.statusEffectResist : undefined,
+          statusEffectResistModifier: "statusEffectResistModifier" in stigma ? stigma.statusEffectResistModifier : undefined,
+          impactTypeResist: "impactTypeResist" in stigma ? stigma.impactTypeResist : undefined,
+          impactTypeResistModifier: "impactTypeResistModifier" in stigma ? stigma.impactTypeResistModifier : undefined,
+          attack: "attack" in stigma ? stigma.attack : undefined,
+          attackModifier: "attackModifier" in stigma ? stigma.attackModifier : undefined,
+          defense: "defense" in stigma ? stigma.defense : undefined,
+          defenseModifier: "defenseModifier" in stigma ? stigma.defenseModifier : undefined,
+          blockDamage: "blockDamage" in stigma ? stigma.blockDamage : undefined,
+          blockDamageModifier: "blockDamageModifier" in stigma ? stigma.blockDamageModifier : undefined,
+          blockDamageModifiers: "blockDamageModifiers" in stigma && stigma.blockDamageModifiers ? stigma.blockDamageModifiers : undefined,
+          damagePerSecond: "damagePerSecond" in stigma ? stigma.damagePerSecond : undefined,
+          damagePerSecondModifier: "damagePerSecondModifier" in stigma ? stigma.damagePerSecondModifier : undefined,
+          damagePerSecondModifiers: "damagePerSecondModifiers" in stigma && stigma.damagePerSecondModifiers ? stigma.damagePerSecondModifiers : undefined,
           staggerDamage: "staggerDamage" in stigma ? stigma.staggerDamage : undefined,
           manaCost: "manaCost" in stigma ? stigma.manaCost : undefined,
           manaRegen: "manaRegen" in stigma ? stigma.manaRegen : undefined,
           range: "range" in stigma ? stigma.range : 20,
           area: "area" in stigma ? stigma.area : 4,
-          isNontarget: "isNontarget" in stigma ? stigma.isNontarget : false,
-          isMobile: "isMobile" in stigma ? stigma.isMobile : false,
           castingDuration: "castingDuration" in stigma ? stigma.castingDuration : "Instant Cast",
           cooldown: "cooldown" in stigma ? stigma.cooldown : "Instant Cast",
           target: "target" in stigma ? stigma.target : "Single Target",
           condition: "condition" in stigma && Array.isArray(stigma.condition) ? stigma.condition : [],
-          isShared: "isShared" in stigma ? stigma.isShared : false,
           spellTag: {
             [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -268,31 +347,22 @@ async function main() {
 
         // --- Seed SPECIALTY CHOICES for this stigma ---
         if (stigma.specialtyChoices && stigma.specialtyChoices.length > 0) {
+          // Delete all existing specialty choices for this stigma first
+          await prisma.specialtyChoice.deleteMany({
+            where: {
+              stigmaId: createdStigma.id,
+            },
+          });
+
+          // Create all specialty choices
           for (const specialtyChoice of stigma.specialtyChoices) {
-            // Check if specialty choice already exists
-            const existingSpecialtyChoice = await prisma.specialtyChoice.findFirst({
-              where: {
-                stigmaId: createdStigma.id,
+            await prisma.specialtyChoice.create({
+              data: {
+                description: specialtyChoice.description,
                 unlockLevel: specialtyChoice.unlockLevel,
+                stigmaId: createdStigma.id,
               },
             });
-
-            if (existingSpecialtyChoice) {
-              await prisma.specialtyChoice.update({
-                where: { id: existingSpecialtyChoice.id },
-                data: {
-                  description: specialtyChoice.description,
-                },
-              });
-            } else {
-              await prisma.specialtyChoice.create({
-                data: {
-                  description: specialtyChoice.description,
-                  unlockLevel: specialtyChoice.unlockLevel,
-                  stigmaId: createdStigma.id,
-                },
-              });
-            }
           }
         }
       }
@@ -356,12 +426,16 @@ async function main() {
           attackModifier: "attackModifier" in passive ? passive.attackModifier : undefined,
           defense: "defense" in passive ? passive.defense : undefined,
           defenseModifier: "defenseModifier" in passive ? passive.defenseModifier : undefined,
+          blockDamage: "blockDamage" in passive ? passive.blockDamage : undefined,
+          blockDamageModifier: "blockDamageModifier" in passive ? passive.blockDamageModifier : undefined,
+          blockDamageModifiers: "blockDamageModifiers" in passive && passive.blockDamageModifiers ? passive.blockDamageModifiers : undefined,
+          damagePerSecond: "damagePerSecond" in passive ? passive.damagePerSecond : undefined,
+          damagePerSecondModifier: "damagePerSecondModifier" in passive ? passive.damagePerSecondModifier : undefined,
+          damagePerSecondModifiers: "damagePerSecondModifiers" in passive && passive.damagePerSecondModifiers ? passive.damagePerSecondModifiers : undefined,
           staggerDamage: "staggerDamage" in passive ? passive.staggerDamage : undefined,
           manaCost: "manaCost" in passive ? passive.manaCost : undefined,
           manaRegen: "manaRegen" in passive ? passive.manaRegen : undefined,
           range: "range" in passive ? passive.range : 20,
-          isNontarget: passive.isNontarget ?? false,
-          isMobile: passive.isMobile ?? false,
           castingDuration: passive.castingDuration ?? "Instant Cast",
           cooldown: passive.cooldown ?? "Instant Cast",
           target: passive.target ?? "Single Target",

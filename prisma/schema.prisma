@@ -87,9 +87,69 @@ model Ability {
   damageMin         Int?
   damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
   damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
   damageMax         Int?
   damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
   damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
+  damageBoost       Int?
+  damageBoostModifier Int?
+  damageBoostModifiers Json? // Tableau de modifiers par niveau
+
+  damageTolerance   Int?
+  damageToleranceModifier Int?
+  damageToleranceModifiers Json? // Tableau de modifiers par niveau
+
+  healMin      Int?
+  healMinModifier Int?
+  healMinModifiers Json? // Tableau de modifiers par niveau
+
+  healMax      Int?
+  healMaxModifier Int?
+  healMaxModifiers Json? // Tableau de modifiers par niveau
+
+  healBoost    Int?
+  healBoostModifier Int?
+  healBoostModifiers Int? // Tableau de modifiers par niveau
+
+  incomingHeal Int?
+  incomingHealModifier Int?
+  incomingHealModifiers Int? // Tableau de modifiers par niveau
+  
+  minMP        Int?
+  minMPModifier Int?
+  minMPModifiers Json? // Tableau de modifiers par niveau
+
+  maxHP        Int?
+  maxHPModifier Int?
+  maxHPModifiers Json? // Tableau de modifiers par niveau
+
+  minHP        Int?
+  minHPModifier Int?
+  minHPModifiers Json? // Tableau de modifiers par niveau
+  maxMP        Int?
+  maxMPModifier Int?
+  maxMPModifiers Json? // Tableau de modifiers par niveau
+
+  criticalHitResist  Int?
+  criticalHitResistModifier Int?
+  statusEffectResist Int?
+  statusEffectResistModifier Int?
+  impactTypeResist   Int?
+  impactTypeResistModifier Int?
+
+  attack  Int?
+  attackModifier Int?
+  defense Int?
+  defenseModifier Int?
+
+  blockDamage Int?
+  blockDamageModifier Int?
+  blockDamageModifiers Json? // Tableau de modifiers par niveau
+
+  damagePerSecond Int?
+  damagePerSecondModifier Int?
+  damagePerSecondModifiers Json? // Tableau de modifiers par niveau
 
   staggerDamage Int?
 
@@ -98,9 +158,6 @@ model Ability {
 
   range Int? @default(20)
   area  Int? @default(4)
-
-  isNontarget Boolean @default(false)
-  isMobile    Boolean @default(false)
 
   castingDuration String? @default("Instant Cast")
   cooldown        String? @default("Instant Cast")
@@ -196,27 +253,46 @@ model Passive {
   damageMin         Int?
   damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
   damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
   damageMax         Int?
   damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
   damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
   damageBoost       Int?
+  damageBoostModifier Int?
+  damageBoostModifiers Json? // Tableau de modifiers par niveau
+
   damageTolerance   Int?
+  damageToleranceModifier Int?
+  damageToleranceModifiers Json? // Tableau de modifiers par niveau
 
   healMin      Int?
   healMinModifier Int?
   healMinModifiers Json? // Tableau de modifiers par niveau
+
   healMax      Int?
   healMaxModifier Int?
   healMaxModifiers Json? // Tableau de modifiers par niveau
+
   healBoost    Int?
   healBoostModifier Int?
   healBoostModifiers Int? // Tableau de modifiers par niveau
+
   incomingHeal Int?
   incomingHealModifier Int?
   incomingHealModifiers Int? // Tableau de modifiers par niveau
+  
+  minMP        Int?
+  minMPModifier Int?
+  minMPModifiers Json? // Tableau de modifiers par niveau
+
   maxHP        Int?
   maxHPModifier Int?
   maxHPModifiers Json? // Tableau de modifiers par niveau
+
+  minHP        Int?
+  minHPModifier Int?
+  minHPModifiers Json? // Tableau de modifiers par niveau
   maxMP        Int?
   maxMPModifier Int?
   maxMPModifiers Json? // Tableau de modifiers par niveau
@@ -233,6 +309,14 @@ model Passive {
   defense Int?
   defenseModifier Int?
 
+  blockDamage Int?
+  blockDamageModifier Int?
+  blockDamageModifiers Json? // Tableau de modifiers par niveau
+
+  damagePerSecond Int?
+  damagePerSecondModifier Int?
+  damagePerSecondModifiers Json? // Tableau de modifiers par niveau
+
   staggerDamage Int?
 
   manaCost  Int?
@@ -240,9 +324,6 @@ model Passive {
 
   range Int? @default(20)
   area  Int? @default(4)
-
-  isNontarget Boolean @default(false)
-  isMobile    Boolean @default(false)
 
   castingDuration String? @default("Instant Cast")
   cooldown        String? @default("Instant Cast")
@@ -270,13 +351,73 @@ model Stigma {
   maxLevel    Int     @default(20)
   description String?
 
-   // Stats et Coûts
+  // Stats et Coûts
   damageMin         Int?
   damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
   damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
   damageMax         Int?
   damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
   damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
+
+  damageBoost       Int?
+  damageBoostModifier Int?
+  damageBoostModifiers Json? // Tableau de modifiers par niveau
+
+  damageTolerance   Int?
+  damageToleranceModifier Int?
+  damageToleranceModifiers Json? // Tableau de modifiers par niveau
+
+  healMin      Int?
+  healMinModifier Int?
+  healMinModifiers Json? // Tableau de modifiers par niveau
+
+  healMax      Int?
+  healMaxModifier Int?
+  healMaxModifiers Json? // Tableau de modifiers par niveau
+
+  healBoost    Int?
+  healBoostModifier Int?
+  healBoostModifiers Int? // Tableau de modifiers par niveau
+
+  incomingHeal Int?
+  incomingHealModifier Int?
+  incomingHealModifiers Int? // Tableau de modifiers par niveau
+  
+  minMP        Int?
+  minMPModifier Int?
+  minMPModifiers Json? // Tableau de modifiers par niveau
+
+  maxHP        Int?
+  maxHPModifier Int?
+  maxHPModifiers Json? // Tableau de modifiers par niveau
+
+  minHP        Int?
+  minHPModifier Int?
+  minHPModifiers Json? // Tableau de modifiers par niveau
+  maxMP        Int?
+  maxMPModifier Int?
+  maxMPModifiers Json? // Tableau de modifiers par niveau
+
+  criticalHitResist  Int?
+  criticalHitResistModifier Int?
+  statusEffectResist Int?
+  statusEffectResistModifier Int?
+  impactTypeResist   Int?
+  impactTypeResistModifier Int?
+
+  attack  Int?
+  attackModifier Int?
+  defense Int?
+  defenseModifier Int?
+
+  blockDamage Int?
+  blockDamageModifier Int?
+  blockDamageModifiers Json? // Tableau de modifiers par niveau
+
+  damagePerSecond Int?
+  damagePerSecondModifier Int?
+  damagePerSecondModifiers Json? // Tableau de modifiers par niveau
 
   staggerDamage Int?
 
@@ -286,9 +427,6 @@ model Stigma {
   range Int? @default(20)
   area  Int? @default(4)
 
-  isNontarget Boolean @default(false)
-  isMobile    Boolean @default(false)
-
   castingDuration String? @default("Instant Cast")
   cooldown        String? @default("Instant Cast")
 
@@ -297,7 +435,6 @@ model Stigma {
   // Conditions du stigma (ex: ["Nontarget Skill", "Mobile"])
   condition String[] @default([])
 
-  isShared Boolean @default(false) // Partagé entre plusieurs classes
   baseCost Int     @default(1) // Coût par défaut en Stigma Points (STP)
   baseCostModifier Int @default(2)
 

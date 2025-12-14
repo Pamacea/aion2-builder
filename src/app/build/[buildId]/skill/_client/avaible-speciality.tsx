@@ -32,9 +32,14 @@ export const AvailableSpeciality = ({
     return null;
   }
 
-  // Sort specialty choices by unlock level
+  // Sort specialty choices by unlock level, then by id for stable sorting
   const sortedSpecialtyChoices = [...targetAbility.specialtyChoices].sort(
-    (a, b) => a.unlockLevel - b.unlockLevel
+    (a, b) => {
+      if (a.unlockLevel !== b.unlockLevel) {
+        return a.unlockLevel - b.unlockLevel;
+      }
+      return a.id - b.id;
+    }
   );
 
   const handleToggle = (specialtyChoiceId: number) => {

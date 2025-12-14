@@ -28,7 +28,17 @@ export const PassiveSchemaBase = z.object({
     .transform((val) => (Array.isArray(val) ? val : null))
     .nullish(),
   damageBoost: z.number().nullish(),
+  damageBoostModifier: z.number().nullish(),
+  damageBoostModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
   damageTolerance: z.number().nullish(),
+  damageToleranceModifier: z.number().nullish(),
+  damageToleranceModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
 
   healMin: z.number().nullish(),
   healMinModifier: z.number().nullish(),
@@ -44,8 +54,16 @@ export const PassiveSchemaBase = z.object({
     .nullish(),
   healBoost: z.number().nullish(),
   healBoostModifier: z.number().nullish(),
+  healBoostModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
   incomingHeal: z.number().nullish(),
   incomingHealModifier: z.number().nullish(),
+  incomingHealModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
   maxHP: z.number().nullish(),
   maxHPModifier: z.number().nullish(),
   maxHPModifiers: z
@@ -55,6 +73,19 @@ export const PassiveSchemaBase = z.object({
   maxMP: z.number().nullish(),
   maxMPModifier: z.number().nullish(),
   maxMPModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+
+  minMP: z.number().nullish(),
+  minMPModifier: z.number().nullish(),
+  minMPModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+  minHP: z.number().nullish(),
+  minHPModifier: z.number().nullish(),
+  minHPModifiers: z
     .union([z.array(z.number()), z.null()])
     .transform((val) => (Array.isArray(val) ? val : null))
     .nullish(),
@@ -71,6 +102,20 @@ export const PassiveSchemaBase = z.object({
   defense: z.number().nullish(),
   defenseModifier: z.number().nullish(),
 
+  blockDamage: z.number().nullish(),
+  blockDamageModifier: z.number().nullish(),
+  blockDamageModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+
+  damagePerSecond: z.number().nullish(),
+  damagePerSecondModifier: z.number().nullish(),
+  damagePerSecondModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+
   staggerDamage: z.number().nullish(),
 
   manaCost: z.number().nullish(),
@@ -78,9 +123,6 @@ export const PassiveSchemaBase = z.object({
 
   range: z.number().default(20).nullish(),
   area: z.number().default(4).nullish(),
-
-  isNontarget: z.boolean().default(false),
-  isMobile: z.boolean().default(false),
 
   castingDuration: z.string().default("Instant Cast").nullish(),
   cooldown: z.string().default("Instant Cast").nullish(),

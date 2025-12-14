@@ -1,33 +1,30 @@
 "use client";
 
-import {
-  AbilityType,
-  BuildAbilityType,
-  BuildPassiveType,
-  BuildStigmaType,
-  PassiveType,
-  StigmaType,
-} from "@/types/schema";
+import { AbilityType, PassiveType, StigmaType } from "@/types/schema";
+import { SkillDescProps } from "@/types/skill.type";
 import { calculateStat } from "@/utils/statsUtils";
 import React from "react";
-
-type SkillDescProps = {
-  ability?: AbilityType;
-  passive?: PassiveType;
-  stigma?: StigmaType;
-  buildAbility?: BuildAbilityType;
-  buildPassive?: BuildPassiveType;
-  buildStigma?: BuildStigmaType;
-  className?: string;
-};
 
 /**
  * Remplace les placeholders dans la description par les valeurs calculées avec style orange
  * Placeholders supportés:
- * - {{DMG_MIN}} -> damageMin calculé
+ * - {{DMG_MIN}} ou {{MIN_DMG}} -> damageMin calculé
  * - {{DMG_MAX}} -> damageMax calculé
+ * - {{DAMAGE_PER_SECOND}} -> damagePerSecond calculé
+ * - {{ATTACK_PERCENTAGE}} -> attack calculé (en pourcentage)
  * - {{MAX_HP_PERCENTAGE}} -> maxHP calculé (en pourcentage)
  * - {{MAX_MP_FLAT}} -> maxMP calculé (en flat)
+ * - {{HEAL_MIN}} -> healMin calculé
+ * - {{HEAL_MAX}} -> healMax calculé
+ * - {{HEAL_BOOST_PERCENTAGE}} -> healBoost calculé (en pourcentage)
+ * - {{DEFENSE_PERCENTAGE}} -> defense calculé (en pourcentage)
+ * - {{CRITICAL_HIT_RESIST}} -> criticalHitResist calculé
+ * - {{INCOMING_HEAL_PERCENTAGE}} -> incomingHeal calculé (en pourcentage)
+ * - {{BLOCK_DAMAGE}} -> blockDamage calculé
+ * - {{DAMAGE_BOOST_PERCENTAGE}} -> damageBoost calculé (en pourcentage)
+ * - {{STATUS_EFFECT_RESIST}} -> statusEffectResist calculé
+ * - {{IMPACT_TYPE_RESIST}} -> impactTypeResist calculé
+ * - {{DAMAGE_TOLERANCE}} -> damageTolerance calculé
  */
 function processDescription(
   description: string,
@@ -45,12 +42,20 @@ function processDescription(
   ): number => {
     type SkillWithKeys = AbilityType | PassiveType | StigmaType;
     const skillRecord = skill as SkillWithKeys & Record<string, unknown>;
-    const base = baseKey in skillRecord ? (skillRecord[baseKey] as number | null | undefined) : null;
-    const modifier = modifierKey in skillRecord ? (skillRecord[modifierKey] as number | null | undefined) : null;
-    const modifiersValue = modifiersKey in skillRecord ? skillRecord[modifiersKey] : null;
-    const modifiers = modifiersValue && Array.isArray(modifiersValue)
-      ? (modifiersValue as number[])
-      : null;
+    const base =
+      baseKey in skillRecord
+        ? (skillRecord[baseKey] as number | null | undefined)
+        : null;
+    const modifier =
+      modifierKey in skillRecord
+        ? (skillRecord[modifierKey] as number | null | undefined)
+        : null;
+    const modifiersValue =
+      modifiersKey in skillRecord ? skillRecord[modifiersKey] : null;
+    const modifiers =
+      modifiersValue && Array.isArray(modifiersValue)
+        ? (modifiersValue as number[])
+        : null;
     return calculateStat(base, modifier, level, modifiers);
   };
 
@@ -71,16 +76,113 @@ function processDescription(
 
     switch (placeholder) {
       case "DMG_MIN":
-        value = getCalculatedValue("damageMin", "damageMinModifier", "damageMinModifiers");
+      case "MIN_DMG":
+        value = getCalculatedValue(
+          "damageMin",
+          "damageMinModifier",
+          "damageMinModifiers"
+        );
         break;
       case "DMG_MAX":
-        value = getCalculatedValue("damageMax", "damageMaxModifier", "damageMaxModifiers");
+        value = getCalculatedValue(
+          "damageMax",
+          "damageMaxModifier",
+          "damageMaxModifiers"
+        );
+        break;
+      case "DAMAGE_PER_SECOND":
+        value = getCalculatedValue(
+          "damagePerSecond",
+          "damagePerSecondModifier",
+          "damagePerSecondModifiers"
+        );
+        break;
+      case "ATTACK_PERCENTAGE":
+        // attack n'a pas de attackModifiers, seulement attackModifier
+        value = getCalculatedValue("attack", "attackModifier", "");
         break;
       case "MAX_HP_PERCENTAGE":
         value = getCalculatedValue("maxHP", "maxHPModifier", "maxHPModifiers");
         break;
       case "MAX_MP_FLAT":
         value = getCalculatedValue("maxMP", "maxMPModifier", "maxMPModifiers");
+        break;
+      case "HEAL_MIN":
+        value = getCalculatedValue(
+          "healMin",
+          "healMinModifier",
+          "healMinModifiers"
+        );
+        break;
+      case "HEAL_MAX":
+        value = getCalculatedValue(
+          "healMax",
+          "healMaxModifier",
+          "healMaxModifiers"
+        );
+        break;
+      case "HEAL_BOOST_PERCENTAGE":
+        value = getCalculatedValue(
+          "healBoost",
+          "healBoostModifier",
+          "healBoostModifiers"
+        );
+        break;
+      case "DEFENSE_PERCENTAGE":
+        value = getCalculatedValue(
+          "defense",
+          "defenseModifier",
+          "defenseModifiers"
+        );
+        break;
+      case "CRITICAL_HIT_RESIST":
+        value = getCalculatedValue(
+          "criticalHitResist",
+          "criticalHitResistModifier",
+          "criticalHitResistModifiers"
+        );
+        break;
+      case "INCOMING_HEAL_PERCENTAGE":
+        value = getCalculatedValue(
+          "incomingHeal",
+          "incomingHealModifier",
+          "incomingHealModifiers"
+        );
+        break;
+      case "BLOCK_DAMAGE":
+        value = getCalculatedValue(
+          "blockDamage",
+          "blockDamageModifier",
+          "blockDamageModifiers"
+        );
+        break;
+      case "DAMAGE_BOOST_PERCENTAGE":
+        value = getCalculatedValue(
+          "damageBoost",
+          "damageBoostModifier",
+          "damageBoostModifiers"
+        );
+        break;
+      case "STATUS_EFFECT_RESIST":
+        value = getCalculatedValue(
+          "statusEffectResist",
+          "statusEffectResistModifier",
+          "statusEffectResistModifiers"
+        );
+        break;
+      case "IMPACT_TYPE_RESIST":
+        value = getCalculatedValue(
+          "impactTypeResist",
+          "impactTypeResistModifier",
+          "impactTypeResistModifiers"
+        );
+        break;
+      case "DAMAGE_TOLERANCE":
+        value = getCalculatedValue(
+          "damageTolerance",
+          "damageToleranceModifier",
+          "damageToleranceModifiers"
+        );
         break;
       default:
         // Si le placeholder n'est pas reconnu, garder le texte original
@@ -91,7 +193,10 @@ function processDescription(
 
     // Ajouter la valeur en orange
     parts.push(
-      <span key={`value-${keyCounter++}`} className="text-orange-500 font-semibold">
+      <span
+        key={`value-${keyCounter++}`}
+        className="text-orange-500 font-semibold"
+      >
         {value}
       </span>
     );
@@ -107,6 +212,9 @@ function processDescription(
   return parts.length > 0 ? parts : [description];
 }
 
+//=============================
+// COMPONENT
+//=============================
 export const SkillDesc = ({
   ability,
   passive,
@@ -118,7 +226,8 @@ export const SkillDesc = ({
 }: SkillDescProps) => {
   const skill = ability || passive || stigma;
   const description = skill?.description;
-  const level = buildAbility?.level || buildPassive?.level || buildStigma?.level || 1;
+  const level =
+    buildAbility?.level || buildPassive?.level || buildStigma?.level || 1;
 
   if (!description || !skill) {
     return null;

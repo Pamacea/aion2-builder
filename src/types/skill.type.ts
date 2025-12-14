@@ -29,3 +29,13 @@ export type SkillConditionProps = {
   chainSkillStigma?: ChainSkillStigmaType;
   className?: string;
 };
+
+export type SkillDescProps = {
+  ability?: AbilityType;
+  passive?: PassiveType;
+  stigma?: StigmaType;
+  buildAbility?: BuildAbilityType;
+  buildPassive?: BuildPassiveType;
+  buildStigma?: BuildStigmaType;
+  className?: string;
+};

@@ -102,7 +102,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html>
+    <html suppressHydrationWarning>
       <body
         className={`${roboto.className} ${cinzel.variable} dark antialiased bg-[url('/aion-background.webp')] bg-cover`}
       >
