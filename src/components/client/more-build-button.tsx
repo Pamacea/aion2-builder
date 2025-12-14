@@ -18,7 +18,7 @@ export const MoreBuildButton = () => {
       )}
     >
       <Image
-        src="/icons/home-logo.webp"
+        src="/icons/more-build.webp"
         alt="Bahion Logo"
         width={32}
         height={32}

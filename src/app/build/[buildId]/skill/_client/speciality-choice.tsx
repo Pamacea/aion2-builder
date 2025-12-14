@@ -46,7 +46,10 @@ export const SpecialtyChoice = ({
             </>
           )}
           {!isLocked && (
-            <Image src="/icons/lock-logo.webp" alt="Lock Icon" width={12} height={12} className="absolute z-0" />
+            <Image src="/icons/avaiable-speciality.webp" alt="Lock Icon" width={24} height={24} className="absolute z-0" />
+          )}
+          {!isLocked && isActive && (
+            <Image src="/icons/activate-speciality.webp" alt="Active Icon" width={24} height={24} className="absolute z-0" />
           )}
         </div>
         <p className={`text-xs uppercase font-semibold ${isLocked ? "text-foreground/50" : ""}`}>
