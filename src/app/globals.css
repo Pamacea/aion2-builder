@@ -170,6 +170,15 @@
   }
 }
 
+@layer utilities {
+  .font-cinzel {
+    font-family: var(--font-cinzel);
+  }
+  .font-roboto {
+    font-family: var(--font-roboto);
+  }
+}
+
 html, body {
   overflow-x: hidden;
 }

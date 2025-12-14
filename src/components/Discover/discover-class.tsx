@@ -12,7 +12,7 @@ export const DiscoverClass = async () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-center">
         {classes.map((cls) => (
           <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`}>
-            <div className="bg-background/30 p-6 rounded-xl h-80 w-64 flex flex-col items-center justify-center gap-4 border-2 border-primary hover:scale-105 transition-transform cursor-pointer">
+            <div className="bg-background/30 p-6 h-80 w-64 flex flex-col items-center justify-center gap-4 border-y-2 border-foreground/50 hover:border-primary hover:scale-105 transition-transform cursor-pointer">
               <Image
                 src={`${CLASS_PATH}${cls.iconUrl || "default-icon.webp"}`}
                 alt={`${cls.name} icon`}
@@ -20,7 +20,7 @@ export const DiscoverClass = async () => {
                 height={96}
                 className="rounded-md"
               />
-              <h2 className="uppercase font-bold text-2xl text-center">
+              <h2 className="uppercase font-extrabold text-2xl text-center font-cinzel">
                 {cls.name}
               </h2>
               <p className="text-center text-sm font-light">
