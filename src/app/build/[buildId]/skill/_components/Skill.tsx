@@ -345,17 +345,19 @@ export const Skill = () => {
           <SkillLevelModifier />
         </section>
 
-        <section className="w-full flex items-center justify-between gap-2 pt-2">
-          <ResetSkillButton disabled={isChainSkill} />
-          <PlusButton
-            onClick={handleIncrement}
-            disabled={!hasSelectedSkill || currentLevel >= maxLevel || isChainSkill}
-          />
-          <MinusButton
-            onClick={handleDecrement}
-            disabled={!hasSelectedSkill || currentLevel <= 1 || isChainSkill}
-          />
-        </section>
+        {!isChainSkill && (
+          <section className="w-full flex items-center justify-between gap-2 pt-2">
+            <ResetSkillButton disabled={!hasSelectedSkill} />
+            <PlusButton
+              onClick={handleIncrement}
+              disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+            />
+            <MinusButton
+              onClick={handleDecrement}
+              disabled={!hasSelectedSkill || currentLevel <= 1}
+            />
+          </section>
+        )}
       </div>
     </div>
   );
