@@ -554,3 +554,147 @@ export async function getRandomStarterBuildId(): Promise<number | null> {
   return await getStarterBuildIdByClassName(randomClass);
 }
 
+// ======================================
+// GET ALL BUILDS
+// ======================================
+export async function getAllBuilds(): Promise<BuildType[]> {
+  const builds = await prisma.build.findMany({
+    include: {
+      class: {
+        include: {
+          tags: true,
+        },
+      },
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  return builds.map((build) => BuildSchema.parse(build));
+}
+
+// ======================================
+// CREATE BUILD FROM EXISTING BUILD
+// ======================================
+export async function createBuildFromBuild(sourceBuildId: number): Promise<BuildType | null> {
+  const sourceBuild = await getBuildById(sourceBuildId);
+  if (!sourceBuild) return null;
+
+  const newBuild = await prisma.build.create({
+    data: {
+      name: `${sourceBuild.name} (Copy)`,
+      classId: sourceBuild.classId,
+      baseSP: sourceBuild.baseSP,
+      extraSP: sourceBuild.extraSP,
+      baseSTP: sourceBuild.baseSTP,
+      extraSTP: sourceBuild.extraSTP,
+
+      abilities: {
+        create: sourceBuild.abilities?.map((ability) => ({
+          abilityId: ability.abilityId,
+          level: ability.level,
+          activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
+        })) ?? [],
+      },
+
+      passives: {
+        create: sourceBuild.passives?.map((passive) => ({
+          passiveId: passive.passiveId,
+          level: passive.level,
+        })) ?? [],
+      },
+
+      stigmas: {
+        create: sourceBuild.stigmas?.map((stigma) => ({
+          stigmaId: stigma.stigmaId,
+          level: stigma.level,
+          stigmaCost: stigma.stigmaCost,
+          activeSpecialtyChoiceIds: stigma.activeSpecialtyChoiceIds ?? [],
+        })) ?? [],
+      },
+    },
+
+    include: {
+      class: {
+        include: {
+          tags: true,
+          abilities: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+          passives: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+          stigmas: {
+            include: {
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
+      },
+      abilities: {
+        include: {
+          ability: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+              specialtyChoices: true,
+            },
+          },
+        },
+      },
+      passives: {
+        include: {
+          passive: {
+            include: {
+              class: {
+                include: {
+                  tags: true,
+                },
+              },
+              spellTag: true,
+            },
+          },
+        },
+      },
+      stigmas: {
+        include: {
+          stigma: {
+            include: {
+              spellTag: true,
+              specialtyChoices: true,
+              classes: {
+                include: {
+                  tags: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return BuildSchema.parse(newBuild);
+}
+
