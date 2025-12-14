@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { classesData } from "data/classes";
+import { classesData } from "data/classes/index";
 import { spellTagsList } from "data/spellTags";
 import { tagsList } from "data/tags";
 import { PrismaClient } from "generated/prisma/client";
