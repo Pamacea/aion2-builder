@@ -7,6 +7,8 @@ import { MinusButton } from "../_client/minus-button";
 import { PassiveSkill } from "../_client/passive-skill";
 import { PlusButton } from "../_client/plus-button";
 import { ResetSkillButton } from "../_client/reset-skill-button";
+import { SkillLevelModifier } from "../_client/skill-level-modifier";
+import { SkillsPoints } from "../_client/skills-points";
 import { StigmaSkill } from "../_client/stigma-skill";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 
@@ -62,7 +64,7 @@ export const Skill = () => {
       } else {
         setSelectedSkill(null);
       }
-    } 
+    }
     // If skill is selected but not in build yet, check if it was just added
     else if (selectedSkill.ability) {
       const buildAbility = findBuildAbility(selectedSkill.ability.id);
@@ -112,8 +114,12 @@ export const Skill = () => {
     selectedBuildAbility?.maxLevel ||
     selectedBuildPassive?.maxLevel ||
     selectedBuildStigma?.maxLevel ||
-    (selectedPassive && "maxLevel" in selectedPassive ? selectedPassive.maxLevel : undefined) ||
-    (selectedStigma && "maxLevel" in selectedStigma ? selectedStigma.maxLevel : undefined) ||
+    (selectedPassive && "maxLevel" in selectedPassive
+      ? selectedPassive.maxLevel
+      : undefined) ||
+    (selectedStigma && "maxLevel" in selectedStigma
+      ? selectedStigma.maxLevel
+      : undefined) ||
     20;
   const hasSelectedSkill = !!selectedSkill;
 
@@ -187,15 +193,21 @@ export const Skill = () => {
     if (type === "ability") {
       const buildAbility = findBuildAbility(id);
       const ability = availableAbilities.find((a) => a.id === id);
-      setSelectedSkill(buildAbility ? { buildAbility } : ability ? { ability } : null);
+      setSelectedSkill(
+        buildAbility ? { buildAbility } : ability ? { ability } : null
+      );
     } else if (type === "passive") {
       const buildPassive = findBuildPassive(id);
       const passive = availablePassives.find((p) => p.id === id);
-      setSelectedSkill(buildPassive ? { buildPassive } : passive ? { passive } : null);
+      setSelectedSkill(
+        buildPassive ? { buildPassive } : passive ? { passive } : null
+      );
     } else if (type === "stigma") {
       const buildStigma = findBuildStigma(id);
       const stigma = availableStigmas.find((s) => s.id === id);
-      setSelectedSkill(buildStigma ? { buildStigma } : stigma ? { stigma } : null);
+      setSelectedSkill(
+        buildStigma ? { buildStigma } : stigma ? { stigma } : null
+      );
     }
   };
 
@@ -271,16 +283,23 @@ export const Skill = () => {
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className=" w-full flex items-center justify-between gap-2 pt-2">
-        <ResetSkillButton />
-        <PlusButton
-          onClick={handleIncrement}
-          disabled={!hasSelectedSkill || currentLevel >= maxLevel}
-        />
-        <MinusButton
-          onClick={handleDecrement}
-          disabled={!hasSelectedSkill || currentLevel <= 1}
-        />
+      <div className=" w-full flex flex-col items-center justify-between gap-2 pt-2">
+        <section className="w-full flex flex-col gap-2">
+          <SkillsPoints />
+          <SkillLevelModifier />
+        </section>
+
+        <section className="w-full flex items-center justify-between gap-2 pt-2">
+          <ResetSkillButton />
+          <PlusButton
+            onClick={handleIncrement}
+            disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+          />
+          <MinusButton
+            onClick={handleDecrement}
+            disabled={!hasSelectedSkill || currentLevel <= 1}
+          />
+        </section>
       </div>
     </div>
   );

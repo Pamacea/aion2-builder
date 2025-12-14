@@ -73,6 +73,10 @@ export const AbilitySchemaBase = z.object({
 
   target: z.string().default("Single Target").nullish(),
 
+  baseCost: z.number().default(1),
+  baseCostModifier: z.number().default(2),
+  maxLevel: z.number().default(20),
+
   classId: z.number(),
 });
 export type AbilityTypeBase = z.infer<typeof AbilitySchemaBase>;
@@ -173,6 +177,9 @@ export const PassiveSchemaBase = z.object({
 
   target: z.string().default("Single Target").nullish(),
 
+  baseCost: z.number().default(1),
+  baseCostModifier: z.number().default(2),
+
   classId: z.number(),
 });
 export type PassiveTypeBase = z.infer<typeof PassiveSchemaBase>;
@@ -219,6 +226,7 @@ export const StigmaSchemaBase = z.object({
 
   isShared: z.boolean().default(false),
   baseCost: z.number().default(10),
+  baseCostModifier: z.number().default(2),
 });
 export type StigmaTypeBase = z.infer<typeof StigmaSchemaBase>;
 
