@@ -1,7 +1,7 @@
 import { defaultTagColor, tagColors } from "@/lib/tag";
 import { TagTypeBase } from "@/types/schema";
 
-export const TagList = ({ tags }: { tags: TagTypeBase[] }) => {
+export const TagsList = ({ tags }: { tags: TagTypeBase[] }) => {
   return (
     <section className="flex flex-wrap gap-2">
       {tags.map((tag: TagTypeBase) => {

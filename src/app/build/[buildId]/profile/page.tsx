@@ -1,7 +1,6 @@
 "use client";
 
 import { getClassTags } from "@/actions/classActions";
-import { TagList } from "@/app/classes/[slug]/_components/TagList";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { TagTypeBase } from "@/types/schema";
 import { useParams } from "next/navigation";
@@ -9,6 +8,7 @@ import { useEffect, useState } from "react";
 import { BuildName } from "./_client/build-name";
 import { ProfilelassBanner } from "./_client/class-banner";
 import { ClassSelect } from "./_client/class-select";
+import { TagsList } from "@/app/classes/[slug]/_components/tagsList";
 
 export default function BuildProfilePage() {
   const params = useParams();
@@ -40,7 +40,7 @@ export default function BuildProfilePage() {
         <BuildName />
       </div>
       <div className="w-1/2">
-        <TagList tags={classTags} />
+        <TagsList tags={classTags} />
       </div>
       <ProfilelassBanner classBanner={build.class.bannerUrl} />
     </main>

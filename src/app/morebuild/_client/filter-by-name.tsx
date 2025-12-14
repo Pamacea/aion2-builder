@@ -1,11 +1,9 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { FilterByNameProps } from "@/types/build.type";
 
-type FilterByNameProps = {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-};
+
 
 export const FilterByName = ({ searchQuery, onSearchChange }: FilterByNameProps) => {
   return (

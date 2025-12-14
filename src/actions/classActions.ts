@@ -14,10 +14,7 @@ export const getClassByName = async (name: string): Promise<ClassType | null> =>
     where: { name },
     include: { tags: true, abilities: true, passives: true, stigmas: true, builds: true },
   });
-
-  if (!cls) return null;
-
-  return cls;
+  return cls as ClassType | null;
 };
 
 export const getClassTags = async (className: string): Promise<TagTypeBase[]> => {
@@ -26,9 +23,5 @@ export const getClassTags = async (className: string): Promise<TagTypeBase[]> =>
     include: { tags: true },
   });
 
-  if (!cls) {
-    return [];
-  }
-
-  return cls.tags; 
+  return cls?.tags ?? [];
 };

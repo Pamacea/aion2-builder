@@ -1,9 +1,5 @@
-import { ExploreOthersClasses } from "./[slug]/_components/ExploreOthersClasses";
+import { ExploreOthersClasses } from "./[slug]/_components/exploreOtherClasses";
 
 export default function ClassPage() {
-  return (
-    <>
-      <ExploreOthersClasses />
-    </>
-  );
+  return <ExploreOthersClasses />;
 }

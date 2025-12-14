@@ -4,6 +4,40 @@ import type { ClassType } from "./class.type";
 import type { PassiveType } from "./passive.type";
 import type { StigmaType } from "./stigma.type";
 
+// ======================================
+// MORE BUILD TYPE
+// ======================================
+export type MoreBuildProps = {
+  builds: BuildType[];
+  classes: ClassType[];
+};
+
+export type BuildCardProps = {
+  build: BuildType;
+};
+
+export type ShowBuildButtonProps = {
+  buildId: number;
+};
+
+export type FilterByNameProps = {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+};
+
+export type FilterByClassProps = {
+  classes: ClassType[];
+  selectedClassId: number | null;
+  onClassChange: (classId: number | null) => void;
+};
+
+export type CreateBuildBaseProps = {
+  buildId: number;
+};
+
+// ======================================
+// BUILD STATE (USEBUILDSTORE)
+// ======================================
 export type BuildState = {
   build: BuildType | null;
   loading: boolean;

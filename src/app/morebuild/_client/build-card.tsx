@@ -1,15 +1,12 @@
 "use client";
 
 import { CLASS_PATH } from "@/constants/paths";
-import { BuildType } from "@/types/schema";
+import { BuildCardProps } from "@/types/schema";
 import Image from "next/image";
 import Link from "next/link";
 import { CreateBuildBase } from "./create-build-base";
 import { ShowBuildButton } from "./show-build-button";
 
-type BuildCardProps = {
-  build: BuildType;
-};
 
 export const BuildCard = ({ build }: BuildCardProps) => {
   const bannerUrl = build.class?.bannerUrl || "default-banner.webp";

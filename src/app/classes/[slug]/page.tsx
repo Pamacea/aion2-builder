@@ -1,16 +1,12 @@
-import { ClassType } from "@/types/schema";
-import { getStarterBuildIdByClassName } from "actions/buildActions";
-import { getClassByName } from "actions/classActions";
 import { Class } from "./_components/Class";
-import { ExploreOthersClasses } from "./_components/ExploreOthersClasses";
+import { ExploreOthersClasses } from "./_components/exploreOtherClasses";
+import { getClassPageData } from "./_utils/getClassPageData";
 
 export default async function ClassPage(props: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await props.params;
-
-  const classData: ClassType | null = await getClassByName(slug);
-  const starterbuildId = await getStarterBuildIdByClassName(slug);
+  const { classData, starterbuildId } = await getClassPageData(slug);
 
   if (!classData) {
     return <div>Class not found</div>;

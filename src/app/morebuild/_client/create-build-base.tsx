@@ -2,12 +2,10 @@
 
 import { createBuildFromBuild } from "@/actions/buildActions";
 import { Button } from "@/components/ui/button";
+import { CreateBuildBaseProps } from "@/types/build.type";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type CreateBuildBaseProps = {
-  buildId: number;
-};
 
 export const CreateBuildBase = ({ buildId }: CreateBuildBaseProps) => {
   const router = useRouter();

@@ -1,11 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ShowBuildButtonProps } from "@/types/build.type";
 import { useRouter } from "next/navigation";
-
-type ShowBuildButtonProps = {
-  buildId: number;
-};
 
 export const ShowBuildButton = ({ buildId }: ShowBuildButtonProps) => {
   const router = useRouter();

@@ -1,10 +1,10 @@
 import { ClassType } from "@/types/schema";
-import { ClassBanner } from "../client/class-banner";
-import { ClassCharacter } from "../client/class-character";
-import { ClassHead } from "../client/class-head";
-import { CreateYourBuildButton } from "../client/createyourbuild-button";
-import { MoreBuild } from "../client/morebuild";
-import { TagList } from "./TagList";
+import { CreateYourBuildButton } from "../_client/buttons/createyourbuild-button";
+import { ClassBanner } from "../_client/class-banner";
+import { ClassCharacter } from "../_client/class-character";
+import { ClassHead } from "../_client/class-head";
+import { MoreBuild } from "../_client/more-build";
+import { TagsList } from "./tagsList";
 
 export const Class = ({ classData, starterbuildId }: { classData: ClassType | null, starterbuildId: number | null }) => {
   if (!classData) {
@@ -13,9 +13,9 @@ export const Class = ({ classData, starterbuildId }: { classData: ClassType | nu
 
   return (
     <section className="w-1/2 h-full flex flex-col justify-between md:flex-row gap-8 md:gap-16">
-      <div className="flex flex-col gap-4">
+      <div className="w-1/2 flex flex-col gap-4">
         <ClassHead className={classData.name} />
-        <TagList tags={classData.tags as { id: number; name: string }[]} />
+        <TagsList tags={classData.tags as { id: number; name: string }[]} />
         <ClassBanner
           classBanner={classData.bannerUrl || "default-banner.webp"}
         />

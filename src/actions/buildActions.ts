@@ -1,8 +1,32 @@
 "use server";
 
 import { BuildSchema, BuildType } from "@/types/schema";
+import { fullBuildInclude } from "@/utils/actionsUtils";
 import { isStarterBuild } from "@/utils/buildUtils";
 import { prisma } from "../lib/prisma";
+
+// ======================================
+// DATA MAPPING HELPERS
+// ======================================
+const mapBuildAbilityData = (ability: NonNullable<BuildType["abilities"]>[number]) => ({
+  abilityId: ability.abilityId,
+  level: ability.level,
+  activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
+  selectedChainSkillIds: ability.selectedChainSkillIds ?? [],
+});
+
+const mapBuildPassiveData = (passive: NonNullable<BuildType["passives"]>[number]) => ({
+  passiveId: passive.passiveId,
+  level: passive.level,
+});
+
+const mapBuildStigmaData = (stigma: NonNullable<BuildType["stigmas"]>[number]) => ({
+  stigmaId: stigma.stigmaId,
+  level: stigma.level,
+  stigmaCost: stigma.stigmaCost ?? 10,
+  activeSpecialtyChoiceIds: stigma.activeSpecialtyChoiceIds ?? [],
+  selectedChainSkillIds: stigma.selectedChainSkillIds ?? [],
+});
 
 export async function loadBuildAction(buildId: number): Promise<BuildType | null> {
   if (!buildId || isNaN(buildId)) {
@@ -29,144 +53,10 @@ export async function saveBuildAction(
 export const getBuildById = async (id: number): Promise<BuildType | null> => {
   const build = await prisma.build.findUnique({
     where: { id },
-    include: {
-      class: {
-        include: {
-          tags: true,
-          abilities: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          passives: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-          stigmas: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              parentStigmas: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      abilities: {
-        include: {
-          ability: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      passives: {
-        include: {
-          passive: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-        },
-      },
-      stigmas: {
-        include: {
-          stigma: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              classes: {
-                include: {
-                  tags: true,
-                },
-              },
-              chainSkills: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: fullBuildInclude,
   });
 
   if (!build) return null;
-
   return BuildSchema.parse(build);
 };
 
@@ -199,136 +89,24 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
     data: {
       name: buildData.name,
       classId: buildData.classId,
-
       abilities: {
-        create: buildData.abilities?.map((ability) => ({
-          abilityId: ability.abilityId,
-          level: ability.level,
-          activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
+        create: buildData.abilities?.map((a) => ({
+          abilityId: a.abilityId,
+          level: a.level,
+          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
         })) ?? [],
       },
-
       passives: {
-        create: buildData.passives?.map((passive) => ({
-          passiveId: passive.passiveId,
-          level: passive.level,
-        })) ?? [],
+        create: buildData.passives?.map(mapBuildPassiveData) ?? [],
       },
-
       stigmas: {
-        create: buildData.stigmas?.map((stigma) => ({
-          stigmaId: stigma.stigmaId,
-          stigmaCost: stigma.stigmaCost,
+        create: buildData.stigmas?.map((s) => ({
+          stigmaId: s.stigmaId,
+          stigmaCost: s.stigmaCost,
         })) ?? [],
       },
     },
-
-    include: {
-      class: {
-        include: {
-          tags: true,
-          abilities: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          passives: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-          stigmas: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              parentStigmas: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      abilities: {
-        include: {
-          ability: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-            },
-          },
-        },
-      },
-      passives: {
-        include: {
-          passive: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-        },
-      },
-      stigmas: {
-        include: {
-          stigma: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              classes: {
-                include: {
-                  tags: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: fullBuildInclude,
   });
 
   return BuildSchema.parse(newBuild);
@@ -387,12 +165,7 @@ export async function updateBuild(
   if ('abilities' in data && data.abilities !== undefined) {
     updateData.abilities = {
       deleteMany: { buildId },
-      create: data.abilities.map((a) => ({
-        abilityId: a.abilityId,
-        level: a.level,
-        activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
-        selectedChainSkillIds: a.selectedChainSkillIds ?? [],
-      })),
+      create: data.abilities.map(mapBuildAbilityData),
     };
   }
   
@@ -400,10 +173,7 @@ export async function updateBuild(
   if ('passives' in data && data.passives !== undefined) {
     updateData.passives = {
       deleteMany: { buildId },
-      create: data.passives.map((p) => ({
-        passiveId: p.passiveId,
-        level: p.level,
-      })),
+      create: data.passives.map(mapBuildPassiveData),
     };
   }
   
@@ -411,153 +181,14 @@ export async function updateBuild(
   if ('stigmas' in data && data.stigmas !== undefined) {
     updateData.stigmas = {
       deleteMany: { buildId },
-      create: data.stigmas.map((s) => ({
-        stigmaId: s.stigmaId,
-        level: s.level,
-        stigmaCost: s.stigmaCost ?? 10,
-        activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
-        selectedChainSkillIds: s.selectedChainSkillIds ?? [],
-      })),
+      create: data.stigmas.map(mapBuildStigmaData),
     };
   }
   
   const updated = await prisma.build.update({
     where: { id: buildId },
     data: updateData as Parameters<typeof prisma.build.update>[0]['data'],
-    include: {
-      class: {
-        include: {
-          tags: true,
-          abilities: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          passives: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-          stigmas: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              parentStigmas: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      abilities: {
-        include: {
-          ability: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      passives: {
-        include: {
-          passive: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-        },
-      },
-      stigmas: {
-        include: {
-          stigma: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              classes: {
-                include: {
-                  tags: true,
-                },
-              },
-              chainSkills: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: fullBuildInclude,
   });
 
   return BuildSchema.parse(updated);
@@ -567,11 +198,9 @@ export async function updateBuild(
 // CREATE BUILD FROM STARTER BUILD
 // ======================================
 export async function createBuildFromStarter(starterBuildId: number): Promise<BuildType | null> {
-  // Get the starter build
   const starterBuild = await getBuildById(starterBuildId);
   if (!starterBuild) return null;
 
-  // Create a new build based on the starter build
   const className = starterBuild.class.name.charAt(0).toUpperCase() + starterBuild.class.name.slice(1);
   const newBuild = await prisma.build.create({
     data: {
@@ -581,136 +210,24 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
       extraSP: starterBuild.extraSP,
       baseSTP: starterBuild.baseSTP,
       extraSTP: starterBuild.extraSTP,
-
       abilities: {
-        create: starterBuild.abilities?.map((ability) => ({
-          abilityId: ability.abilityId,
-          level: ability.level,
-          activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
+        create: starterBuild.abilities?.map((a) => ({
+          abilityId: a.abilityId,
+          level: a.level,
+          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
         })) ?? [],
       },
-
       passives: {
-        create: starterBuild.passives?.map((passive) => ({
-          passiveId: passive.passiveId,
-          level: passive.level,
-        })) ?? [],
+        create: starterBuild.passives?.map(mapBuildPassiveData) ?? [],
       },
-
       stigmas: {
-        create: starterBuild.stigmas?.map((stigma) => ({
-          stigmaId: stigma.stigmaId,
-          stigmaCost: stigma.stigmaCost,
+        create: starterBuild.stigmas?.map((s) => ({
+          stigmaId: s.stigmaId,
+          stigmaCost: s.stigmaCost,
         })) ?? [],
       },
     },
-
-    include: {
-      class: {
-        include: {
-          tags: true,
-          abilities: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          passives: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-          stigmas: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              parentStigmas: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      abilities: {
-        include: {
-          ability: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-            },
-          },
-        },
-      },
-      passives: {
-        include: {
-          passive: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-        },
-      },
-      stigmas: {
-        include: {
-          stigma: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              classes: {
-                include: {
-                  tags: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: fullBuildInclude,
   });
 
   return BuildSchema.parse(newBuild);
@@ -760,138 +277,26 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
       extraSP: sourceBuild.extraSP,
       baseSTP: sourceBuild.baseSTP,
       extraSTP: sourceBuild.extraSTP,
-
       abilities: {
-        create: sourceBuild.abilities?.map((ability) => ({
-          abilityId: ability.abilityId,
-          level: ability.level,
-          activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
+        create: sourceBuild.abilities?.map((a) => ({
+          abilityId: a.abilityId,
+          level: a.level,
+          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
         })) ?? [],
       },
-
       passives: {
-        create: sourceBuild.passives?.map((passive) => ({
-          passiveId: passive.passiveId,
-          level: passive.level,
-        })) ?? [],
+        create: sourceBuild.passives?.map(mapBuildPassiveData) ?? [],
       },
-
       stigmas: {
-        create: sourceBuild.stigmas?.map((stigma) => ({
-          stigmaId: stigma.stigmaId,
-          level: stigma.level,
-          stigmaCost: stigma.stigmaCost,
-          activeSpecialtyChoiceIds: stigma.activeSpecialtyChoiceIds ?? [],
+        create: sourceBuild.stigmas?.map((s) => ({
+          stigmaId: s.stigmaId,
+          level: s.level,
+          stigmaCost: s.stigmaCost,
+          activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
         })) ?? [],
       },
     },
-
-    include: {
-      class: {
-        include: {
-          tags: true,
-          abilities: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-              parentAbilities: {
-                include: {
-                  chainAbility: {
-                    include: {
-                      class: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                      spellTag: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          passives: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-          stigmas: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              parentStigmas: {
-                include: {
-                  chainStigma: {
-                    include: {
-                      spellTag: true,
-                      classes: {
-                        include: {
-                          tags: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      abilities: {
-        include: {
-          ability: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-              specialtyChoices: true,
-            },
-          },
-        },
-      },
-      passives: {
-        include: {
-          passive: {
-            include: {
-              class: {
-                include: {
-                  tags: true,
-                },
-              },
-              spellTag: true,
-            },
-          },
-        },
-      },
-      stigmas: {
-        include: {
-          stigma: {
-            include: {
-              spellTag: true,
-              specialtyChoices: true,
-              classes: {
-                include: {
-                  tags: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: fullBuildInclude,
   });
 
   return BuildSchema.parse(newBuild);

@@ -6,7 +6,34 @@ import type { StigmaType } from "./stigma.type";
 import type { TagType } from "./tags.type";
 
 
+// ======================================
+// CLASS HELPER TYPE
+// ======================================
 export type ClassItem = { id: number; maxLevel?: number; baseCost?: number };
+
+
+// ======================================
+// CLASSES TYPE
+// ======================================
+export type ClassImageProps = {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  priority?: boolean;
+};
+
+export type ClassButtonProps = {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  asButton?: boolean;
+};
+
+export type ClassGridProps = {
+  classes: ClassType[];
+};
 
 // ---------------------------
 // Class Schema Base
