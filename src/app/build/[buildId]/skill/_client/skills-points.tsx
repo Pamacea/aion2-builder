@@ -127,7 +127,7 @@ export const SkillsPoints = () => {
   if (!build) return null;
 
   return (
-    <div className="flex items-center justify-between gap-4 text-sm">
+    <div className="flex lg:flex-row flex-col items-center justify-between gap-4 text-sm">
       <div className="flex items-center gap-2">
         <span className="text-green-600 bg-green-600/30 border-y-2 border-foreground/50 text-center font-bold uppercase px-3 py-1 rounded-sm">SP</span>
         <span

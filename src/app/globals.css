@@ -199,8 +199,8 @@ html, body {
 
 /* Center toast vertically */
 [data-sonner-toaster] {
-  top: 85% !important;
-  right: 3.5% !important;
+  top: 70% !important;
+  right: 5% !important;
   bottom: auto !important;
 }
 

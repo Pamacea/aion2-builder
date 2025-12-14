@@ -178,7 +178,8 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     <div
       ref={ref}
       className={`
-        relative w-14 h-14  border-2 border-foreground/30 bg-background/80
+        relative w-6 h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 xl:w-14 xl:h-14
+        border-2 border-foreground/30 bg-background/80
         flex items-center justify-center
         transition-all cursor-move
         ${isDragging ? "opacity-50" : ""}
@@ -200,7 +201,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
           className="w-full h-full rounded-md object-cover"
         />
       ) : (
-        <div className="text-foreground/20 text-xs">+</div>
+        <div className="text-foreground/20 text-[10px] sm:text-xs">+</div>
       )}
     </div>
   );

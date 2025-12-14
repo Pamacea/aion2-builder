@@ -1,10 +1,11 @@
 "use client";
 
 import { useBuildStore } from "@/store/useBuildEditor";
+import { ShortcutSkill } from "@/types/shortcut.type";
+import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResetShortcutButton } from "../_client/buttons/reset-shortcut-button";
 import { ShortcutSlot } from "../_client/shortcut-slot";
-import { ShortcutSkill } from "@/types/shortcut.type";
 import {
   BOTTOM_SLOTS_COUNT,
   LEFT_SLOTS_COUNT,
@@ -12,7 +13,6 @@ import {
   RESERVED_SLOT_ID,
   RIGHT_SLOTS_COUNT,
 } from "../_utils/constants";
-import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
 
 export const Shortcut = () => {
   const { build, updateShortcuts, addStigma } = useBuildStore();
@@ -355,21 +355,21 @@ export const Shortcut = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-end gap-4 ">
+    <div className="w-full h-full flex flex-col justify-end gap-2 sm:gap-4">
       {/* Header with Refresh Button - at the bottom */}
       <div className="flex items-center justify-between">
         <ResetShortcutButton onClick={handleRefresh} />
       </div>
       {/* Main Content: U-shaped layout */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3 sm:gap-6">
         {/* Top Row: Left, Middle and Right blocks */}
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-0">
           {/* Left: Cast Slots (4x5) */}
-          <div className="flex flex-col gap-2">
-            <div className="text-sm font-semibold text-foreground/80 px-2">
+          <div className="flex flex-col gap-1 sm:gap-2">
+            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
               1
             </div>
-            <div className="grid grid-cols-4 grid-rows-5 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 grid-rows-5 gap-1.5 sm:gap-2.5">
               {Array.from({ length: LEFT_SLOTS_COUNT }).map((_, index) => {
                 const slotId = index;
                 return (
@@ -385,14 +385,14 @@ export const Shortcut = () => {
             </div>
           </div>
 
-          <div className="w-29"></div>
+          <div className="hidden sm:block w-29"></div>
 
           {/* Middle: Additional Slots (2x5) */}
-          <div className="flex flex-col gap-2">
-            <div className="text-sm font-semibold text-foreground/80 px-2">
+          <div className="flex flex-col gap-1 sm:gap-2">
+            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
               A
             </div>
-            <div className="grid grid-cols-2 grid-rows-5 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 grid-rows-5 gap-1.5 sm:gap-2.5">
               {Array.from({ length: MIDDLE_SLOTS_COUNT }).map((_, index) => {
                 const slotId = LEFT_SLOTS_COUNT + BOTTOM_SLOTS_COUNT + index;
                 return (
@@ -409,11 +409,11 @@ export const Shortcut = () => {
           </div>
 
           {/* Right: Additional Slots (1x5) */}
-          <div className="flex flex-col gap-2">
-            <div className="text-sm font-semibold text-foreground/80 px-2">
+          <div className="flex flex-col gap-1 sm:gap-2">
+            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
               RC
             </div>
-            <div className="grid grid-cols-1 grid-rows-5 gap-2.5">
+            <div className="grid grid-cols-1 grid-rows-5 gap-1.5 sm:gap-2.5">
               {Array.from({ length: RIGHT_SLOTS_COUNT }).map((_, index) => {
                 const slotId =
                   LEFT_SLOTS_COUNT +
@@ -435,9 +435,9 @@ export const Shortcut = () => {
         </div>
 
         {/* Bottom: Main Bar (12 slots) - aligns with top blocks */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1 sm:gap-2">
           {/* Use same gap as top blocks for proper alignment */}
-          <div className="grid grid-cols-12 gap-2">
+          <div className="grid grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-2">
             {Array.from({ length: BOTTOM_SLOTS_COUNT }).map((_, index) => {
               const slotId = LEFT_SLOTS_COUNT + index;
               const isReserved = slotId === RESERVED_SLOT_ID;

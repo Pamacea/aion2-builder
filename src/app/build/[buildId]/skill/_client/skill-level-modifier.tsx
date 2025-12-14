@@ -44,25 +44,25 @@ export const SkillLevelModifier = () => {
   const hasStigmas = build.stigmas && build.stigmas.some((s) => s.level > 1);
 
   return (
-    <div className="w-full flex items-center justify-between gap-2 py-2">
+    <div className="w-full flex flex-col xl:flex-row items-center justify-between gap-2 py-2">
       <Button
         onClick={handleSetAllAbilitiesTo10}
         disabled={!hasAbilities}
-        className="text-xs bg-blue-600/30 text-blue-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2 hover:bg-blue-600/50 hover:text-blue-400²"
+        className="w-full xl:w-1/3  text-xs bg-blue-600/30 text-blue-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2 hover:bg-blue-600/50 hover:text-blue-400²"
       >
         RANK ACTIVE TO 10
       </Button>
       <Button
         onClick={handleSetAllPassivesTo10}
         disabled={!hasPassives}
-       className="text-xs bg-green-600/30 text-green-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2 hover:bg-green-600/50 hover:text-green-400"
+       className="w-full xl:w-1/3 text-xs bg-green-600/30 text-green-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2 hover:bg-green-600/50 hover:text-green-400"
       >
         RANK PASSIVE TO 10
       </Button>
       <Button
         onClick={handleSetAllStigmasTo10}
         disabled={!hasStigmas}
-        className="text-xs bg-purple-600/30 text-purple-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2  hover:bg-purple-600/50 hover:text-purple-400"
+        className="w-full xl:w-1/3 text-xs bg-purple-600/30 text-purple-400 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2  hover:bg-purple-600/50 hover:text-purple-400"
       >
         RANK STIGMA TO 10
       </Button>

@@ -11,6 +11,6 @@ export const PlusButton = ({ onClick, disabled = false }: PlusButtonProps) => (
     alt="Plus Icon"
     onClick={onClick}
     disabled={disabled}
-    className="h-full w-2/4 bg-green-600/50 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50"
+    className="h-full lg:w-2/4 bg-green-600/50 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50"
   />
 );

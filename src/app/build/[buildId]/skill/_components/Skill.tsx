@@ -339,23 +339,27 @@ export const Skill = () => {
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className=" w-full flex flex-col items-center justify-between gap-2 pt-2">
-        <section className="w-full flex flex-col gap-2">
-          <SkillsPoints />
-          <SkillLevelModifier />
+      <div className="w-full flex flex-col items-center justify-between gap-2 sm:gap-3 pt-2 sm:pt-4">
+        <section className="w-full flex flex-col gap-2 sm:gap-4">
+          <div className="flex-1">
+            <SkillsPoints />
+          </div>
+          <div className="flex-1">
+            <SkillLevelModifier />
+          </div>
         </section>
 
         {!isChainSkill && (
-          <section className="w-full flex items-center justify-between gap-2 pt-2">
+          <section className="w-full flex items-center justify-center sm:justify-between gap-2 sm:gap-3 pt-2 sm:pt-4">
             <ResetSkillButton disabled={!hasSelectedSkill} />
-            <PlusButton
-              onClick={handleIncrement}
-              disabled={!hasSelectedSkill || currentLevel >= maxLevel}
-            />
-            <MinusButton
-              onClick={handleDecrement}
-              disabled={!hasSelectedSkill || currentLevel <= 1}
-            />
+              <PlusButton
+                onClick={handleIncrement}
+                disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+              />
+              <MinusButton
+                onClick={handleDecrement}
+                disabled={!hasSelectedSkill || currentLevel <= 1}
+              />
           </section>
         )}
       </div>
