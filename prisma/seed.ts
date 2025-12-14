@@ -145,6 +145,56 @@ async function main() {
           }
         }
       }
+
+      // --- Seed CHAIN SKILLS for abilities ---
+      if (c.abilities && c.abilities.length > 0) {
+        for (const ability of c.abilities) {
+          // Find the parent ability
+          const parentAbility = await prisma.ability.findFirst({
+            where: {
+              name: ability.name,
+              classId: classRecord.id,
+            },
+          });
+
+          if (parentAbility && ability.chainSkills && ability.chainSkills.length > 0) {
+            console.log(`🔗 Seeding chain skills for ${ability.name}...`);
+            for (const chainSkillName of ability.chainSkills) {
+              // Find the chain skill ability
+              const chainSkillAbility = await prisma.ability.findFirst({
+                where: {
+                  name: chainSkillName,
+                  classId: classRecord.id,
+                },
+              });
+
+              if (chainSkillAbility) {
+                // Check if chain skill relation already exists
+                const existingChainSkill = await prisma.chainSkill.findFirst({
+                  where: {
+                    parentAbilityId: parentAbility.id,
+                    chainAbilityId: chainSkillAbility.id,
+                  },
+                });
+
+                if (!existingChainSkill) {
+                  await prisma.chainSkill.create({
+                    data: {
+                      parentAbilityId: parentAbility.id,
+                      chainAbilityId: chainSkillAbility.id,
+                    },
+                  });
+                  console.log(`  ✅ Created chain skill: ${ability.name} -> ${chainSkillName}`);
+                } else {
+                  console.log(`  ℹ️  Chain skill already exists: ${ability.name} -> ${chainSkillName}`);
+                }
+              } else {
+                console.log(`  ⚠️  Chain skill ability not found: ${chainSkillName} for class ${classRecord.name}`);
+              }
+            }
+          }
+        }
+      }
     }
 
     // --- Seed STIGMAS for this class ---

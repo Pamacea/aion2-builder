@@ -105,6 +105,39 @@ export const Skill = () => {
   const selectedPassive = selectedSkill?.passive;
   const selectedStigma = selectedSkill?.stigma;
 
+  // Check if the selected skill is a chain skill
+  // A skill is a chain skill if it appears as chainAbility/chainStigma in parentAbilities/parentStigmas of other skills
+  let isChainSkill = false;
+  if (selectedAbility || selectedBuildAbility) {
+    const abilityToCheck = selectedBuildAbility?.ability || selectedAbility;
+    if (abilityToCheck) {
+      const allAbilities = build?.class?.abilities || [];
+      for (const ab of allAbilities) {
+        if (ab.parentAbilities && ab.parentAbilities.length > 0) {
+          const isChain = ab.parentAbilities.some(cs => cs.chainAbility.id === abilityToCheck.id);
+          if (isChain) {
+            isChainSkill = true;
+            break;
+          }
+        }
+      }
+    }
+  } else if (selectedStigma || selectedBuildStigma) {
+    const stigmaToCheck = selectedBuildStigma?.stigma || selectedStigma;
+    if (stigmaToCheck) {
+      const allStigmas = build?.class?.stigmas || [];
+      for (const st of allStigmas) {
+        if (st.parentStigmas && st.parentStigmas.length > 0) {
+          const isChain = st.parentStigmas.some(cs => cs.chainStigma.id === stigmaToCheck.id);
+          if (isChain) {
+            isChainSkill = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+
   const currentLevel =
     selectedBuildAbility?.level ||
     selectedBuildPassive?.level ||
@@ -125,6 +158,9 @@ export const Skill = () => {
 
   // Handle level changes
   const handleIncrement = () => {
+    // Don't allow level changes for chain skills
+    if (isChainSkill) return;
+    
     if (selectedBuildAbility) {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
       updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
@@ -153,6 +189,9 @@ export const Skill = () => {
   };
 
   const handleDecrement = () => {
+    // Don't allow level changes for chain skills
+    if (isChainSkill) return;
+    
     if (selectedBuildAbility) {
       if (currentLevel <= 0) {
         // Remove skill from build if level would go below 0
@@ -290,14 +329,14 @@ export const Skill = () => {
         </section>
 
         <section className="w-full flex items-center justify-between gap-2 pt-2">
-          <ResetSkillButton />
+          <ResetSkillButton disabled={isChainSkill} />
           <PlusButton
             onClick={handleIncrement}
-            disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+            disabled={!hasSelectedSkill || currentLevel >= maxLevel || isChainSkill}
           />
           <MinusButton
             onClick={handleDecrement}
-            disabled={!hasSelectedSkill || currentLevel <= 1}
+            disabled={!hasSelectedSkill || currentLevel <= 1 || isChainSkill}
           />
         </section>
       </div>

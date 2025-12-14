@@ -42,6 +42,20 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
           passives: {
@@ -58,6 +72,20 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
             include: {
               spellTag: true,
               specialtyChoices: true,
+              parentStigmas: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -73,6 +101,20 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -100,6 +142,20 @@ export const getBuildById = async (id: number): Promise<BuildType | null> => {
               classes: {
                 include: {
                   tags: true,
+                },
+              },
+              chainSkills: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -180,6 +236,20 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
           passives: {
@@ -196,6 +266,20 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
             include: {
               spellTag: true,
               specialtyChoices: true,
+              parentStigmas: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -307,6 +391,7 @@ export async function updateBuild(
         abilityId: a.abilityId,
         level: a.level,
         activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
+        selectedChainSkillIds: a.selectedChainSkillIds ?? [],
       })),
     };
   }
@@ -330,6 +415,8 @@ export async function updateBuild(
         stigmaId: s.stigmaId,
         level: s.level,
         stigmaCost: s.stigmaCost ?? 10,
+        activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
+        selectedChainSkillIds: s.selectedChainSkillIds ?? [],
       })),
     };
   }
@@ -350,6 +437,20 @@ export async function updateBuild(
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
           passives: {
@@ -366,6 +467,20 @@ export async function updateBuild(
             include: {
               spellTag: true,
               specialtyChoices: true,
+              parentStigmas: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -381,6 +496,20 @@ export async function updateBuild(
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -408,6 +537,20 @@ export async function updateBuild(
               classes: {
                 include: {
                   tags: true,
+                },
+              },
+              chainSkills: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -475,6 +618,20 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
           passives: {
@@ -491,6 +648,20 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
             include: {
               spellTag: true,
               specialtyChoices: true,
+              parentStigmas: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -628,6 +799,20 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
               },
               spellTag: true,
               specialtyChoices: true,
+              parentAbilities: {
+                include: {
+                  chainAbility: {
+                    include: {
+                      class: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                      spellTag: true,
+                    },
+                  },
+                },
+              },
             },
           },
           passives: {
@@ -644,6 +829,20 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
             include: {
               spellTag: true,
               specialtyChoices: true,
+              parentStigmas: {
+                include: {
+                  chainStigma: {
+                    include: {
+                      spellTag: true,
+                      classes: {
+                        include: {
+                          tags: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },

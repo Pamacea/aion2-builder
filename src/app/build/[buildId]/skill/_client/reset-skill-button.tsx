@@ -6,7 +6,11 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 
-export const ResetSkillButton = () => {
+type ResetSkillButtonProps = {
+  disabled?: boolean;
+};
+
+export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) => {
   const { selectedSkill, setSelectedSkill } = useSelectedSkill();
   const { updateAbilityLevel, updatePassiveLevel, updateStigmaLevel, build } = useBuildStore();
 
@@ -37,7 +41,7 @@ export const ResetSkillButton = () => {
   }, [build?.abilities, build?.passives, build?.stigmas]);
 
   const handleReset = () => {
-    if (!selectedSkill) return;
+    if (!selectedSkill || disabled) return;
 
     if (selectedSkill.buildAbility) {
       const abilityId = selectedSkill.buildAbility.abilityId;
@@ -57,7 +61,7 @@ export const ResetSkillButton = () => {
   return (
     <Button
       onClick={handleReset}
-      disabled={!hasSelectedSkill}
+      disabled={!hasSelectedSkill || disabled}
       className="h-full bg-background/80 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Image 

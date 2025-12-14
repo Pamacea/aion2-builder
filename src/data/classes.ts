@@ -110,6 +110,30 @@
               abilityId: 1,
             },
           ],
+          chainSkills: ["Earth's Retribution Chain"], // Référence au nom du chain skill
+          classId: 1,
+        },
+        {
+          name: "Earth's Retribution Chain",
+          iconUrl: "EarthsRetribution.webp",
+          description: "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m and restores 110MP.",
+          
+          damageMin: 371,
+          damageMinModifier: undefined, // Utilise damageMinModifiers à la place
+          damageMinModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
+          damageMax: 390,
+          damageMaxModifier: undefined, // Utilise damageMaxModifiers à la place
+          damageMaxModifiers: [18, 18, 17, 27, 34, 41, 34, 34, 33, 34], // Modifiers pour niveaux 2-11
+          staggerDamage: 100,
+          manaCost: 0,
+          manaRegen: 0,
+          range: 20,
+          isNontarget: false,
+          isMobile: false,
+          castingDuration: "Instant Cast",
+          cooldown: "Instant Cast",
+          target: "Single Target",
+          spellTag: ["Earth", "Attack", "Magic"],
           classId: 1,
         },
       ],

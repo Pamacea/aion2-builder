@@ -117,10 +117,44 @@ model Ability {
   // Relations avec le système de spécialités et les builds
   specialtyChoices SpecialtyChoice[]
   buildAbilities   BuildAbility[]
+  
+  // Chain Skills (compétences enchaînées)
+  chainSkills      ChainSkill[] @relation("AbilityChainSkills")
+  parentAbilities   ChainSkill[] @relation("AbilityParentSkills")
 }
 
 // ---------------------------
-// 4. Choix de Spécialité (SpecialtyChoice)
+// 4. Chain Skills (Compétences enchaînées pour Abilities)
+// ---------------------------
+model ChainSkill {
+  id            Int     @id @default(autoincrement())
+  parentAbilityId Int   // Ability parente
+  chainAbilityId   Int   // Ability chain skill
+  
+  parentAbility Ability @relation("AbilityParentSkills", fields: [parentAbilityId], references: [id], onDelete: Cascade)
+  chainAbility  Ability @relation("AbilityChainSkills", fields: [chainAbilityId], references: [id], onDelete: Cascade)
+  
+  @@unique([parentAbilityId, chainAbilityId])
+  @@index([parentAbilityId])
+}
+
+// ---------------------------
+// 5. Chain Skills (Compétences enchaînées pour Stigmas)
+// ---------------------------
+model ChainSkillStigma {
+  id            Int     @id @default(autoincrement())
+  parentStigmaId Int   // Stigma parent
+  chainStigmaId   Int   // Stigma chain skill
+  
+  parentStigma Stigma @relation("StigmaParentSkills", fields: [parentStigmaId], references: [id], onDelete: Cascade)
+  chainStigma  Stigma @relation("StigmaChainSkills", fields: [chainStigmaId], references: [id], onDelete: Cascade)
+  
+  @@unique([parentStigmaId, chainStigmaId])
+  @@index([parentStigmaId])
+}
+
+// ---------------------------
+// 6. Choix de Spécialité (SpecialtyChoice)
 // ---------------------------
 model SpecialtyChoice {
   id          Int    @id @default(autoincrement())
@@ -261,6 +295,10 @@ model Stigma {
   classes      Class[] // Classes pouvant équiper ce stigma
   buildStigmas BuildStigma[] // Relation vers les builds
   specialtyChoices SpecialtyChoice[] // Choix de spécialité pour ce stigma
+  
+  // Chain Skills (compétences enchaînées)
+  chainSkills      ChainSkillStigma[] @relation("StigmaChainSkills")
+  parentStigmas    ChainSkillStigma[] @relation("StigmaParentSkills")
 }
 
 // ================================================================
@@ -311,6 +349,9 @@ model BuildAbility {
 
   // Spécialités actives (référencent SpecialtyChoice.id)
   activeSpecialtyChoiceIds Int[]
+  
+  // Chain Skills sélectionnés (IDs des chain skills choisis, max 2)
+  selectedChainSkillIds Int[] @default([])
 }
 
 // ---------------------------
@@ -346,4 +387,7 @@ model BuildStigma {
 
   // Spécialités actives (référencent SpecialtyChoice.id)
   activeSpecialtyChoiceIds Int[]
+  
+  // Chain Skills sélectionnés (IDs des chain skills choisis, max 2)
+  selectedChainSkillIds Int[] @default([])
 }
