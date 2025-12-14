@@ -66,6 +66,8 @@
           name: "Earth's Retribution",
           iconUrl: "EarthsRetribution.webp",
           description: "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m and restores 110MP.",
+
+          condition: ["Mobile"],
           
           damageMin: 371,
           damageMinModifier: undefined, // Utilise damageMinModifiers à la place
@@ -117,6 +119,8 @@
           name: "Earth's Retribution Chain",
           iconUrl: "EarthsRetribution.webp",
           description: "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m and restores 110MP.",
+
+          condition: ["Mobile"],
           
           damageMin: 371,
           damageMinModifier: undefined, // Utilise damageMinModifiers à la place

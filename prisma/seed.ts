@@ -95,6 +95,7 @@ async function main() {
           castingDuration: "castingDuration" in ability ? ability.castingDuration : "Instant Cast",
           cooldown: "cooldown" in ability ? ability.cooldown : "Instant Cast",
           target: "target" in ability ? ability.target : "Single Target",
+          condition: "condition" in ability && Array.isArray(ability.condition) ? ability.condition : [],
           spellTag: {
             [existingAbility ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -241,6 +242,7 @@ async function main() {
           castingDuration: "castingDuration" in stigma ? stigma.castingDuration : "Instant Cast",
           cooldown: "cooldown" in stigma ? stigma.cooldown : "Instant Cast",
           target: "target" in stigma ? stigma.target : "Single Target",
+          condition: "condition" in stigma && Array.isArray(stigma.condition) ? stigma.condition : [],
           isShared: "isShared" in stigma ? stigma.isShared : false,
           spellTag: {
             [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),

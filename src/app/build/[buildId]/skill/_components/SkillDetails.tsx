@@ -4,16 +4,18 @@ import { useBuildStore } from "@/store/useBuildEditor";
 import {
   AbilityType,
   BuildAbilityType,
-  BuildPassiveType,
   BuildStigmaType,
-  PassiveType,
-  StigmaType,
+  ChainSkillStigmaType,
+  ChainSkillType,
+  StigmaType
 } from "@/types/schema";
+import { SkillDetailsProps } from "@/types/skill.type";
 import { AvailableSpeciality } from "../_client/avaible-speciality";
 import { AvailableSpecialityStigma } from "../_client/avaible-speciality-stigma.tsx";
 import { ChainSkill } from "../_client/chain-skill";
 import { SkillTag } from "../_client/skil-tag";
 import { SkillCastDuration } from "../_client/skill-cast-duration";
+import { SkillCondition } from "../_client/skill-condition";
 import { SkillCooldown } from "../_client/skill-cooldown";
 import { SkillDesc } from "../_client/skill-desc";
 import { SkillManaCost } from "../_client/skill-mana-cost";
@@ -23,15 +25,6 @@ import { SkillStaggerDamage } from "../_client/skill-stagger-damage";
 import { SkillTarget } from "../_client/skill-target";
 import { useSelectedSkill } from "../_context/SelectedSkillContext";
 
-type SkillDetailsProps = {
-  buildAbility?: BuildAbilityType;
-  buildPassive?: BuildPassiveType;
-  buildStigma?: BuildStigmaType;
-  ability?: AbilityType;
-  passive?: PassiveType;
-  stigma?: StigmaType;
-  className?: string;
-};
 
 export const SkillDetails = ({
   buildAbility: propBuildAbility,
@@ -98,6 +91,24 @@ export const SkillDetails = ({
   const chainSkillStigma = parentStigma || targetStigma;
   const chainSkillBuildStigma = parentBuildStigma || buildStigma;
 
+  // Find the ChainSkill or ChainSkillStigma object if current skill is a chain skill
+  let chainSkillData: ChainSkillType | undefined;
+  let chainSkillStigmaData: ChainSkillStigmaType | undefined;
+
+  if (targetAbility && parentAbility) {
+    // Current skill is a chain skill, find the ChainSkill object
+    const chainSkill = parentAbility.parentAbilities?.find(cs => cs.chainAbility.id === targetAbility.id);
+    if (chainSkill) {
+      chainSkillData = chainSkill;
+    }
+  } else if (targetStigma && parentStigma) {
+    // Current skill is a chain skill stigma, find the ChainSkillStigma object
+    const chainSkill = parentStigma.parentStigmas?.find(cs => cs.chainStigma.id === targetStigma.id);
+    if (chainSkill) {
+      chainSkillStigmaData = chainSkill;
+    }
+  }
+
   // If no skill is provided, show empty state
   if (!targetAbility && !targetPassive && !targetStigma) {
     return (
@@ -151,6 +162,14 @@ export const SkillDetails = ({
         ability={targetAbility}
         passive={targetPassive}
         stigma={targetStigma}
+      />
+
+      {/* Condition */}
+      <SkillCondition
+        ability={targetAbility}
+        stigma={targetStigma}
+        chainSkill={chainSkillData}
+        chainSkillStigma={chainSkillStigmaData}
       />
 
       {/* Specialty Choices (only for abilities) */}
