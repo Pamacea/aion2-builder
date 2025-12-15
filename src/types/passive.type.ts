@@ -129,6 +129,9 @@ export const PassiveSchemaBase = z.object({
 
   target: z.string().default("Single Target").nullish(),
 
+  effectCondition: z.string().nullish(),
+  chargeLevels: z.string().nullish(),
+
   baseCost: z.number().default(1),
   baseCostModifier: z.number().default(2),
 

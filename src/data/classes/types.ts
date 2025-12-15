@@ -72,6 +72,8 @@ export interface AbilityData {
   castingDuration?: string;
   cooldown?: string;
   target?: string;
+  effectCondition?: string;
+  chargeLevels?: string;
   spellTag: string[];
   specialtyChoices?: SpecialtyChoiceData[];
   chainSkills?: string[]; // Names of chain skills
@@ -145,6 +147,8 @@ export interface PassiveData {
   castingDuration?: string;
   cooldown?: string;
   target?: string;
+  effectCondition?: string;
+  chargeLevels?: string;
   spellTag: string[];
   classId: number;
   baseCost?: number;
@@ -217,6 +221,8 @@ export interface StigmaData {
   castingDuration?: string;
   cooldown?: string;
   target?: string;
+  effectCondition?: string;
+  chargeLevels?: string;
   spellTag: string[];
   specialtyChoices?: SpecialtyChoiceData[];
   classId: number;

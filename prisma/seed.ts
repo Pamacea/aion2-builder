@@ -141,6 +141,8 @@ async function main() {
           cooldown: "cooldown" in ability ? ability.cooldown : "Instant Cast",
           target: "target" in ability ? ability.target : "Single Target",
           condition: "condition" in ability && Array.isArray(ability.condition) ? ability.condition : [],
+          effectCondition: "effectCondition" in ability ? ability.effectCondition : undefined,
+          chargeLevels: "chargeLevels" in ability ? ability.chargeLevels : undefined,
           spellTag: {
             [existingAbility ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -323,6 +325,8 @@ async function main() {
           cooldown: "cooldown" in stigma ? stigma.cooldown : "Instant Cast",
           target: "target" in stigma ? stigma.target : "Single Target",
           condition: "condition" in stigma && Array.isArray(stigma.condition) ? stigma.condition : [],
+          effectCondition: "effectCondition" in stigma ? stigma.effectCondition : undefined,
+          chargeLevels: "chargeLevels" in stigma ? stigma.chargeLevels : undefined,
           spellTag: {
             [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -439,6 +443,8 @@ async function main() {
           castingDuration: passive.castingDuration ?? "Instant Cast",
           cooldown: passive.cooldown ?? "Instant Cast",
           target: passive.target ?? "Single Target",
+          effectCondition: "effectCondition" in passive ? passive.effectCondition : undefined,
+          chargeLevels: "chargeLevels" in passive ? passive.chargeLevels : undefined,
           spellTag: {
             [existingPassive ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },

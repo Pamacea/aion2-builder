@@ -125,6 +125,9 @@ export const StigmaSchemaBase = z.object({
 
   condition: z.array(z.string()).default([]),
 
+  effectCondition: z.string().nullish(),
+  chargeLevels: z.string(),
+
   baseCost: z.number().default(10),
   baseCostModifier: z.number().default(2),
 });

@@ -123,6 +123,9 @@ export const AbilitySchemaBase = z.object({
 
   condition: z.array(z.string()).default([]),
 
+  effectCondition: z.string().nullish(),
+  chargeLevels: z.string().nullish(),
+
   baseCost: z.number().default(1),
   baseCostModifier: z.number().default(2),
   maxLevel: z.number().default(20),

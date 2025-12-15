@@ -167,6 +167,10 @@ model Ability {
   // Conditions du sort (ex: ["Nontarget Skill", "Mobile"])
   condition String[] @default([])
 
+  // Conditions d'effet
+  effectCondition String? 
+  chargeLevels String?
+
   // Relation vers les tags  du sort
   spellTag SpellTag[]
 
@@ -330,6 +334,10 @@ model Passive {
 
   target String? @default("Single Target")
 
+  // Conditions d'effet
+  effectCondition String? 
+  chargeLevels String?
+
   // Relation vers les tags  du sort
   spellTag SpellTag[]
 
@@ -350,6 +358,10 @@ model Stigma {
   iconUrl     String?
   maxLevel    Int     @default(20)
   description String?
+
+  // Conditions d'effet
+  effectCondition String? 
+  chargeLevels String
 
   // Stats et Coûts
   damageMin         Int?
