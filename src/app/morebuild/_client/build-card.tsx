@@ -1,15 +1,20 @@
 "use client";
 
+import { CreateButton } from "@/components/client/buttons/create-button";
 import { CLASS_PATH } from "@/constants/paths";
+import { useAuth } from "@/hooks/useAuth";
 import { BuildCardProps } from "@/types/schema";
 import Image from "next/image";
 import Link from "next/link";
-import { CreateBuildBase } from "./create-build-base";
 import { ShowBuildButton } from "./show-build-button";
 
 
 export const BuildCard = ({ build }: BuildCardProps) => {
   const bannerUrl = build.class?.bannerUrl || "default-banner.webp";
+  const { isAuthenticated } = useAuth();
+  
+  // Le bouton Create Build sera caché si l'utilisateur n'est pas connecté
+  const isCreateButtonHidden = isAuthenticated === false;
 
   return (
     <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all hover:scale-110">
@@ -34,12 +39,20 @@ export const BuildCard = ({ build }: BuildCardProps) => {
         </Link>
         <p className="text-sm text-foreground/70 mb-3 uppercase">{build.class?.name}</p>
         <div className="flex gap-2">
-          <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+          <div className={isCreateButtonHidden ? "w-full" : "flex-1"} onClick={(e) => e.stopPropagation()}>
             <ShowBuildButton buildId={build.id} />
           </div>
-          <div className="flex-1" onClick={(e) => e.stopPropagation()}>
-            <CreateBuildBase buildId={build.id} />
-          </div>
+          {!isCreateButtonHidden && (
+            <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+              <CreateButton
+                variant="text"
+                buildId={build.id}
+                text="Create Build"
+                hideWhenUnauthenticated
+                className="w-full bg-background/60 text-foreground border-y-2 border-foreground/50 hover:bg-background/80 hover:border-foreground/70 font-bold uppercase text-xs py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

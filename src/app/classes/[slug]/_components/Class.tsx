@@ -1,5 +1,5 @@
+import { CreateButton } from "@/components/client/buttons/create-button";
 import { ClassType } from "@/types/schema";
-import { CreateYourBuildButton } from "../_client/buttons/createyourbuild-button";
 import { ClassBanner } from "../_client/class-banner";
 import { ClassCharacter } from "../_client/class-character";
 import { ClassHead } from "../_client/class-head";
@@ -19,7 +19,13 @@ export const Class = ({ classData, starterbuildId }: { classData: ClassType | nu
         <ClassBanner
           classBanner={classData.bannerUrl || "default-banner.webp"}
         />
-        <CreateYourBuildButton starterBuildId={starterbuildId} />
+        <CreateButton
+          variant="text"
+          starterBuildId={starterbuildId}
+          text="create your build"
+          showDiscordWhenUnauthenticated
+          className="w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        />
         <MoreBuild starterBuildHref={`/build/${starterbuildId}`} />
       </div>
       <div className="flex justify-center items-center">
