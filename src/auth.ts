@@ -33,5 +33,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async signIn() {
+      // Permettre la connexion
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Si l'URL est relative, la convertir en URL absolue
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      // Si l'URL est sur le même domaine, l'utiliser
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // Sinon, rediriger vers la base
+      return baseUrl;
+    },
   },
 });

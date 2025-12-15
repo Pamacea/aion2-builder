@@ -10,20 +10,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { signIn } from "@/lib/auth-client";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { CreateButtonProps } from "@/types/create-button.type";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export const CreateButton = ({
-  variant = "icon",
   buildId,
   starterBuildId,
   text = "create your build",
-  hideWhenUnauthenticated = variant === "icon", // Cache par défaut pour variant="icon"
+  hideWhenUnauthenticated = false,
   showDiscordWhenUnauthenticated = false,
   className,
 }: CreateButtonProps) => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isCreating, setIsCreating] = useState(false);
   const { build } = useBuildStore();
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,9 +30,10 @@ export const CreateButton = ({
   const handleCreate = async () => {
     if (isCreating) return;
 
-    // Si non authentifié, rediriger vers la connexion
+    // Si non authentifié, rediriger vers la connexion avec callbackUrl
     if (isAuthenticated === false) {
-      await signIn("discord");
+      const callbackUrl = encodeURIComponent(pathname || "/");
+      await signIn("discord", callbackUrl);
       return;
     }
 
@@ -64,9 +64,10 @@ export const CreateButton = ({
       console.error("Error creating build:", error);
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      // Si erreur d'authentification, rediriger vers la connexion
+      // Si erreur d'authentification, rediriger vers la connexion avec callbackUrl
       if (errorMessage.includes("connecté")) {
-        await signIn("discord");
+        const callbackUrl = encodeURIComponent(pathname || "/");
+        await signIn("discord", callbackUrl);
       }
     } finally {
       setIsCreating(false);
@@ -81,13 +82,14 @@ export const CreateButton = ({
   // Afficher le bouton Discord si non authentifié
   if (isAuthenticated === false && showDiscordWhenUnauthenticated) {
     const buttonClassName =
-      variant === "icon"
-        ? "w-full bg-primary/20 text-primary border-y-2 border-primary hover:bg-primary/30 font-bold uppercase text-xs py-2 flex justify-center items-center"
-        : "w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary";
+      "w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary";
 
     return (
       <button
-        onClick={() => signIn("discord")}
+        onClick={() => {
+          const callbackUrl = encodeURIComponent(pathname || "/");
+          signIn("discord", callbackUrl);
+        }}
         className={buttonClassName}
         suppressHydrationWarning
       >
@@ -96,9 +98,7 @@ export const CreateButton = ({
     );
   }
 
-  // Styles selon la variante
-  const iconClassName =
-    "h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25 disabled:opacity-50";
+  // Styles pour la variante text
   const defaultTextClassName =
     "w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed";
   const textClassName = className || defaultTextClassName;
@@ -108,25 +108,6 @@ export const CreateButton = ({
     isLoading ||
     (starterBuildId === null && !buildId) ||
     (buildId === undefined && starterBuildId === null && !build);
-
-  if (variant === "icon") {
-    return (
-      <button
-        onClick={handleCreate}
-        disabled={isDisabled}
-        className={iconClassName}
-        title={isLoading ? "Vérification..." : "Créer un build"}
-        suppressHydrationWarning
-      >
-        <Image
-          src="/icons/create-logo.webp"
-          alt="Create Build"
-          width={48}
-          height={48}
-        />
-      </button>
-    );
-  }
 
   return (
     <button

@@ -4,7 +4,6 @@ import { Cinzel, Roboto } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
-import { AuthSession } from "@/components/auth-session";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -112,7 +111,6 @@ export default function RootLayout({
             {children}
             <Toaster />
           </Layout>
-          <AuthSession />
         </Providers>
       </body>
     </html>
