@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
 import { fullBuildInclude } from "@/utils/actionsUtils";
 import { isStarterBuild } from "@/utils/buildUtils";
@@ -8,19 +9,25 @@ import { prisma } from "../lib/prisma";
 // ======================================
 // DATA MAPPING HELPERS
 // ======================================
-const mapBuildAbilityData = (ability: NonNullable<BuildType["abilities"]>[number]) => ({
+const mapBuildAbilityData = (
+  ability: NonNullable<BuildType["abilities"]>[number]
+) => ({
   abilityId: ability.abilityId,
   level: ability.level,
   activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
   selectedChainSkillIds: ability.selectedChainSkillIds ?? [],
 });
 
-const mapBuildPassiveData = (passive: NonNullable<BuildType["passives"]>[number]) => ({
+const mapBuildPassiveData = (
+  passive: NonNullable<BuildType["passives"]>[number]
+) => ({
   passiveId: passive.passiveId,
   level: passive.level,
 });
 
-const mapBuildStigmaData = (stigma: NonNullable<BuildType["stigmas"]>[number]) => ({
+const mapBuildStigmaData = (
+  stigma: NonNullable<BuildType["stigmas"]>[number]
+) => ({
   stigmaId: stigma.stigmaId,
   level: stigma.level,
   stigmaCost: stigma.stigmaCost ?? 10,
@@ -28,7 +35,9 @@ const mapBuildStigmaData = (stigma: NonNullable<BuildType["stigmas"]>[number]) =
   selectedChainSkillIds: stigma.selectedChainSkillIds ?? [],
 });
 
-export async function loadBuildAction(buildId: number): Promise<BuildType | null> {
+export async function loadBuildAction(
+  buildId: number
+): Promise<BuildType | null> {
   if (!buildId || isNaN(buildId)) {
     return null;
   }
@@ -39,13 +48,24 @@ export async function saveBuildAction(
   buildId: number,
   data: BuildType
 ): Promise<BuildType | null> {
+  const session = await auth();
+
   // Prevent saving starter builds
   if (isStarterBuild(data)) {
-    throw new Error("Cannot modify starter builds. Please create a new build from the starter build.");
+    throw new Error(
+      "Cannot modify starter builds. Please create a new build from the starter build."
+    );
   }
+
+  // Vérifier que l'utilisateur est le propriétaire du build
+  if (data.userId && session?.user?.id !== data.userId) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
   return await updateBuild(buildId, data as Partial<BuildType>);
 }
-
 
 // ======================================
 // GET BUILD BY ID (full BuildType)
@@ -90,20 +110,22 @@ export async function createBuild(buildData: BuildType): Promise<BuildType> {
       name: buildData.name,
       classId: buildData.classId,
       abilities: {
-        create: buildData.abilities?.map((a) => ({
-          abilityId: a.abilityId,
-          level: a.level,
-          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
-        })) ?? [],
+        create:
+          buildData.abilities?.map((a) => ({
+            abilityId: a.abilityId,
+            level: a.level,
+            activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
+          })) ?? [],
       },
       passives: {
         create: buildData.passives?.map(mapBuildPassiveData) ?? [],
       },
       stigmas: {
-        create: buildData.stigmas?.map((s) => ({
-          stigmaId: s.stigmaId,
-          stigmaCost: s.stigmaCost,
-        })) ?? [],
+        create:
+          buildData.stigmas?.map((s) => ({
+            stigmaId: s.stigmaId,
+            stigmaCost: s.stigmaCost,
+          })) ?? [],
       },
     },
     include: fullBuildInclude,
@@ -119,6 +141,20 @@ export async function updateBuild(
   buildId: number,
   data: Partial<BuildType>
 ): Promise<BuildType> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  // Vérifier que l'utilisateur est le propriétaire du build (sauf si le build n'a pas de propriétaire)
+  if (currentBuild?.userId && session?.user?.id !== currentBuild.userId) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
   const updateData: {
     name?: string;
     classId?: number;
@@ -147,47 +183,52 @@ export async function updateBuild(
       }>;
     };
   } = {};
-  
-  if ('name' in data && data.name !== undefined) {
+
+  if ("name" in data && data.name !== undefined) {
     updateData.name = data.name as string;
   }
-  
-  if ('class' in data && data.class && typeof data.class === 'object' && 'id' in data.class) {
+
+  if (
+    "class" in data &&
+    data.class &&
+    typeof data.class === "object" &&
+    "id" in data.class
+  ) {
     updateData.classId = (data.class as { id: number }).id;
   }
-  
+
   // Handle shortcuts update
-  if ('shortcuts' in data && data.shortcuts !== undefined) {
+  if ("shortcuts" in data && data.shortcuts !== undefined) {
     updateData.shortcuts = data.shortcuts as BuildType["shortcuts"];
   }
-  
+
   // Handle abilities update
-  if ('abilities' in data && data.abilities !== undefined) {
+  if ("abilities" in data && data.abilities !== undefined) {
     updateData.abilities = {
       deleteMany: { buildId },
       create: data.abilities.map(mapBuildAbilityData),
     };
   }
-  
+
   // Handle passives update
-  if ('passives' in data && data.passives !== undefined) {
+  if ("passives" in data && data.passives !== undefined) {
     updateData.passives = {
       deleteMany: { buildId },
       create: data.passives.map(mapBuildPassiveData),
     };
   }
-  
+
   // Handle stigmas update
-  if ('stigmas' in data && data.stigmas !== undefined) {
+  if ("stigmas" in data && data.stigmas !== undefined) {
     updateData.stigmas = {
       deleteMany: { buildId },
       create: data.stigmas.map(mapBuildStigmaData),
     };
   }
-  
+
   const updated = await prisma.build.update({
     where: { id: buildId },
-    data: updateData as Parameters<typeof prisma.build.update>[0]['data'],
+    data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
     include: fullBuildInclude,
   });
 
@@ -197,44 +238,57 @@ export async function updateBuild(
 // ======================================
 // CREATE BUILD FROM STARTER BUILD
 // ======================================
-export async function createBuildFromStarter(starterBuildId: number): Promise<BuildType | null> {
+export async function createBuildFromStarter(
+  starterBuildId: number
+): Promise<BuildType | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Vous devez être connecté pour créer un build");
+  }
+
   const starterBuild = await getBuildById(starterBuildId);
   if (!starterBuild) return null;
 
-  const className = starterBuild.class.name.charAt(0).toUpperCase() + starterBuild.class.name.slice(1);
-  
+  const className =
+    starterBuild.class.name.charAt(0).toUpperCase() +
+    starterBuild.class.name.slice(1);
+
   // Find the first ability (smallest abilityId) - this is the auto attack
   const firstAbilityId = starterBuild.class?.abilities
-    ? Math.min(...starterBuild.class.abilities.map(a => a.id))
+    ? Math.min(...starterBuild.class.abilities.map((a) => a.id))
     : null;
-  
+
   const newBuild = await prisma.build.create({
     data: {
       name: `Custom - ${className} Build`,
       classId: starterBuild.classId,
+      userId: session.user.id,
       baseSP: starterBuild.baseSP,
       extraSP: starterBuild.extraSP,
       baseSTP: starterBuild.baseSTP,
       extraSTP: starterBuild.extraSTP,
       abilities: {
-        create: starterBuild.abilities?.map((a) => ({
-          abilityId: a.abilityId,
-          level: a.abilityId === firstAbilityId ? 1 : 0, // First ability (auto attack) always starts at level 1
-          activeSpecialtyChoiceIds: [],
-        })) ?? [],
+        create:
+          starterBuild.abilities?.map((a) => ({
+            abilityId: a.abilityId,
+            level: a.abilityId === firstAbilityId ? 1 : 0, // First ability (auto attack) always starts at level 1
+            activeSpecialtyChoiceIds: [],
+          })) ?? [],
       },
       passives: {
-        create: starterBuild.passives?.map((p) => ({
-          passiveId: p.passiveId,
-          level: 0, // New builds start at level 0, not copying starter build levels
-          maxLevel: p.maxLevel,
-        })) ?? [],
+        create:
+          starterBuild.passives?.map((p) => ({
+            passiveId: p.passiveId,
+            level: 0, // New builds start at level 0, not copying starter build levels
+            maxLevel: p.maxLevel,
+          })) ?? [],
       },
       stigmas: {
-        create: starterBuild.stigmas?.map((s) => ({
-          stigmaId: s.stigmaId,
-          stigmaCost: s.stigmaCost,
-        })) ?? [],
+        create:
+          starterBuild.stigmas?.map((s) => ({
+            stigmaId: s.stigmaId,
+            stigmaCost: s.stigmaCost,
+          })) ?? [],
       },
     },
     include: fullBuildInclude,
@@ -247,7 +301,16 @@ export async function createBuildFromStarter(starterBuildId: number): Promise<Bu
 // GET RANDOM STARTER BUILD ID
 // ======================================
 export async function getRandomStarterBuildId(): Promise<number | null> {
-  const classes = ["gladiator", "templar", "ranger", "assassin", "chanter", "sorcerer", "elementalist", "cleric"];
+  const classes = [
+    "gladiator",
+    "templar",
+    "ranger",
+    "assassin",
+    "chanter",
+    "sorcerer",
+    "elementalist",
+    "cleric",
+  ];
   const randomClass = classes[Math.floor(Math.random() * classes.length)];
   return await getStarterBuildIdByClassName(randomClass);
 }
@@ -263,6 +326,14 @@ export async function getAllBuilds(): Promise<BuildType[]> {
           tags: true,
         },
       },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
     },
     orderBy: {
       id: "desc",
@@ -275,40 +346,50 @@ export async function getAllBuilds(): Promise<BuildType[]> {
 // ======================================
 // CREATE BUILD FROM EXISTING BUILD
 // ======================================
-export async function createBuildFromBuild(sourceBuildId: number): Promise<BuildType | null> {
+export async function createBuildFromBuild(
+  sourceBuildId: number
+): Promise<BuildType | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Vous devez être connecté pour créer un build");
+  }
+
   const sourceBuild = await getBuildById(sourceBuildId);
   if (!sourceBuild) return null;
 
   // Find the first ability (smallest abilityId) - this is the auto attack
   const firstAbilityId = sourceBuild.class?.abilities
-    ? Math.min(...sourceBuild.class.abilities.map(a => a.id))
+    ? Math.min(...sourceBuild.class.abilities.map((a) => a.id))
     : null;
 
   const newBuild = await prisma.build.create({
     data: {
       name: `${sourceBuild.name} (Copy)`,
       classId: sourceBuild.classId,
+      userId: session.user.id,
       baseSP: sourceBuild.baseSP,
       extraSP: sourceBuild.extraSP,
       baseSTP: sourceBuild.baseSTP,
       extraSTP: sourceBuild.extraSTP,
       abilities: {
-        create: sourceBuild.abilities?.map((a) => ({
-          abilityId: a.abilityId,
-          level: a.abilityId === firstAbilityId ? 1 : a.level, // First ability (auto attack) always starts at level 1
-          activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
-        })) ?? [],
+        create:
+          sourceBuild.abilities?.map((a) => ({
+            abilityId: a.abilityId,
+            level: a.abilityId === firstAbilityId ? 1 : a.level, // First ability (auto attack) always starts at level 1
+            activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
+          })) ?? [],
       },
       passives: {
         create: sourceBuild.passives?.map(mapBuildPassiveData) ?? [],
       },
       stigmas: {
-        create: sourceBuild.stigmas?.map((s) => ({
-          stigmaId: s.stigmaId,
-          level: s.level,
-          stigmaCost: s.stigmaCost,
-          activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
-        })) ?? [],
+        create:
+          sourceBuild.stigmas?.map((s) => ({
+            stigmaId: s.stigmaId,
+            level: s.level,
+            stigmaCost: s.stigmaCost,
+            activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
+          })) ?? [],
       },
     },
     include: fullBuildInclude,
@@ -316,4 +397,3 @@ export async function createBuildFromBuild(sourceBuildId: number): Promise<Build
 
   return BuildSchema.parse(newBuild);
 }
-

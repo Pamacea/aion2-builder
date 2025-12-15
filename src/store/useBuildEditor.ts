@@ -7,7 +7,7 @@ import {
   BuildState,
   BuildStigmaType,
 } from "@/types/schema";
-import { isStarterBuild, syncChainSkills } from "@/utils/buildUtils";
+import { isBuildOwner, isStarterBuild, syncChainSkills } from "@/utils/buildUtils";
 import { filterChainSkills } from "@/utils/chainSkillsUtils";
 import { loadBuildAction, saveBuildAction } from "actions/buildActions";
 import { create } from "zustand";
@@ -43,6 +43,9 @@ export const useBuildStore = create<BuildState>((set, get) => {
     build: null,
     loading: true,
     saving: false,
+    currentUserId: null,
+
+    setCurrentUserId: (userId) => set({ currentUserId: userId }),
 
     setBuild: (build) => set({ build }),
 
@@ -50,15 +53,33 @@ export const useBuildStore = create<BuildState>((set, get) => {
       set({ loading: true });
       const data = await loadBuildAction(buildId);
       set({ build: data, loading: false });
+      
+      // Charger l'ID de l'utilisateur actuel si disponible
+      try {
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+        if (session?.user?.id) {
+          set({ currentUserId: session.user.id });
+        }
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
     },
 
     updateBuild: (partial) => {
       const currentBuild = get().build;
+      const currentUserId = get().currentUserId;
       if (!currentBuild) return;
 
       // Prevent updating starter builds
       if (isStarterBuild(currentBuild)) {
         console.warn("Cannot modify starter builds");
+        return;
+      }
+
+      // Prevent updating builds if user is not the owner
+      if (!isBuildOwner(currentBuild, currentUserId)) {
+        console.warn("Cannot modify builds that you don't own");
         return;
       }
 
@@ -81,13 +102,15 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     setName: (name) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       get().updateBuild({ name });
     },
 
     setClassId: (classId) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       const currentClass = build?.class;
       if (!currentClass) return;
       get().updateBuild({ classId, class: { ...currentClass, id: classId } });
@@ -95,7 +118,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     setClassByName: async (className) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
 
       const newClass = await getClassByName(className);
       if (!newClass) return;
@@ -129,7 +153,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updateAbilityLevel: (abilityId, level) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       const classAbility = build.class?.abilities?.find(
         (a) => a.id === abilityId
@@ -186,7 +211,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updatePassiveLevel: (passiveId, level) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       const passives = build?.passives?.map((p) =>
         p.passiveId === passiveId ? { ...p, level } : p
       );
@@ -195,7 +221,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updateStigma: (stigmaId, stigmaCost) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       const stigmas = build?.stigmas?.map((s) =>
         s.stigmaId === stigmaId ? { ...s, stigmaCost } : s
       );
@@ -208,7 +235,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     addAbility: (abilityId, level = 0) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       // Check if ability already exists
       const existingAbility = build.abilities?.find(
@@ -244,7 +272,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     removeAbility: (abilityId) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
       const abilities = build.abilities?.filter(
         (a) => a.abilityId !== abilityId
       );
@@ -253,7 +282,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     toggleSpecialtyChoice: (abilityId, specialtyChoiceId) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       // Find the ability and its class ability to check unlock level
       const buildAbility = build.abilities?.find(
@@ -335,7 +365,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     addPassive: (passiveId, level = 0) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       // Check if passive already exists
       const existingPassive = build.passives?.find(
@@ -369,7 +400,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     removePassive: (passiveId) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
       const passives = build.passives?.filter((p) => p.passiveId !== passiveId);
       get().updateBuild({ passives });
     },
@@ -393,7 +425,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updateStigmaLevel: (stigmaId, level) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       let selectedChainSkillIds: number[] = [];
       const updatedStigmas =
@@ -436,7 +469,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     addStigma: (stigmaId, level = 0, stigmaCost) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       // Check if stigma already exists
       const existingStigma = build.stigmas?.find(
@@ -474,14 +508,16 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     removeStigma: (stigmaId) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
       const stigmas = build.stigmas?.filter((s) => s.stigmaId !== stigmaId);
       get().updateBuild({ stigmas });
     },
 
     toggleSpecialtyChoiceStigma: (stigmaId, specialtyChoiceId) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       // Find the stigma and its class stigma to check unlock level
       const buildStigma = build.stigmas?.find((s) => s.stigmaId === stigmaId);
@@ -555,7 +591,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updateShortcuts: (shortcuts) => {
       const build = get().build;
-      if (isStarterBuild(build)) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       get().updateBuild({ shortcuts });
     },
 
@@ -565,7 +602,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     updateChainSkill: (skillId, chainSkillIds, type) => {
       const build = get().build;
-      if (isStarterBuild(build) || !build) return;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
       if (type === "ability") {
         // Find the parent ability to get its level

@@ -36,6 +36,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  builds        Build[] // Builds créés par l'utilisateur
 }
 
 model Account {
@@ -525,6 +526,10 @@ model Build {
   // Classe associée
   classId Int
   class   Class @relation(fields: [classId], references: [id])
+
+  // Propriétaire du build (optionnel pour les starter builds)
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Points de compétence
   baseSP  Int @default(231) // Points de base après leveling

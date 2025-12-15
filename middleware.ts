@@ -1,9 +1,8 @@
-import { auth } from "@/auth";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export default auth((req) => {
+export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isAuthenticated = !!req.auth;
 
   // Routes publiques qui ne nécessitent pas d'authentification
   const publicRoutes = [
@@ -24,17 +23,21 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // Si l'utilisateur n'est pas authentifié et essaie d'accéder à une route protégée
-  if (!isAuthenticated) {
-    // Rediriger vers la page de connexion
+  // Pour les routes protégées, vérifier la présence d'un cookie de session
+  // Note: La vérification complète de l'authentification se fait côté serveur dans les actions
+  const sessionToken = req.cookies.get("authjs.session-token") || req.cookies.get("__Secure-authjs.session-token");
+
+  // Si pas de cookie de session, rediriger vers la connexion
+  if (!sessionToken) {
     const signInUrl = new URL("/api/auth/signin/discord", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
-  // Autoriser l'accès si l'utilisateur est authentifié
+  // Autoriser l'accès si un cookie de session est présent
+  // La vérification réelle de la validité de la session se fait côté serveur
   return NextResponse.next();
-});
+}
 
 // Configuration du matcher pour spécifier les routes à protéger
 // Le middleware s'exécutera sur toutes les routes sauf celles listées dans publicRoutes

@@ -2,16 +2,18 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { isStarterBuild } from "@/utils/buildUtils";
+import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import { StarterBuildMessage } from "../_components/starterBuildMessage";
 import { CLASSES } from "../_utils/constants";
 
 export const ClassSelect = () => {
-  const { build, setClassByName } = useBuildStore();
+  const { build, setClassByName, currentUserId } = useBuildStore();
 
   if (!build) return null;
 
   const isStarter = isStarterBuild(build);
+  const isOwner = isBuildOwner(build, currentUserId);
+  const isDisabled = isStarter || !isOwner;
 
   return (
     <section className="w-full flex flex-col items-start justify-start gap-4">
@@ -19,7 +21,7 @@ export const ClassSelect = () => {
       <Select
         value={build.class.name}
         onValueChange={(className) => setClassByName(className)}
-        disabled={isStarter}
+        disabled={isDisabled}
       >
         <SelectTrigger className="uppercase w-full text-3xl disabled:opacity-50 disabled:cursor-not-allowed">
           <SelectValue placeholder="Select a class" />

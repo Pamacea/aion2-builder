@@ -42,6 +42,8 @@ export type BuildState = {
   build: BuildType | null;
   loading: boolean;
   saving: boolean;
+  currentUserId: string | null;
+  setCurrentUserId: (userId: string | null) => void;
   setBuild: (build: BuildType) => void;
   updateBuild: (partial: Partial<BuildType>) => void;
   setName: (name: string) => void;
@@ -88,6 +90,7 @@ export const BuildSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
   classId: z.number(),
+  userId: z.string().nullish(),
   baseSP: z.number().default(231),
   extraSP: z.number().default(0),
   baseSTP: z.number().default(40),
@@ -151,6 +154,12 @@ export type BuildStigmaType = {
 // ---------------------------
 export type BuildType = BuildTypeBase & {
   class: ClassType;
+  user?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
   abilities?: BuildAbilityType[];
   passives?: BuildPassiveType[];
   stigmas?: BuildStigmaType[];

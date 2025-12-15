@@ -174,6 +174,12 @@ export const StigmaSchema: z.ZodType<StigmaType> = StigmaSchemaBase.extend({
 // ---------------------------
 export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
   class: z.lazy(() => ClassSchema),
+  user: z.object({
+    id: z.string(),
+    name: z.string().nullish(),
+    email: z.string().nullish(),
+    image: z.string().nullish(),
+  }).nullable().optional(),
   abilities: z.array(BuildAbilitySchema).optional(),
   passives: z.array(BuildPassiveSchema).optional(),
   stigmas: z.array(BuildStigmaSchema).optional(),

@@ -2,6 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
+import { isBuildOwner } from "@/utils/buildUtils";
 import { SpecialtyChoice } from "./speciality-choice";
 
 type AvailableSpecialityProps = {
@@ -21,7 +22,8 @@ export const AvailableSpeciality = ({
   className = "",
   onToggleSpecialtyChoice,
 }: AvailableSpecialityProps) => {
-  const { toggleSpecialtyChoice } = useBuildStore();
+  const { toggleSpecialtyChoice, build, currentUserId } = useBuildStore();
+  const isOwner = isBuildOwner(build, currentUserId);
 
   // Determine which ability and data to use
   const targetAbility = buildAbility?.ability || ability;
@@ -68,7 +70,11 @@ export const AvailableSpeciality = ({
         // Check if trying to activate 3rd specialty choice - requires level 20
         const isLockedByThirdSlot = !isActive && activeIds.length >= 2 && (abilityLevel === undefined || abilityLevel < 20);
         // Specialty choice is locked if not in build, level is 0, level is too low, max reached, or trying to activate 3rd without level 20
-        const isLocked = isLockedByNotInBuild || isLockedByLevel || isLockedByMax || isLockedByThirdSlot;
+        // Also lock if user is not the owner (but keep active specialties visible)
+        const isLockedByRules = isLockedByNotInBuild || isLockedByLevel || isLockedByMax || isLockedByThirdSlot;
+        const isLocked = isLockedByRules || !isOwner;
+        // For active specialties, keep full opacity even if not owner (important information)
+        const shouldReduceOpacity = isLocked && !isActive;
         
         return (
           <div
@@ -81,7 +87,9 @@ export const AvailableSpeciality = ({
             className={
               onToggleSpecialtyChoice || buildAbility
                 ? isLocked
-                  ? "cursor-not-allowed opacity-50"
+                  ? shouldReduceOpacity
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-not-allowed opacity-100"
                   : "cursor-pointer hover:opacity-80 transition-opacity"
                 : ""
             }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useBuildStore } from "@/store/useBuildEditor";
+import { isBuildOwner } from "@/utils/buildUtils";
 import { useEffect } from "react";
 import { ActiveSkill } from "../_client/active-skill";
 import { MinusButton } from "../_client/buttons/minus-button";
@@ -16,6 +17,7 @@ import { getEffectiveMaxLevel } from "../_utils/levelLimits";
 export const Skill = () => {
   const {
     build,
+    currentUserId,
     getAvailableAbilities,
     getAvailablePassives,
     getAvailableStigmas,
@@ -115,7 +117,9 @@ export const Skill = () => {
       const allAbilities = build?.class?.abilities || [];
       for (const ab of allAbilities) {
         if (ab.parentAbilities && ab.parentAbilities.length > 0) {
-          const isChain = ab.parentAbilities.some(cs => cs.chainAbility.id === abilityToCheck.id);
+          const isChain = ab.parentAbilities.some(
+            (cs) => cs.chainAbility.id === abilityToCheck.id
+          );
           if (isChain) {
             isChainSkill = true;
             break;
@@ -129,7 +133,9 @@ export const Skill = () => {
       const allStigmas = build?.class?.stigmas || [];
       for (const st of allStigmas) {
         if (st.parentStigmas && st.parentStigmas.length > 0) {
-          const isChain = st.parentStigmas.some(cs => cs.chainStigma.id === stigmaToCheck.id);
+          const isChain = st.parentStigmas.some(
+            (cs) => cs.chainStigma.id === stigmaToCheck.id
+          );
           if (isChain) {
             isChainSkill = true;
             break;
@@ -144,7 +150,7 @@ export const Skill = () => {
     selectedBuildPassive?.level ||
     selectedBuildStigma?.level ||
     0;
-  
+
   // Get actual maxLevel from the skill
   const actualMaxLevel =
     selectedBuildAbility?.maxLevel ||
@@ -160,21 +166,23 @@ export const Skill = () => {
       ? selectedStigma.maxLevel
       : undefined) ||
     20;
-  
+
   // Determine skill type for effective max level calculation
-  const skillType = selectedBuildAbility || selectedAbility
-    ? "ability"
-    : selectedBuildPassive || selectedPassive
-      ? "passive"
-      : "stigma";
-  
+  const skillType =
+    selectedBuildAbility || selectedAbility
+      ? "ability"
+      : selectedBuildPassive || selectedPassive
+        ? "passive"
+        : "stigma";
+
   // Apply effective max level (10 for abilities/passives, full maxLevel for stigmas)
   const maxLevel = getEffectiveMaxLevel(skillType, actualMaxLevel);
-  
+
   const hasSelectedSkill = !!selectedSkill;
 
   // Count stigmas with level >= 1
-  const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
+  const stigmasWithLevelOneOrMore =
+    build?.stigmas?.filter((s) => s.level >= 1) || [];
   const stigmaCountAtLevelOneOrMore = stigmasWithLevelOneOrMore.length;
   const maxStigmasAllowed = 4;
 
@@ -198,7 +206,7 @@ export const Skill = () => {
   const handleIncrement = () => {
     // Don't allow level changes for chain skills
     if (isChainSkill) return;
-    
+
     if (selectedBuildAbility) {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
       updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
@@ -237,7 +245,7 @@ export const Skill = () => {
   const handleDecrement = () => {
     // Don't allow level changes for chain skills
     if (isChainSkill) return;
-    
+
     if (selectedBuildAbility) {
       if (currentLevel <= 0) {
         // Remove skill from build if level would go below 0
@@ -373,26 +381,30 @@ export const Skill = () => {
           <div className="flex-1">
             <SkillsPoints />
           </div>
-          <div className="flex-1">
-            <SkillLevelModifier />
-          </div>
+          {/* Cacher les boutons "Rank to 10" si l'utilisateur n'est pas propriétaire */}
+          {isBuildOwner(build, currentUserId) && (
+            <div className="flex-1">
+              <SkillLevelModifier />
+            </div>
+          )}
         </section>
 
-        {!isChainSkill && (
+        {/* Cacher les boutons reset, plus, minus si l'utilisateur n'est pas propriétaire */}
+        {!isChainSkill && isBuildOwner(build, currentUserId) && (
           <section className="w-full flex items-center justify-center sm:justify-between gap-2 sm:gap-3 pt-2 sm:pt-4">
             <ResetSkillButton disabled={!hasSelectedSkill} />
-              <PlusButton
-                onClick={handleIncrement}
-                disabled={
-                  !hasSelectedSkill ||
-                  currentLevel >= maxLevel ||
-                  (skillType === "stigma" && !canIncrementStigma())
-                }
-              />
-              <MinusButton
-                onClick={handleDecrement}
-                disabled={!hasSelectedSkill || currentLevel <= 1}
-              />
+            <PlusButton
+              onClick={handleIncrement}
+              disabled={
+                !hasSelectedSkill ||
+                currentLevel >= maxLevel ||
+                (skillType === "stigma" && !canIncrementStigma())
+              }
+            />
+            <MinusButton
+              onClick={handleDecrement}
+              disabled={!hasSelectedSkill || currentLevel <= 1}
+            />
           </section>
         )}
       </div>

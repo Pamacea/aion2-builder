@@ -11,7 +11,7 @@ export const DiscoverClass = async () => {
     <section className="h-full w-full flex flex-col items-center justify-center gap-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-center">
         {classes.map((cls) => (
-          <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`}>
+          <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`} suppressHydrationWarning>
             <div className="bg-background/30 p-6 h-80 w-64 flex flex-col items-center justify-center gap-4 border-y-2 border-foreground/50 hover:border-primary hover:scale-105 transition-transform cursor-pointer">
               <Image
                 src={`${CLASS_PATH}${cls.iconUrl || "default-icon.webp"}`}

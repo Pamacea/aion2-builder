@@ -7,6 +7,7 @@ export const Bahion = () => {
       <Link
         href="/"
         className="h-full justify-start items-center flex px-4 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+        suppressHydrationWarning
       >
         <Image src="/bahion.webp" alt="Bahion Logo" width={100} height={100} />
       </Link>

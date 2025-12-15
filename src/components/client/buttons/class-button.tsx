@@ -17,6 +17,7 @@ export const ClassButton = () => {
           ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
           : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
       )}
+      suppressHydrationWarning
     >
       <Image
         src="/icons/class-logo.webp"

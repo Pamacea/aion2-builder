@@ -5,7 +5,20 @@ import { BuildAbilityType, BuildStigmaType, BuildType, ClassItem } from "@/types
 // ======================================
 export function isStarterBuild(build: BuildType | null): boolean {
   if (!build) return false;
-  return build.name.startsWith("Starter Build -");
+  return build.name.includes("-starter-build");
+}
+
+// ======================================
+// HELPER: Check if user is the owner of the build
+// ======================================
+export function isBuildOwner(build: BuildType | null, userId: string | null | undefined): boolean {
+  if (!build) return false;
+  // Starter builds n'ont pas de propriétaire
+  if (isStarterBuild(build)) return false;
+  // Si le build n'a pas de userId, il n'a pas de propriétaire
+  if (!build.userId) return false;
+  // Vérifier si l'utilisateur actuel est le propriétaire
+  return build.userId === userId;
 }
 
 export const syncChainSkills = <T extends BuildAbilityType | BuildStigmaType>(

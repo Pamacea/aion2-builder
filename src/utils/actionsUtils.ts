@@ -98,6 +98,14 @@ export const buildStigmaInclude = {
 
 export const fullBuildInclude = {
   class: classInclude,
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+  },
   abilities: buildAbilityInclude,
   passives: buildPassiveInclude,
   stigmas: buildStigmaInclude,

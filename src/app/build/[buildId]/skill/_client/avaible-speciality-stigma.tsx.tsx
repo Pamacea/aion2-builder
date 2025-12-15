@@ -2,6 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
+import { isBuildOwner } from "@/utils/buildUtils";
 import { useEffect, useMemo } from "react";
 import { SpecialtyChoice } from "./speciality-choice";
 
@@ -22,7 +23,8 @@ export const AvailableSpecialityStigma = ({
   className = "",
   onToggleSpecialtyChoice,
 }: AvailableSpecialityStigmaProps) => {
-  const { toggleSpecialtyChoiceStigma } = useBuildStore();
+  const { toggleSpecialtyChoiceStigma, build, currentUserId } = useBuildStore();
+  const isOwner = isBuildOwner(build, currentUserId);
 
   // Determine which stigma and data to use
   const targetStigma = buildStigma?.stigma || stigma;
@@ -34,7 +36,7 @@ export const AvailableSpecialityStigma = ({
 
   // Auto-activate/deactivate specialty choices based on level
   useEffect(() => {
-    if (!buildStigma || !targetStigma || !targetStigma.specialtyChoices) return;
+    if (!buildStigma || !targetStigma || !targetStigma.specialtyChoices || !isOwner) return;
 
     const newActiveIds: number[] = [];
     
@@ -80,7 +82,7 @@ export const AvailableSpecialityStigma = ({
         }
       });
     }
-  }, [stigmaLevel, buildStigma, targetStigma, activeIds, toggleSpecialtyChoiceStigma]);
+  }, [stigmaLevel, buildStigma, targetStigma, activeIds, toggleSpecialtyChoiceStigma, isOwner]);
 
   if (!targetStigma || !targetStigma.specialtyChoices || targetStigma.specialtyChoices.length === 0) {
     return null;
@@ -109,8 +111,12 @@ export const AvailableSpecialityStigma = ({
         // Otherwise, check if level is below unlock level
         const isLockedByNotInBuild = !buildStigma;
         const isLockedByLevel = stigmaLevel === undefined || stigmaLevel === 0 || stigmaLevel < specialtyChoice.unlockLevel;
-        // Specialty choice is locked if not in build, level is 0, or level is too low (no max limit for stigmas)
-        const isLocked = isLockedByNotInBuild || isLockedByLevel;
+        // Specialty choice is locked if not in build, level is 0, level is too low, or user is not the owner (no max limit for stigmas)
+        // But keep active specialties visible even if not owner (important information)
+        const isLockedByRules = isLockedByNotInBuild || isLockedByLevel;
+        const isLocked = isLockedByRules || !isOwner;
+        // For active specialties, keep full opacity even if not owner (important information)
+        const shouldReduceOpacity = isLocked && !isActive;
         
         return (
           <div
@@ -123,7 +129,9 @@ export const AvailableSpecialityStigma = ({
             className={
               onToggleSpecialtyChoice || buildStigma
                 ? isLocked
-                  ? "cursor-not-allowed opacity-50"
+                  ? shouldReduceOpacity
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-not-allowed opacity-100"
                   : "cursor-pointer hover:opacity-80 transition-opacity"
                 : ""
             }

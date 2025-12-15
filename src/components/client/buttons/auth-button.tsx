@@ -26,11 +26,12 @@ export const AuthButton = ({ isAuthenticated, userName }: AuthButtonProps) => {
 
   if (isAuthenticated) {
     return (
-      <div className="flex items-center pr-2 gap-2 bg-background/50 border-y-2 border-foreground/50 hover:bg-background/70 hover:border-foreground/70 transition-all duration-300">
+      <div className="flex items-center pr-2 gap-2 bg-background/50 border-y-2 border-foreground/50 hover:bg-background/70 hover:border-foreground/70 transition-all duration-300" suppressHydrationWarning>
         <Button
           onClick={handleSignOut}
           disabled={isLoading}
           className="gap-2 bg-destructive/50  hover:bg-destructive/70 transition-all duration-300"
+          suppressHydrationWarning
         >
           <LogOut className="size-4" />
         </Button>
