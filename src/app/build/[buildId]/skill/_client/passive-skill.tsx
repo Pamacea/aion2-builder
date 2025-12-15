@@ -22,9 +22,17 @@ export const PassiveSkill = ({
   className = "",
 }: PassiveSkillProps) => {
   const [localSelected, setLocalSelected] = useState(isSelected);
+  const [imageError, setImageError] = useState(false);
 
   const currentLevel = buildPassive?.level ?? 0;
   const isInBuild = buildPassive !== undefined;
+
+  // Build image path with fallback
+  const classNameForPath = passive.class?.name || "default";
+  const iconUrl = passive.iconUrl || "default-icon.webp";
+  const imageSrc = imageError 
+    ? "/icons/default-spell-icon.webp"
+    : `${ABILITY_PATH}${classNameForPath}/${iconUrl}`;
 
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
@@ -65,12 +73,10 @@ export const PassiveSkill = ({
       onClick={handleSelect}
     >
       {/* Icon with gold border */}
-      <Image
-        src={`${ABILITY_PATH}${passive.class?.name || "default"}/${passive.iconUrl || "default-icon.webp"}`}
-        alt={passive.name}
-        width={48}
-        height={48}
-        className={`w-full h-full rounded-md object-cover border-2 ${
+      <div
+        className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
+          imageError ? "bg-background/80" : ""
+        } ${
           currentLevel === 0 ? "grayscale opacity-50" : ""
         } ${
           selected
@@ -79,7 +85,18 @@ export const PassiveSkill = ({
               ? "border-yellow-400/50"
               : "border-yellow-600/30"
         }`}
-      />
+      >
+        <Image
+          src={imageSrc}
+          alt={passive.name}
+          width={48}
+          height={48}
+          onError={() => setImageError(true)}
+          className={`rounded-md object-contain ${
+            imageError ? "w-3/4 h-3/4" : "w-full h-full object-cover"
+          }`}
+        />
+      </div>
       {/* Lock icon when level is 0 */}
       {currentLevel === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

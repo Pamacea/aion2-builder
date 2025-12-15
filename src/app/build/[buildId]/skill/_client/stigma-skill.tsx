@@ -25,6 +25,7 @@ export const StigmaSkill = ({
 }: StigmaSkillProps) => {
   const { build } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
+  const [imageError, setImageError] = useState(false);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const hasClickedOnceRef = useRef(false);
 
@@ -40,6 +41,14 @@ export const StigmaSkill = ({
 
   const currentLevel = buildStigma?.level ?? 0;
   const isInBuild = buildStigma !== undefined;
+
+  // Build image path with fallback
+  const iconUrl = stigma.iconUrl || "default-icon.webp";
+  const imageSrc = imageError 
+    ? "/icons/default-spell-icon.webp"
+    : classNameForPath 
+      ? `${ABILITY_PATH}${classNameForPath}/${iconUrl}`
+      : "/icons/default-spell-icon.webp";
 
   // Check if this skill is selected for shortcut
   const isSelectedForShortcut =
@@ -171,12 +180,10 @@ export const StigmaSkill = ({
     >
       {/* Icon with gold border */}
       {classNameForPath ? (
-        <Image
-          src={`${ABILITY_PATH}${classNameForPath}/${stigma.iconUrl || "default-icon.webp"}`}
-          alt={stigma.name}
-          width={48}
-          height={48}
-          className={`w-full h-full rounded-md object-cover border-2 ${
+        <div
+          className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
+            imageError ? "bg-background/80" : ""
+          } ${
             currentLevel === 0 ? "grayscale opacity-50" : ""
           } ${
             selected
@@ -185,7 +192,18 @@ export const StigmaSkill = ({
                 ? "border-yellow-400/50"
                 : "border-yellow-600/30"
           }`}
-        />
+        >
+          <Image
+            src={imageSrc}
+            alt={stigma.name}
+            width={48}
+            height={48}
+            onError={() => setImageError(true)}
+            className={`rounded-md object-contain ${
+              imageError ? "w-3/4 h-3/4" : "w-full h-full object-cover"
+            }`}
+          />
+        </div>
       ) : (
         <div
           className={`w-full h-full rounded-md border-2 flex items-center justify-center ${

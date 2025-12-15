@@ -4,6 +4,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType, BuildPassiveType, BuildStigmaType, PassiveType, StigmaType } from "@/types/schema";
 import Image from "next/image";
+import { useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
 
@@ -28,6 +29,8 @@ type ShortcutSlotProps = {
 export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const { build } = useBuildStore();
+  const [imageError, setImageError] = useState(false);
+  const prevIconSrcRef = useRef<string | null>(null);
   
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
@@ -139,6 +142,22 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
 
   const iconSrc = getIconSrc();
   const skillName = getSkillName();
+  
+  // Reset image error when iconSrc changes (new skill or skill change)
+  if (prevIconSrcRef.current !== iconSrc) {
+    prevIconSrcRef.current = iconSrc;
+    if (imageError) {
+      setImageError(false);
+    }
+  }
+  
+  // Build image path with fallback
+  const imageSrc = imageError 
+    ? "/icons/default-spell-icon.webp"
+    : iconSrc || "/icons/default-spell-icon.webp";
+  
+  // Create a key for the image to reset error state when skill changes
+  const imageKey = `${skill?.ability?.id || skill?.passive?.id || skill?.stigma?.id || 'empty'}-${iconSrc}`;
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
@@ -211,11 +230,15 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     >
       {iconSrc ? (
         <Image
-          src={iconSrc}
+          key={imageKey}
+          src={imageSrc}
           alt={skillName}
           width={48}
           height={48}
-          className="w-full h-full rounded-md object-cover"
+          onError={() => setImageError(true)}
+          className={`w-full h-full rounded-md object-cover ${
+            imageError ? "bg-background/80 scale-70" : ""
+          }`}
         />
       ) : (
         <div className="text-foreground/20 text-[10px] sm:text-xs">+</div>

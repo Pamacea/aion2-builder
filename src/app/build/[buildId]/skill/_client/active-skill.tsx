@@ -23,11 +23,19 @@ export const ActiveSkill = ({
   className = "",
 }: ActiveSkillProps) => {
   const [localSelected, setLocalSelected] = useState(isSelected);
+  const [imageError, setImageError] = useState(false);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const hasClickedOnceRef = useRef(false);
 
   const currentLevel = buildAbility?.level ?? 0;
   const isInBuild = buildAbility !== undefined;
+
+  // Build image path
+  const classNameForPath = ability.class?.name || "default";
+  const iconUrl = ability.iconUrl || "default-icon.webp";
+  const imageSrc = imageError 
+    ? "/icons/default-spell-icon.webp"
+    : `${ABILITY_PATH}${classNameForPath}/${iconUrl}`;
   
   // Check if this skill is selected for shortcut
   const isSelectedForShortcut = selectedSkill?.type === "ability" && 
@@ -148,12 +156,10 @@ export const ActiveSkill = ({
       onContextMenu={handleContextMenu}
     >
       {/* Icon with gold border */}
-      <Image
-        src={`${ABILITY_PATH}${ability.class?.name || "default"}/${ability.iconUrl || "default-icon.webp"}`}
-        alt={ability.name}
-        width={48}
-        height={48}
-        className={`w-full h-full rounded-md object-cover border-2 ${
+      <div
+        className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
+          imageError ? "bg-background/80" : ""
+        } ${
           currentLevel === 0 ? "grayscale opacity-50" : ""
         } ${
           selected
@@ -162,7 +168,18 @@ export const ActiveSkill = ({
               ? "border-yellow-400/50"
               : "border-yellow-600/30"
         }`}
-      />
+      >
+        <Image
+          src={imageSrc}
+          alt={ability.name}
+          width={48}
+          height={48}
+          onError={() => setImageError(true)}
+          className={`rounded-md object-contain ${
+            imageError ? "w-3/4 h-3/4" : "w-full h-full object-cover"
+          }`}
+        />
+      </div>
       {/* Lock icon when level is 0 */}
       {currentLevel === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
