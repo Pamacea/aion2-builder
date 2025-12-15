@@ -301,6 +301,71 @@ export async function createBuildFromStarter(
 }
 
 // ======================================
+// LIKE/UNLIKE BUILD
+// ======================================
+export async function toggleLikeBuild(buildId: number): Promise<{ liked: boolean; likesCount: number }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Vous devez être connecté pour liker un build");
+  }
+
+  // Vérifier si l'utilisateur a déjà liké ce build
+  const existingLike = await prisma.like.findUnique({
+    where: {
+      buildId_userId: {
+        buildId,
+        userId: session.user.id,
+      },
+    },
+  });
+
+  if (existingLike) {
+    // Unliker : supprimer le like
+    await prisma.like.delete({
+      where: {
+        id: existingLike.id,
+      },
+    });
+  } else {
+    // Liker : créer un nouveau like
+    await prisma.like.create({
+      data: {
+        buildId,
+        userId: session.user.id,
+      },
+    });
+  }
+
+  // Compter le nombre total de likes
+  const likesCount = await prisma.like.count({
+    where: { buildId },
+  });
+
+  return {
+    liked: !existingLike,
+    likesCount,
+  };
+}
+
+export async function getBuildLikes(buildId: number): Promise<number> {
+  return await prisma.like.count({
+    where: { buildId },
+  });
+}
+
+export async function hasUserLikedBuild(buildId: number, userId: string): Promise<boolean> {
+  const like = await prisma.like.findUnique({
+    where: {
+      buildId_userId: {
+        buildId,
+        userId,
+      },
+    },
+  });
+  return !!like;
+}
+
+// ======================================
 // GET RANDOM STARTER BUILD ID
 // ======================================
 export async function getRandomStarterBuildId(): Promise<number | null> {
@@ -323,21 +388,7 @@ export async function getRandomStarterBuildId(): Promise<number | null> {
 // ======================================
 export async function getAllBuilds(): Promise<BuildType[]> {
   const builds = await prisma.build.findMany({
-    include: {
-      class: {
-        include: {
-          tags: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-        },
-      },
-    },
+    include: fullBuildInclude,
     orderBy: {
       id: "desc",
     },

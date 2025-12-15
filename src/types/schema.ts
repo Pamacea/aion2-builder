@@ -17,6 +17,7 @@ import {
 } from "./ability.type";
 import {
   BuildSchemaBase,
+  LikeType,
   type BuildAbilityType,
   type BuildPassiveType,
   type BuildStigmaType,
@@ -170,6 +171,22 @@ export const StigmaSchema: z.ZodType<StigmaType> = StigmaSchemaBase.extend({
 }) as z.ZodType<StigmaType>;
 
 // ---------------------------
+// Like Schema
+// ---------------------------
+export const LikeSchema: z.ZodType<LikeType> = z.object({
+  id: z.number(),
+  buildId: z.number(),
+  userId: z.string(),
+  createdAt: z.date(),
+  user: z.object({
+    id: z.string(),
+    name: z.string().nullish(),
+    email: z.string().nullish(),
+    image: z.string().nullish(),
+  }).optional(),
+}) as z.ZodType<LikeType>;
+
+// ---------------------------
 // Build Schema
 // ---------------------------
 export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
@@ -183,6 +200,7 @@ export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
   abilities: z.array(BuildAbilitySchema).optional(),
   passives: z.array(BuildPassiveSchema).optional(),
   stigmas: z.array(BuildStigmaSchema).optional(),
+  likes: z.array(LikeSchema).optional(),
 }) as z.ZodType<BuildType>;
 
 // ---------------------------

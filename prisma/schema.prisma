@@ -37,6 +37,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   builds        Build[] // Builds créés par l'utilisateur
+  likes         Like[] // Builds likés par l'utilisateur
 }
 
 model Account {
@@ -546,6 +547,24 @@ model Build {
   abilities BuildAbility[]
   passives  BuildPassive[]
   stigmas   BuildStigma[]
+  likes     Like[] // Likes reçus par ce build
+}
+
+// ---------------------------
+// 11. Like (Système de likes pour les builds)
+// ---------------------------
+model Like {
+  id     Int    @id @default(autoincrement())
+  buildId Int
+  build  Build  @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([buildId, userId]) // Un utilisateur ne peut liker qu'une fois un build
+  @@index([buildId])
+  @@index([userId])
 }
 
 // ---------------------------

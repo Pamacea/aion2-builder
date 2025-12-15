@@ -109,4 +109,16 @@ export const fullBuildInclude = {
   abilities: buildAbilityInclude,
   passives: buildPassiveInclude,
   stigmas: buildStigmaInclude,
+  likes: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  },
 };

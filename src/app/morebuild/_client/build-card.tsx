@@ -4,20 +4,78 @@ import { CreateButton } from "@/components/client/buttons/create-button";
 import { CLASS_PATH } from "@/constants/paths";
 import { useAuth } from "@/hooks/useAuth";
 import { BuildCardProps } from "@/types/schema";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ShowBuildButton } from "./show-build-button";
 
 
 export const BuildCard = ({ build }: BuildCardProps) => {
   const bannerUrl = build.class?.bannerUrl || "default-banner.webp";
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   
   // Le bouton Create Build sera caché si l'utilisateur n'est pas connecté
   const isCreateButtonHidden = isAuthenticated === false;
 
+  // État pour les likes
+  const [likesCount, setLikesCount] = useState(build.likes?.length || 0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+
+  // Vérifier si l'utilisateur actuel a liké ce build
+  useEffect(() => {
+    if (userId && build.likes) {
+      const userLiked = build.likes.some((like) => like.userId === userId);
+      setIsLiked(userLiked);
+    }
+  }, [userId, build.likes]);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+    try {
+      const response = await fetch(`/api/builds/${build.id}/like`, {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLikesCount(data.likesCount);
+        setIsLiked(data.liked);
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   return (
     <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all hover:scale-110">
+      {/* Like Button - Top Right */}
+      <button
+        onClick={handleLike}
+        disabled={!isAuthenticated || isLiking}
+        className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm transition-colors ${
+          isLiked
+            ? "text-red-500 hover:text-red-600"
+            : "text-foreground/50 hover:text-foreground/70"
+        } ${!isAuthenticated ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+        title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Connectez-vous pour liker"}
+      >
+        <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
+        <span className="text-xs font-semibold">{likesCount}</span>
+      </button>
+
       {/* Banner Background */}
       <div className="relative h-48 w-full">
         <Image
@@ -42,6 +100,7 @@ export const BuildCard = ({ build }: BuildCardProps) => {
           {build.user?.name && (
             <p className="text-xs text-foreground/70">by {build.user.name}</p>
           )}
+          {!build.user?.name && <div />}
         </div>
         <div className="flex gap-2">
           <div className={isCreateButtonHidden ? "w-full" : "flex-1"} onClick={(e) => e.stopPropagation()}>

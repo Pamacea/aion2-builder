@@ -8,7 +8,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       data-slot="input"
       className={cn(
-        "flex justify-between pr-4 items-center font-bold border-b-2 border-foreground/50 py-2 ring-0 focus:outline-none ",
+        "flex justify-between items-center font-bold border-b-2 border-background/30 py-2 ring-0 focus:outline-none ",
         className
       )}
       {...props}

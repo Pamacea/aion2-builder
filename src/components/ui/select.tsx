@@ -5,7 +5,6 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { DropDownButton } from "../client/buttons";
 
 function Select({
   ...props
@@ -38,14 +37,13 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex justify-between pr-8 items-center font-bold border-b-2 border-foreground/50 py-2",
+        "flex pr-4 justify-between items-center font-bold border-b-2 border-background/30 py-2",
         className
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <DropDownButton />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

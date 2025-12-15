@@ -150,6 +150,22 @@ export type BuildStigmaType = {
 };
 
 // ---------------------------
+// Like Type
+// ---------------------------
+export type LikeType = {
+  id: number;
+  buildId: number;
+  userId: string;
+  createdAt: Date;
+  user?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+};
+
+// ---------------------------
 // Build Type (with relations)
 // ---------------------------
 export type BuildType = BuildTypeBase & {
@@ -163,6 +179,7 @@ export type BuildType = BuildTypeBase & {
   abilities?: BuildAbilityType[];
   passives?: BuildPassiveType[];
   stigmas?: BuildStigmaType[];
+  likes?: LikeType[];
   shortcuts?: Record<string, {
     type: "ability" | "stigma";
     abilityId?: number;
