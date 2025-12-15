@@ -26,6 +26,16 @@ export const Footer = () => {
       ],
     },
     {
+      title: "BUILDER",
+      links: [
+        { 
+          name: "How to Use", 
+          href: "/howtouse",
+          external: false 
+        },
+      ],
+    },
+    {
       title: "Legal",
       links: [
         { 
@@ -48,7 +58,7 @@ export const Footer = () => {
     <footer className="w-full mt-auto pt-8 font-sans border-t-2 border-background/30 bg-background/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section principale avec les colonnes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-8">
           {sections.map((section, index) => (
             <div key={index} className="space-y-4">
               <h3 className="text-sm font-bold uppercase text-foreground tracking-wider">
