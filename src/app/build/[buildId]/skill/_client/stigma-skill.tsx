@@ -5,7 +5,7 @@ import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
 import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
 
@@ -59,11 +59,23 @@ export const StigmaSkill = ({
 
   // Build image path with fallback
   const iconUrl = stigma.iconUrl || "default-icon.webp";
+  const baseImageSrc = classNameForPath 
+    ? `${ABILITY_PATH}${classNameForPath}/${iconUrl}`
+    : "/icons/default-spell-icon.webp";
   const imageSrc = imageError 
     ? "/icons/default-spell-icon.webp"
-    : classNameForPath 
-      ? `${ABILITY_PATH}${classNameForPath}/${iconUrl}`
-      : "/icons/default-spell-icon.webp";
+    : baseImageSrc;
+
+  // Create a unique key for the image component to force remount when image changes
+  // This resets the error state automatically when the image source changes
+  const imageKey = `${stigma.id}-${baseImageSrc}`;
+  
+  // Reset image error when image key changes (using startTransition to avoid cascading renders)
+  useEffect(() => {
+    startTransition(() => {
+      setImageError(false);
+    });
+  }, [imageKey]);
 
   // Check if this skill is selected for shortcut
   const isSelectedForShortcut =
@@ -212,6 +224,7 @@ export const StigmaSkill = ({
           }`}
         >
           <Image
+            key={imageKey}
             src={imageSrc}
             alt={stigma.name}
             width={48}

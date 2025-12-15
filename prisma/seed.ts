@@ -326,7 +326,7 @@ async function main() {
           target: "target" in stigma ? stigma.target : "Single Target",
           condition: "condition" in stigma && Array.isArray(stigma.condition) ? stigma.condition : [],
           effectCondition: "effectCondition" in stigma ? stigma.effectCondition : undefined,
-          chargeLevels: "chargeLevels" in stigma ? stigma.chargeLevels : undefined,
+          chargeLevels: "chargeLevels" in stigma && stigma.chargeLevels ? stigma.chargeLevels : "",
           spellTag: {
             [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
