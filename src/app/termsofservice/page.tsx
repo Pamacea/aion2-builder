@@ -7,8 +7,8 @@ export default function TermsOfServicePage() {
       
       <div className="prose prose-lg max-w-none space-y-6">
         <section>
-          <p className="text-muted-foreground mb-4">
-            <strong>Last updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          <p className="text-muted-foreground mb-4" suppressHydrationWarning>
+            <strong>Last updated:</strong> {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
           </p>
         </section>
 
