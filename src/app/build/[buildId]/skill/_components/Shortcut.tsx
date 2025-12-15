@@ -2,6 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { ShortcutSkill } from "@/types/shortcut.type";
+import { isStarterBuild } from "@/utils/buildUtils";
 import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ResetShortcutButton } from "../_client/buttons/reset-shortcut-button";
@@ -21,6 +22,7 @@ export const Shortcut = () => {
   >({});
   const isInitialLoad = useRef(true);
   const [shouldSave, setShouldSave] = useState(false);
+  const isStarter = isStarterBuild(build);
 
   // Convert saved shortcuts (with IDs) to local format (with full objects)
   const loadedShortcuts = useMemo(() => {
@@ -251,6 +253,11 @@ export const Shortcut = () => {
     skill: ShortcutSkill | undefined,
     sourceSlotId?: number
   ) => {
+    // Prevent drop if starter build
+    if (isStarter) {
+      return;
+    }
+
     setShortcuts((prev) => {
       const newShortcuts = { ...prev };
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { ABILITY_PATH } from "@/constants/paths";
+import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
+import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -21,11 +23,13 @@ export const PassiveSkill = ({
   onSelect,
   className = "",
 }: PassiveSkillProps) => {
+  const { build } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
 
   const currentLevel = buildPassive?.level ?? 0;
   const isInBuild = buildPassive !== undefined;
+  const isStarter = isStarterBuild(build);
 
   // Build image path with fallback
   const classNameForPath = passive.class?.name || "default";
@@ -43,7 +47,7 @@ export const PassiveSkill = ({
         buildPassive,
       },
     },
-    canDrag: () => isInBuild,
+    canDrag: () => !isStarter && isInBuild, // Cannot drag if starter build
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -69,7 +73,7 @@ export const PassiveSkill = ({
       ref={dragRef}
       className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
-      } ${isInBuild ? "cursor-move" : ""}`}
+      } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
       onClick={handleSelect}
     >
       {/* Icon with gold border */}

@@ -2,40 +2,25 @@
 
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { AbilityType, BuildAbilityType, BuildPassiveType, BuildStigmaType, PassiveType, StigmaType } from "@/types/schema";
+import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
+import { ShortcutSlotProps } from "@/types/shortcut.type";
 
-type ShortcutSlotProps = {
-  slotId: number;
-  skill?: {
-    type: "ability" | "passive" | "stigma";
-    ability?: AbilityType;
-    passive?: PassiveType;
-    stigma?: StigmaType;
-    buildAbility?: BuildAbilityType;
-    buildPassive?: BuildPassiveType;
-    buildStigma?: BuildStigmaType;
-  };
-  onDrop: (slotId: number, skill: ShortcutSlotProps["skill"], sourceSlotId?: number) => void;
-  onClear: (slotId: number) => void;
-  className?: string;
-  isReserved?: boolean; // If true, this slot is reserved and cannot be dragged from or have other skills dropped in
-  isStigmaOnly?: boolean; // If true, this slot only accepts stigmas
-};
 
 export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const { build } = useBuildStore();
   const [imageError, setImageError] = useState(false);
   const prevIconSrcRef = useRef<string | null>(null);
+  const isStarter = isStarterBuild(build);
   
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: { skill, slotId },
-    canDrag: () => !!skill && !isReserved, // Cannot drag from reserved slot
+    canDrag: () => !isStarter && !!skill && !isReserved, // Cannot drag if starter build or from reserved slot
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -44,6 +29,11 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const [{ isOver }, drop] = useDrop({
     accept: "skill",
     canDrop: (item: { skill?: ShortcutSlotProps["skill"]; slotId?: number }) => {
+      // Cannot drop if starter build
+      if (isStarter) {
+        return false;
+      }
+
       const skillToDrop = item?.skill;
       
       // If no skill to drop, cannot drop
@@ -162,6 +152,11 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
     
+    // Cannot modify shortcuts if starter build
+    if (isStarter) {
+      return;
+    }
+    
     // Cannot clear reserved slot
     if (isReserved) {
       return;
@@ -189,6 +184,10 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    // Cannot place skills if starter build
+    if (isStarter) {
+      return;
+    }
     // Cannot place skills in reserved slot via click (only the reserved skill can be there)
     // This is handled by handleDrop, so we just prevent the click
     if (isReserved) {

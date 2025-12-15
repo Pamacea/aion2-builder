@@ -3,6 +3,7 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
+import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -41,6 +42,7 @@ export const StigmaSkill = ({
 
   const currentLevel = buildStigma?.level ?? 0;
   const isInBuild = buildStigma !== undefined;
+  const isStarter = isStarterBuild(build);
 
   // Count stigmas with level >= 1 to check if limit is reached
   const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
@@ -69,12 +71,13 @@ export const StigmaSkill = ({
     selectedSkill.stigma?.id === stigma.id &&
     selectedSkill.buildStigma?.id === buildStigma?.id;
 
-  // Deselect skill automatically if level drops to 0 (only if in build)
+  // Deselect skill automatically if level drops to 0 or if starter build (only if in build)
   useEffect(() => {
-    if (isSelectedForShortcut && currentLevel === 0 && isInBuild) {
+    if (isSelectedForShortcut && ((currentLevel === 0 && isInBuild) || isStarter)) {
       setSelectedSkill(null);
     }
-  }, [currentLevel, isSelectedForShortcut, isInBuild, setSelectedSkill]);
+  }, [currentLevel, isSelectedForShortcut, isInBuild, isStarter, setSelectedSkill]);
+
 
   // Reset click tracking when selection changes or when details are shown
   useEffect(() => {
@@ -97,6 +100,8 @@ export const StigmaSkill = ({
       },
     },
     canDrag: () => {
+      // Cannot drag if starter build
+      if (isStarter) return false;
       // Allow drag if not in build (will be added on drop)
       // But prevent drag if in build with level 0 (locked)
       if (!isInBuild) return true;
@@ -110,8 +115,8 @@ export const StigmaSkill = ({
   const handleClick = () => {
     // Handle left click (only if not dragging and not locked)
     // Allow selection if not in build (for shortcut placement)
-    // But prevent selection if in build with level 0 (locked)
-    if (!isDragging && (!isInBuild || currentLevel > 0)) {
+    // But prevent selection if in build with level 0 (locked) or if starter build
+    if (!isDragging && !isStarter && (!isInBuild || currentLevel > 0)) {
       // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -147,7 +152,7 @@ export const StigmaSkill = ({
         }
       }
     } else {
-      // If not in build or locked, just show details
+      // If not in build or locked or starter build, just show details
       if (onSelect) {
         onSelect();
       } else {
@@ -160,8 +165,8 @@ export const StigmaSkill = ({
     e.preventDefault();
     // Handle right click for selection - toggle behavior
     // Allow selection if not in build (for shortcut placement)
-    // But prevent selection if in build with level 0 (locked)
-    if (!isInBuild || currentLevel > 0) {
+    // But prevent selection if in build with level 0 (locked) or if starter build
+    if (!isStarter && (!isInBuild || currentLevel > 0)) {
       // Toggle selection: if already selected, deselect it
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -187,7 +192,7 @@ export const StigmaSkill = ({
       ref={dragRef}
       className={`relative cursor-pointer transition-all ${className}  inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
-      } ${isInBuild ? "cursor-move" : ""}`}
+      } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >

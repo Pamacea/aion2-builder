@@ -1,7 +1,9 @@
 "use client";
 
 import { ABILITY_PATH } from "@/constants/paths";
+import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
+import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -22,6 +24,7 @@ export const ActiveSkill = ({
   onSelect,
   className = "",
 }: ActiveSkillProps) => {
+  const { build } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
@@ -29,6 +32,7 @@ export const ActiveSkill = ({
 
   const currentLevel = buildAbility?.level ?? 0;
   const isInBuild = buildAbility !== undefined;
+  const isStarter = isStarterBuild(build);
 
   // Build image path
   const classNameForPath = ability.class?.name || "default";
@@ -53,12 +57,12 @@ export const ActiveSkill = ({
 
   const selected = onSelect ? isSelected : localSelected;
 
-  // Deselect skill automatically if level drops to 0
+  // Deselect skill automatically if level drops to 0 or if starter build
   useEffect(() => {
-    if (isSelectedForShortcut && currentLevel === 0 && isInBuild) {
+    if (isSelectedForShortcut && ((currentLevel === 0 && isInBuild) || isStarter)) {
       setSelectedSkill(null);
     }
-  }, [currentLevel, isSelectedForShortcut, isInBuild, setSelectedSkill]);
+  }, [currentLevel, isSelectedForShortcut, isInBuild, isStarter, setSelectedSkill]);
 
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
@@ -69,7 +73,7 @@ export const ActiveSkill = ({
         buildAbility,
       },
     },
-    canDrag: () => isInBuild && currentLevel > 0, // Cannot drag if level is 0 (locked)
+    canDrag: () => !isStarter && isInBuild && currentLevel > 0, // Cannot drag if starter build, level is 0 (locked)
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -77,7 +81,7 @@ export const ActiveSkill = ({
 
   const handleClick = () => {
     // Handle left click (only if not dragging and not locked)
-    if (!isDragging && isInBuild && currentLevel > 0) {
+    if (!isDragging && isInBuild && currentLevel > 0 && !isStarter) {
       // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -113,7 +117,7 @@ export const ActiveSkill = ({
         }
       }
     } else {
-      // If not in build or locked, just show details
+      // If not in build or locked or starter build, just show details
       if (onSelect) {
         onSelect();
       } else {
@@ -124,8 +128,8 @@ export const ActiveSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Handle right click for selection - toggle behavior (only if not locked)
-    if (isInBuild && currentLevel > 0) {
+    // Handle right click for selection - toggle behavior (only if not locked and not starter build)
+    if (isInBuild && currentLevel > 0 && !isStarter) {
       // Toggle selection: if already selected, deselect it
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -151,7 +155,7 @@ export const ActiveSkill = ({
       ref={dragRef}
       className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
-      } ${isInBuild ? "cursor-move" : ""}`}
+      } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
