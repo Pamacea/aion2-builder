@@ -37,7 +37,12 @@ export const BuildCard = ({ build }: BuildCardProps) => {
             {build.name}
           </h3>
         </Link>
-        <p className="text-sm text-foreground/70 mb-3 uppercase">{build.class?.name}</p>
+        <div className="flex flex-row justify-between items-center mb-3">
+          <p className="text-sm text-foreground/70 uppercase">{build.class?.name}</p>
+          {build.user?.name && (
+            <p className="text-xs text-foreground/70">by {build.user.name}</p>
+          )}
+        </div>
         <div className="flex gap-2">
           <div className={isCreateButtonHidden ? "w-full" : "flex-1"} onClick={(e) => e.stopPropagation()}>
             <ShowBuildButton buildId={build.id} />
@@ -45,9 +50,8 @@ export const BuildCard = ({ build }: BuildCardProps) => {
           {!isCreateButtonHidden && (
             <div className="flex-1" onClick={(e) => e.stopPropagation()}>
               <CreateButton
-                variant="text"
                 buildId={build.id}
-                text="Create Build"
+                text="Fork Build"
                 hideWhenUnauthenticated
                 className="w-full bg-background/60 text-foreground border-y-2 border-foreground/50 hover:bg-background/80 hover:border-foreground/70 font-bold uppercase text-xs py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />

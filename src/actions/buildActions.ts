@@ -253,6 +253,9 @@ export async function createBuildFromStarter(
     starterBuild.class.name.charAt(0).toUpperCase() +
     starterBuild.class.name.slice(1);
 
+  // Get owner name from session
+  const ownerName = session.user.name || session.user.email || "Unknown";
+
   // Find the first ability (smallest abilityId) - this is the auto attack
   const firstAbilityId = starterBuild.class?.abilities
     ? Math.min(...starterBuild.class.abilities.map((a) => a.id))
@@ -260,7 +263,7 @@ export async function createBuildFromStarter(
 
   const newBuild = await prisma.build.create({
     data: {
-      name: `Custom - ${className} Build`,
+      name: `Build - ${className} - ${ownerName}`,
       classId: starterBuild.classId,
       userId: session.user.id,
       baseSP: starterBuild.baseSP,
@@ -357,6 +360,13 @@ export async function createBuildFromBuild(
   const sourceBuild = await getBuildById(sourceBuildId);
   if (!sourceBuild) return null;
 
+  const className =
+    sourceBuild.class.name.charAt(0).toUpperCase() +
+    sourceBuild.class.name.slice(1);
+
+  // Get owner name from session
+  const ownerName = session.user.name || session.user.email || "Unknown";
+
   // Find the first ability (smallest abilityId) - this is the auto attack
   const firstAbilityId = sourceBuild.class?.abilities
     ? Math.min(...sourceBuild.class.abilities.map((a) => a.id))
@@ -364,7 +374,7 @@ export async function createBuildFromBuild(
 
   const newBuild = await prisma.build.create({
     data: {
-      name: `${sourceBuild.name} (Copy)`,
+      name: `Build - ${className} - ${ownerName}`,
       classId: sourceBuild.classId,
       userId: session.user.id,
       baseSP: sourceBuild.baseSP,
