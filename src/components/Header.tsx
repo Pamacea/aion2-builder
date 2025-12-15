@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ShareButton } from "./client/buttons";
+import { LikeButton, ShareButton } from "./client/buttons";
 import { AuthButton } from "./client/buttons/auth-button";
 import { Bahion } from "./Header/Bahion";
 import { Buildbar } from "./Header/buildBar";
@@ -42,7 +42,12 @@ export const Header = () => {
       {!pathname?.startsWith("/build") && <Navbar />}
       {pathname?.startsWith("/build") && <Buildbar />}
       <div className="h-full w-1/3 justify-end items-center flex gap-4">
-        {pathname?.startsWith("/build") && <ShareButton />}
+        {pathname?.startsWith("/build") && (
+          <>
+            <LikeButton />
+            <ShareButton />
+          </>
+        )}
         {!isLoading && (
           <AuthButton
             isAuthenticated={isAuthenticated || false}
