@@ -42,6 +42,19 @@ export const StigmaSkill = ({
   const currentLevel = buildStigma?.level ?? 0;
   const isInBuild = buildStigma !== undefined;
 
+  // Count stigmas with level >= 1 to check if limit is reached
+  const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
+  const stigmaCountAtLevelOneOrMore = stigmasWithLevelOneOrMore.length;
+  const maxStigmasAllowed = 4;
+  
+  // Check if this stigma is locked due to the 4-stigma limit
+  // A stigma is locked if:
+  // - It's not in build or has level 0
+  // - AND we already have 4 stigmas with level >= 1
+  const isLockedByLimit = 
+    (currentLevel === 0 || !isInBuild) && 
+    stigmaCountAtLevelOneOrMore >= maxStigmasAllowed;
+
   // Build image path with fallback
   const iconUrl = stigma.iconUrl || "default-icon.webp";
   const imageSrc = imageError 
@@ -184,7 +197,7 @@ export const StigmaSkill = ({
           className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
             imageError ? "bg-background/80" : ""
           } ${
-            currentLevel === 0 ? "grayscale opacity-50" : ""
+            currentLevel === 0 || isLockedByLimit ? "grayscale opacity-50" : ""
           } ${
             selected
               ? "border-yellow-500"
@@ -207,7 +220,7 @@ export const StigmaSkill = ({
       ) : (
         <div
           className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
-            currentLevel === 0 ? "grayscale opacity-50" : ""
+            currentLevel === 0 || isLockedByLimit ? "grayscale opacity-50" : ""
           } ${
             selected
               ? "border-yellow-500"
@@ -219,8 +232,8 @@ export const StigmaSkill = ({
           <span className="text-xs text-foreground/50">?</span>
         </div>
       )}
-      {/* Lock icon when level is 0 */}
-      {currentLevel === 0 && (
+      {/* Lock icon when level is 0 or locked by limit */}
+      {(currentLevel === 0 || isLockedByLimit) && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Image
             src="/icons/lock-logo.webp"

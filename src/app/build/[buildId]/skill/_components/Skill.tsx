@@ -173,6 +173,27 @@ export const Skill = () => {
   
   const hasSelectedSkill = !!selectedSkill;
 
+  // Count stigmas with level >= 1
+  const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
+  const stigmaCountAtLevelOneOrMore = stigmasWithLevelOneOrMore.length;
+  const maxStigmasAllowed = 4;
+
+  // Check if we can increment stigma level
+  const canIncrementStigma = () => {
+    if (selectedBuildStigma) {
+      // If stigma is already in build with level >= 1, we can increment it
+      if (selectedBuildStigma.level >= 1) {
+        return true;
+      }
+      // If stigma is at level 0, check if we have space (less than 4 stigmas at level >= 1)
+      return stigmaCountAtLevelOneOrMore < maxStigmasAllowed;
+    } else if (selectedStigma) {
+      // If stigma is not in build yet, check if we have space
+      return stigmaCountAtLevelOneOrMore < maxStigmasAllowed;
+    }
+    return true; // Not a stigma, allow increment
+  };
+
   // Handle level changes
   const handleIncrement = () => {
     // Don't allow level changes for chain skills
@@ -195,11 +216,19 @@ export const Skill = () => {
       const newLevel = Math.min(currentLevel + 1, maxLevel);
       addPassive(selectedPassive.id, newLevel);
     } else if (selectedBuildStigma) {
+      // Check if we can increment this stigma (limit of 4 stigmas with level >= 1)
+      if (!canIncrementStigma()) {
+        return; // Cannot increment, limit reached
+      }
       const newLevel = Math.min(currentLevel + 1, maxLevel);
       updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
       // The useEffect will handle updating selectedSkill automatically
     } else if (selectedStigma) {
       // Stigma is selected but not in build yet
+      // Check if we can add this stigma (limit of 4 stigmas with level >= 1)
+      if (!canIncrementStigma()) {
+        return; // Cannot add, limit reached
+      }
       const newLevel = Math.min(currentLevel + 1, maxLevel);
       addStigma(selectedStigma.id, newLevel);
     }
@@ -354,7 +383,11 @@ export const Skill = () => {
             <ResetSkillButton disabled={!hasSelectedSkill} />
               <PlusButton
                 onClick={handleIncrement}
-                disabled={!hasSelectedSkill || currentLevel >= maxLevel}
+                disabled={
+                  !hasSelectedSkill ||
+                  currentLevel >= maxLevel ||
+                  (skillType === "stigma" && !canIncrementStigma())
+                }
               />
               <MinusButton
                 onClick={handleDecrement}

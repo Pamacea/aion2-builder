@@ -113,12 +113,55 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
 
   const hasSelectedSkill = !!selectedSkill;
 
+  // Check if the selected skill is locked (level 0)
+  const isSkillLocked = () => {
+    if (!selectedSkill) return false;
+
+    if (selectedSkill.buildAbility) {
+      const abilityId = selectedSkill.buildAbility.abilityId;
+      // First ability (auto-attack) can always be reset (even if at level 1)
+      if (abilityId === firstAbilityId) {
+        return false;
+      }
+      // Other abilities are locked if level is 0
+      return selectedSkill.buildAbility.level === 0;
+    } else if (selectedSkill.buildPassive) {
+      // Passives are locked if level is 0
+      return selectedSkill.buildPassive.level === 0;
+    } else if (selectedSkill.buildStigma) {
+      // Stigmas are locked if level is 0
+      // Also check directly in build to ensure we have the latest value
+      const stigmaId = selectedSkill.buildStigma.stigmaId;
+      const buildStigma = build?.stigmas?.find((s) => s.stigmaId === stigmaId);
+      if (buildStigma) {
+        return buildStigma.level === 0;
+      }
+      // If not found in build, consider it locked (shouldn't happen normally)
+      return true;
+    } else if (selectedSkill.stigma) {
+      // If stigma is selected but not in build, check if it exists in build with level 0
+      const stigmaId = selectedSkill.stigma.id;
+      const buildStigma = build?.stigmas?.find((s) => s.stigmaId === stigmaId);
+      if (buildStigma) {
+        // Stigma is in build, check if it's locked (level 0)
+        return buildStigma.level === 0;
+      }
+      // Stigma is not in build, cannot reset (not locked, but also not resettable)
+      return true;
+    }
+
+    // If skill is not in build yet, it's not locked
+    return false;
+  };
+
+  const isLocked = isSkillLocked();
+
   return (
     <IconButton
       icon="/icons/reset-logo.webp"
       alt="Reset Icon"
       onClick={handleReset}
-      disabled={!hasSelectedSkill || disabled}
+      disabled={!hasSelectedSkill || disabled || isLocked}
       className="h-full bg-background/80 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50 disabled:cursor-not-allowed"
       iconSize={25}
     />
