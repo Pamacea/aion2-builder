@@ -7,7 +7,7 @@ export const DefaultBuildButton = ({
 }) => {
   return (
     <ClassButton href={starterBuildHref} className="w-60">
-      default build
+      Starter Build
     </ClassButton>
   );
 };
