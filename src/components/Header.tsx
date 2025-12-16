@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { LikeButton, ShareButton } from "./client/buttons";
 import { AuthButton } from "./client/buttons/auth-button";
 import { Bahion } from "./Header/Bahion";
-import { Navbar } from "./Header/navBar";
 import { Buildbar } from "./Header/BuildBar";
+import { HeaderNav } from "./Header/HeaderNav";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -15,7 +15,7 @@ export const Header = () => {
   return (
     <header className="w-full h-14  flex items-center justify-center">
       <Bahion />
-      {!pathname?.startsWith("/build") && <Navbar />}
+      {!pathname?.startsWith("/build") && <HeaderNav />}
       {pathname?.startsWith("/build") && <Buildbar />}
       <div className="h-full w-1/3 justify-end items-center flex gap-4">
         {pathname?.startsWith("/build") && (
