@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
   },
   // Exclude Prisma and database packages from client bundles
   serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg'],
+  // Configuration des images pour autoriser les avatars Discord
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.discordapp.com',
+        pathname: '/avatars/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

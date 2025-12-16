@@ -398,6 +398,23 @@ export async function getAllBuilds(): Promise<BuildType[]> {
 }
 
 // ======================================
+// GET BUILDS BY USER ID
+// ======================================
+export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
+  const builds = await prisma.build.findMany({
+    where: {
+      userId: userId,
+    },
+    include: fullBuildInclude,
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  return builds.map((build) => BuildSchema.parse(build));
+}
+
+// ======================================
 // CREATE BUILD FROM EXISTING BUILD
 // ======================================
 export async function createBuildFromBuild(

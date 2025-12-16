@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 type AuthButtonProps = {
@@ -18,6 +18,7 @@ export const AuthButton = ({
 }: AuthButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const handleSignIn = () => {
     setIsLoading(true);
@@ -33,15 +34,23 @@ export const AuthButton = ({
     window.location.href = `/api/auth/signout?callbackUrl=${callbackUrl}`;
   };
 
+  const handleProfileClick = () => {
+    router.push("/myprofile");
+  };
+
   // Style compact pour le Header
   if (compact) {
     if (isAuthenticated) {
       return (
         <div className="h-full flex items-center hover:border-b-2 hover:border-b-foreground/90 border-b-2 border-b-background/30">
           {userName && (
-            <span className="text-sm text-foreground/80 uppercase font-semibold px-8">
+            <Button
+              onClick={handleProfileClick}
+              className="h-full text-sm text-foreground/80 uppercase font-semibold px-8 hover:bg-background/50 transition-all duration-300"
+              title="Mon profil"
+            >
               {userName}
-            </span>
+            </Button>
           )}
           <Button
             onClick={handleSignOut}
