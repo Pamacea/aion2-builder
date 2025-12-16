@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
 import { fullBuildInclude } from "@/utils/actionsUtils";
 import { isStarterBuild } from "@/utils/buildUtils";
-import { unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "../lib/prisma";
 
@@ -355,6 +355,12 @@ export async function toggleLikeBuildAction(buildId: number): Promise<{ liked: b
   const likesCount = await prisma.like.count({
     where: { buildId },
   });
+  
+   // Invalider le cache Next.js pour que les données soient à jour au reload
+   revalidateTag('builds', 'max'); // Invalide le cache de getAllBuilds et getBuildById
+   revalidatePath('/morebuild', 'page'); // Invalide la page /morebuild
+   revalidatePath(`/build/${buildId}`, 'page'); // Invalide la page du build spécifique
+   revalidatePath(`/build/${buildId}/profile`, 'page'); // Invalide aussi la page profile du build
 
   // Le statut après l'action : si on a supprimé (existingLike existait), on a unliké (false)
   // Si on a créé (existingLike n'existait pas), on a liké (true)
