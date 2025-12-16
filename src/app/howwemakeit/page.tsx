@@ -122,12 +122,9 @@ export default function HowWeMakeItPage() {
                   it stays up-to-date with the latest game changes.
                 </p>
                 <div className="space-y-2">
-                  <p className="text-sm text-foreground/70">
-                    Donation link coming soon...
-                  </p>
                   <Link
                     href="https://www.paypal.com/donate/?hosted_button_id=327SH9MHJPYC4"
-                    className="inline-block px-6 py-3 mt-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded uppercase font-bold"
+                    className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded uppercase font-bold"
                   >
                     Make a Donation
                   </Link>
