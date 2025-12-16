@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { LikeButton, ShareButton } from "./client/buttons";
 import { AuthButton } from "./client/buttons/auth-button";
 import { Bahion } from "./Header/Bahion";
@@ -11,30 +10,7 @@ import { Navbar } from "./Header/navBar";
 
 export const Header = () => {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Récupérer le nom d'utilisateur depuis la session
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isAuthenticated === true) {
-      fetch("/api/auth/session")
-        .then((res) => res.json())
-        .then((data) => {
-          const name = data?.user?.name || data?.user?.email || null;
-          if (name !== userName) {
-            setUserName(name);
-          }
-        })
-        .catch(() => {
-          if (userName !== null) {
-            setUserName(null);
-          }
-        });
-    }
-    // Note: userName sera automatiquement null si isAuthenticated change à false
-    // car le composant se re-rendra et userName sera réinitialisé
-  }, [isAuthenticated, userName]);
+  const { isAuthenticated, isLoading, userName } = useAuth();
 
   return (
     <header className="w-full h-14  flex items-center justify-center">
