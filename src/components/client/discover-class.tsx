@@ -5,7 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const DiscoverClass = async () => {
-  const classes: ClassType[] = await getAllClass();
+  let classes: ClassType[] = [];
+  
+  try {
+    classes = await getAllClass();
+  } catch (error) {
+    console.error("Error fetching classes:", error);
+    // Retourner un tableau vide en cas d'erreur pour éviter de casser la page
+    return (
+      <section className="h-full w-full flex flex-col items-center justify-center gap-8">
+        <p className="text-red-500">Erreur de chargement des classes. Veuillez réessayer plus tard.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="h-full w-full flex flex-col items-center justify-center gap-8">
