@@ -1,12 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Compression
-  compress: true,
-  
-  // Optimisation du build
-  swcMinify: true,
-  
   // Redirection de la route de base /build vers /build/profile
   async redirects() {
     return [
@@ -66,8 +60,9 @@ const nextConfig: NextConfig = {
   },
   
   // Optimisation du bundle
+  // Note: lucide-react est déjà optimisé par défaut dans Next.js 16
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-select', '@radix-ui/react-alert-dialog'],
+    optimizePackageImports: ['@radix-ui/react-select', '@radix-ui/react-alert-dialog'],
   },
 };
 
