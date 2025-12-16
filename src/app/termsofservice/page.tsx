@@ -183,7 +183,7 @@ export default function TermsOfServicePage() {
           </p>
           <p className="mt-4">
             <strong>Bahion</strong><br />
-            Email: contact@bahion.com<br />
+            Email: pamacea@live.fr<br />
             Website: https://bahion.com
           </p>
         </section>
