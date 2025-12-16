@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
 import { fullBuildInclude } from "@/utils/actionsUtils";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { prisma } from "../lib/prisma";
 
 // ======================================
@@ -70,15 +72,27 @@ export async function saveBuildAction(
 // ======================================
 // GET BUILD BY ID (full BuildType)
 // ======================================
-export const getBuildById = async (id: number): Promise<BuildType | null> => {
-  const build = await prisma.build.findUnique({
-    where: { id },
-    include: fullBuildInclude,
-  });
+// Cache pour getBuildById - revalidate toutes les minutes
+const getBuildByIdCached = unstable_cache(
+  async (id: number): Promise<BuildType | null> => {
+    const build = await prisma.build.findUnique({
+      where: { id },
+      include: fullBuildInclude,
+    });
 
-  if (!build) return null;
-  return BuildSchema.parse(build);
-};
+    if (!build) return null;
+    return BuildSchema.parse(build);
+  },
+  ['build-by-id'], // Cache key prefix
+  {
+    revalidate: 60, // Revalidate toutes les minutes
+    tags: ['builds'], // Tag pour invalidation manuelle
+  }
+);
+
+export const getBuildById = cache(async (id: number): Promise<BuildType | null> => {
+  return getBuildByIdCached(id);
+});
 
 // ======================================
 // GET STARTER BUILD
@@ -386,16 +400,28 @@ export async function getRandomStarterBuildId(): Promise<number | null> {
 // ======================================
 // GET ALL BUILDS
 // ======================================
-export async function getAllBuilds(): Promise<BuildType[]> {
-  const builds = await prisma.build.findMany({
-    include: fullBuildInclude,
-    orderBy: {
-      id: "desc",
-    },
-  });
+// Cache pour getAllBuilds - revalidate toutes les minutes (les builds peuvent changer)
+const getAllBuildsCached = unstable_cache(
+  async (): Promise<BuildType[]> => {
+    const builds = await prisma.build.findMany({
+      include: fullBuildInclude,
+      orderBy: {
+        id: "desc",
+      },
+    });
 
-  return builds.map((build) => BuildSchema.parse(build));
-}
+    return builds.map((build) => BuildSchema.parse(build));
+  },
+  ['all-builds'], // Cache key
+  {
+    revalidate: 60, // Revalidate toutes les minutes (les builds peuvent être créés/modifiés)
+    tags: ['builds'], // Tag pour invalidation manuelle si nécessaire
+  }
+);
+
+export const getAllBuilds = cache(async (): Promise<BuildType[]> => {
+  return getAllBuildsCached();
+});
 
 // ======================================
 // GET BUILDS BY USER ID

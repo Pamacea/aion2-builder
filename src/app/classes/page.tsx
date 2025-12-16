@@ -1,8 +1,9 @@
 import { ExploreOthersClasses } from "./[slug]/_components/exploreOtherClasses";
 import { VideoPlayer } from "./_components/VideoPlayer";
 
-// Force dynamic rendering since we need database access
-export const dynamic = 'force-dynamic';
+// Utiliser ISR (Incremental Static Regeneration) pour de meilleures performances
+// Revalidate la page toutes les 5 minutes
+export const revalidate = 300; // 5 minutes
 
 export default function ClassPage() {
   return (

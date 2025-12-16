@@ -6,23 +6,32 @@ import { PrismaClient } from "generated/prisma/client";
 // Récupérer la connection string - utiliser DATABASE_URL en priorité
 // IMPORTANT: Ne PAS utiliser les URLs Prisma Accelerate (prisma:// ou prisma+postgres://)
 // avec PrismaPg adapter - utiliser uniquement les URLs PostgreSQL directes
-let connectionString = process.env.DATABASE_URL || 
-                      process.env.BAHIONDB_POSTGRES_URL || 
-                      "";
+// En développement, privilégier l'URL non-poolée pour une meilleure latence
+let connectionString = process.env.NODE_ENV === "development"
+  ? (process.env.DATABASE_URL_UNPOOLED || 
+     process.env.BAHIONDB_POSTGRES_URL_NON_POOLING || 
+     process.env.DATABASE_URL || 
+     process.env.BAHIONDB_POSTGRES_URL || 
+     "")
+  : (process.env.DATABASE_URL || 
+     process.env.BAHIONDB_POSTGRES_URL || 
+     "");
 
 // Si l'URL ne contient pas de paramètres de pool, les ajouter pour améliorer la connexion
 if (connectionString && (connectionString.startsWith("postgresql://") || connectionString.startsWith("postgres://"))) {
   try {
     const url = new URL(connectionString);
-    // Ajouter des paramètres de connexion pour améliorer la stabilité et augmenter les timeouts
+    // En développement, utiliser des paramètres plus agressifs pour réduire la latence
+    const isDev = process.env.NODE_ENV === "development";
+    
     if (!url.searchParams.has("connection_limit")) {
-      url.searchParams.set("connection_limit", "5");
+      url.searchParams.set("connection_limit", isDev ? "10" : "5"); // Plus de connexions en dev
     }
     if (!url.searchParams.has("pool_timeout")) {
-      url.searchParams.set("pool_timeout", "30");
+      url.searchParams.set("pool_timeout", isDev ? "10" : "30"); // Timeout plus court en dev
     }
     if (!url.searchParams.has("connect_timeout")) {
-      url.searchParams.set("connect_timeout", "15");
+      url.searchParams.set("connect_timeout", isDev ? "5" : "15"); // Connexion plus rapide en dev
     }
     // Ajouter sslmode=require pour les connexions sécurisées
     if (!url.searchParams.has("sslmode")) {
@@ -53,5 +62,7 @@ const adapter = new PrismaPg({
 
 export const prisma = new PrismaClient({ 
   adapter,
-  log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+  log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"], // Désactiver "query" en prod pour de meilleures perfs
+  // Optimisation: désactiver le middleware inutile pour améliorer les performances
+  errorFormat: 'minimal',
 });

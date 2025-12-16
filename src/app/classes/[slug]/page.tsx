@@ -2,8 +2,8 @@ import { Class } from "./_components/Class";
 import { ExploreOthersClasses } from "./_components/exploreOtherClasses";
 import { getClassPageData } from "./_utils/getClassPageData";
 
-// Force dynamic rendering since we need database access
-export const dynamic = 'force-dynamic';
+// Utiliser ISR (Incremental Static Regeneration) pour de meilleures performances
+export const revalidate = 300; // Revalidate toutes les 5 minutes
 
 export default async function ClassPage(props: {
   params: Promise<{ slug: string }>;
