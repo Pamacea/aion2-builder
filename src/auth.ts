@@ -6,9 +6,19 @@ import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
 
 // Vérification des variables d'environnement
-const AUTH_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-// AUTH_URL n'est pas nécessaire avec trustHost: true - NextAuth auto-détecte depuis les headers HTTP
-// Cela permet de supporter plusieurs domaines (aion2builder.vercel.app et bahion.oalacea.fr)
+const AUTH_SECRET = process.env.AUTH_SECRET;
+
+// Avec trustHost: true, NextAuth détecte automatiquement le domaine depuis les headers HTTP
+// Cela permet de supporter automatiquement :
+// - http://localhost:3000 (dev local)
+// - https://aion2builder.vercel.app (Vercel production)
+// - https://bahion.oalacea.fr (domaine custom)
+// 
+// AUTH_URL n'est plus nécessaire - trustHost gère tout automatiquement
+// On ne définit 'url' que pour le développement local où on veut forcer localhost
+const baseUrl = process.env.NODE_ENV === "development" 
+  ? "http://localhost:3000" 
+  : undefined; // undefined = laisser trustHost faire l'auto-détection
 
 if (!process.env.DISCORD_CLIENT_ID) {
   console.error("❌ DISCORD_CLIENT_ID is missing");
@@ -19,13 +29,19 @@ if (!process.env.DISCORD_CLIENT_SECRET) {
 if (!AUTH_SECRET) {
   console.error("❌ AUTH_SECRET or NEXTAUTH_SECRET is missing");
 }
+// Debug: logger la configuration
+if (process.env.NODE_ENV === "development") {
+  console.log(`✅ NextAuth configured with URL: ${baseUrl} (dev mode - forced localhost)`);
+} else {
+  console.log(`✅ NextAuth using auto-detection via trustHost (supports multiple domains)`);
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: AUTH_SECRET || undefined, // Utiliser undefined si manquant, NextAuth générera un avertissement
+  secret: AUTH_SECRET || undefined,
   basePath: "/api/auth",
-  // Avec trustHost: true, NextAuth auto-détecte l'URL depuis les headers HTTP
-  // Cela permet de supporter plusieurs domaines sans définir AUTH_URL
+  // En dev: forcer localhost. En prod: undefined = trustHost détecte automatiquement le domaine
+  ...(baseUrl && { url: baseUrl }),
   providers: [
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID || "",
@@ -49,16 +65,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async redirect({ url, baseUrl }) {
+      // En développement, forcer l'utilisation de localhost
+      const redirectBaseUrl = process.env.NODE_ENV === "development" 
+        ? "http://localhost:3000" 
+        : baseUrl;
+      
       // Si l'URL est relative, la convertir en URL absolue
       if (url.startsWith("/")) {
-        return `${baseUrl}${url}`;
+        return `${redirectBaseUrl}${url}`;
       }
+      
       // Si l'URL est sur le même domaine, l'utiliser
-      if (new URL(url).origin === baseUrl) {
-        return url;
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.origin === new URL(redirectBaseUrl).origin) {
+          return url;
+        }
+      } catch {
+        // Si l'URL n'est pas valide, continuer
       }
+      
       // Sinon, rediriger vers la base
-      return baseUrl;
+      return redirectBaseUrl;
     },
   },
 });
