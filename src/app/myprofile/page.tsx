@@ -1,4 +1,4 @@
-import { getBuildsByUserId } from "@/actions/buildActions";
+import { getBuildsByUserId, getLikedBuildsByUserId } from "@/actions/buildActions";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { MyProfile } from "./_components/MyProfile";
@@ -11,6 +11,7 @@ export default async function MyProfilePage() {
   }
 
   const builds = await getBuildsByUserId(session.user.id);
+  const likedBuilds = await getLikedBuildsByUserId(session.user.id);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8">
@@ -22,6 +23,7 @@ export default async function MyProfilePage() {
           image: session.user.image || null,
         }}
         builds={builds}
+        likedBuilds={likedBuilds}
       />
     </div>
   );

@@ -41,8 +41,11 @@ export const AuthButton = ({
   // Style compact pour le Header
   if (compact) {
     if (isAuthenticated) {
+      const isMyProfile = pathname === "/myprofile";
       return (
-        <div className="h-full flex items-center hover:border-b-2 hover:border-b-foreground/90 border-b-2 border-b-background/30">
+        <div className={`h-full flex items-center hover:border-b-2 hover:border-b-foreground/90 border-b-2 ${
+          isMyProfile ? "border-b-foreground" : "border-b-background/30"
+        }`}>
           {userName && (
             <Button
               onClick={handleProfileClick}

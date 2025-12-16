@@ -415,6 +415,27 @@ export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
 }
 
 // ======================================
+// GET LIKED BUILDS BY USER ID
+// ======================================
+export async function getLikedBuildsByUserId(userId: string): Promise<BuildType[]> {
+  const likes = await prisma.like.findMany({
+    where: {
+      userId: userId,
+    },
+    include: {
+      build: {
+        include: fullBuildInclude,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return likes.map((like) => BuildSchema.parse(like.build));
+}
+
+// ======================================
 // CREATE BUILD FROM EXISTING BUILD
 // ======================================
 export async function createBuildFromBuild(
