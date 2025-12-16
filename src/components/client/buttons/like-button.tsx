@@ -1,54 +1,43 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useBuildLike } from "@/hooks/useBuildLike";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { Heart } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Button } from "../../ui/button";
 
 export const LikeButton = () => {
   const params = useParams();
   const buildId = params?.buildId as string;
+  const numericBuildId = useMemo(() => {
+    if (!buildId) return null;
+    const numId = Number(buildId);
+    return !isNaN(numId) ? numId : null;
+  }, [buildId]);
+  
   const { build } = useBuildStore();
   const { isAuthenticated, userId } = useAuth();
+  const { toggleLikeAsync, isLiking } = useBuildLike(numericBuildId || 0);
 
-  // État pour les likes
-  const [likesCount, setLikesCount] = useState(build?.likes?.length || 0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-
-  // Initialiser les likes depuis le build
-  useEffect(() => {
-    if (build?.likes) {
-      setLikesCount(build.likes.length);
-      if (userId && build.likes) {
-        const userLiked = build.likes.some((like) => like.userId === userId);
-        setIsLiked(userLiked);
-      }
-    }
-  }, [build?.likes, userId]);
+  // Calculer les likes depuis le build avec useMemo
+  const likesCount = useMemo(() => build?.likes?.length || 0, [build?.likes?.length]);
+  const isLiked = useMemo(() => {
+    if (!userId || !build?.likes) return false;
+    return build.likes.some((like) => like.userId === userId);
+  }, [userId, build?.likes]);
 
   const handleLike = async () => {
-    if (!isAuthenticated || !buildId || isLiking) {
+    if (!isAuthenticated || !numericBuildId || isLiking) {
       return;
     }
 
-    setIsLiking(true);
     try {
-      const response = await fetch(`/api/builds/${buildId}/like`, {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLikesCount(data.likesCount);
-        setIsLiked(data.liked);
-      }
+      await toggleLikeAsync();
+      // Le cache sera automatiquement invalidé et mis à jour par TanStack Query
     } catch (error) {
       console.error("Error toggling like:", error);
-    } finally {
-      setIsLiking(false);
     }
   };
 

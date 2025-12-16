@@ -3,34 +3,31 @@
 import { CreateButton } from "@/components/client/buttons/create-button";
 import { BANNER_PATH } from "@/constants/paths";
 import { useAuth } from "@/hooks/useAuth";
+import { useBuildLike } from "@/hooks/useBuildLike";
 import { BuildCardProps } from "@/types/schema";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { ShowBuildButton } from "./show-build-button";
 
 
 export const BuildCard = memo(({ build }: BuildCardProps) => {
   const { isAuthenticated, userId } = useAuth();
+  const { toggleLikeAsync, isLiking } = useBuildLike(build.id);
   
   // Le bouton Create Build sera caché si l'utilisateur n'est pas connecté
   const isCreateButtonHidden = isAuthenticated === false;
 
-  // État pour les likes
-  const [likesCount, setLikesCount] = useState(build.likes?.length || 0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-
   // Vérifier si l'utilisateur actuel a liké ce build
-  useEffect(() => {
-    if (userId && build.likes) {
-      const userLiked = build.likes.some((like) => like.userId === userId);
-      setIsLiked(userLiked);
-    }
+  const isLiked = useMemo(() => {
+    if (!userId || !build.likes) return false;
+    return build.likes.some((like) => like.userId === userId);
   }, [userId, build.likes]);
 
-  // Mémoriser le handler de like pour éviter les re-renders
+  const likesCount = useMemo(() => build.likes?.length || 0, [build.likes?.length]);
+
+  // Handler de like optimisé avec TanStack Query
   const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -39,23 +36,13 @@ export const BuildCard = memo(({ build }: BuildCardProps) => {
       return;
     }
 
-    setIsLiking(true);
     try {
-      const response = await fetch(`/api/builds/${build.id}/like`, {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLikesCount(data.likesCount);
-        setIsLiked(data.liked);
-      }
+      await toggleLikeAsync();
+      // Le cache sera automatiquement invalidé et mis à jour par TanStack Query
     } catch (error) {
       console.error("Error toggling like:", error);
-    } finally {
-      setIsLiking(false);
     }
-  }, [isAuthenticated, isLiking, build.id]);
+  }, [isAuthenticated, isLiking, toggleLikeAsync]);
 
   // Mémoriser les valeurs calculées
   const bannerUrl = useMemo(() => 

@@ -1,7 +1,8 @@
 "use client";
 
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { AuthContextType, AuthProviderProps } from "@/types/auth-context.type";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: null,
@@ -11,43 +12,22 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children, initialSession }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
-    initialSession?.user ? true : null
-  );
-  const [isLoading, setIsLoading] = useState(!initialSession);
-  const [userId, setUserId] = useState<string | null>(
-    initialSession?.user?.id || null
-  );
-  const [userName, setUserName] = useState<string | null>(
-    initialSession?.user?.name || initialSession?.user?.email || null
-  );
+  // Utiliser TanStack Query pour la session si pas de session initiale
+  const { data: sessionData, isLoading: sessionLoading } = useAuthSession();
 
-  useEffect(() => {
-    // Si on a déjà une session initiale, on ne fait pas d'appel
-    // isLoading est déjà initialisé à false dans useState(!initialSession)
-    if (initialSession) {
-      return;
-    }
+  // Utiliser la session initiale si disponible, sinon utiliser TanStack Query
+  const session = initialSession || sessionData;
+  const isLoading = initialSession ? false : sessionLoading;
 
-    // Sinon, on récupère la session
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        setIsAuthenticated(!!data?.user);
-        setUserId(data?.user?.id || null);
-        setUserName(data?.user?.name || data?.user?.email || null);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsAuthenticated(false);
-        setUserId(null);
-        setUserName(null);
-        setIsLoading(false);
-      });
-  }, [initialSession]);
+  const value = useMemo<AuthContextType>(() => ({
+    isAuthenticated: session?.user ? true : (isLoading ? null : false),
+    isLoading,
+    userId: session?.user?.id || null,
+    userName: session?.user?.name || session?.user?.email || null,
+  }), [session, isLoading]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, userId, userName }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

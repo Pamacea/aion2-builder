@@ -2,6 +2,8 @@
 
 // Client-side API wrappers to avoid importing server actions directly
 // This prevents bundling server-only code (prisma) in client components
+// Note: Ces fonctions sont maintenant remplacées par les hooks TanStack Query
+// Gardées pour compatibilité avec le code existant
 
 import { BuildType } from "@/types/schema";
 
