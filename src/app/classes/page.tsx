@@ -1,6 +1,9 @@
 import { ExploreOthersClasses } from "./[slug]/_components/exploreOtherClasses";
 import { VideoPlayer } from "./_components/VideoPlayer";
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export default function ClassPage() {
   return (
     <main className="w-full h-full flex flex-col items-center justify-center">

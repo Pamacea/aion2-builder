@@ -2,6 +2,9 @@ import { getAllBuilds } from "@/actions/buildActions";
 import { getAllClass } from "@/actions/classActions";
 import { MoreBuild } from "./_components/MoreBuild";
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export default async function MoreBuildPage() {
   const builds = await getAllBuilds();
   const classes = await getAllClass();
