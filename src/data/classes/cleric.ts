@@ -2,7 +2,7 @@ import type { ClassData } from "./types";
 
 export const clericData: ClassData = {
   name: "cleric",
-  iconUrl: "IC_CLass_Clericx.webp",
+  iconUrl: "IC_Class_Cleric.webp",
   bannerUrl: "BA_Cleric.webp",
   characterURL: "CH_Cleric.webp",
   description:
