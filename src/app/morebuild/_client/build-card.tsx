@@ -98,7 +98,7 @@ export const BuildCard = ({ build }: BuildCardProps) => {
           </h3>
         </Link>
         <div className="flex flex-row justify-between items-center mb-3">
-          <p className="text-sm text-foreground/70 uppercase">{build.class?.name}</p>
+          <p className="text-sm text-foreground/70">{build.class?.name ? build.class.name.charAt(0).toUpperCase() + build.class.name.slice(1) : ''}</p>
           {build.user?.name && (
             <p className="text-xs text-foreground/70">by {build.user.name}</p>
           )}
