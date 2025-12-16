@@ -33,6 +33,11 @@ export const Footer = () => {
           href: "/howtouse",
           external: false 
         },
+        { 
+          name: "How We Make It", 
+          href: "/howwemakeit",
+          external: false 
+        },
       ],
     },
     {
