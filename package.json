@@ -11,6 +11,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "db:reset:manual": "tsx scripts/reset-db-manual.ts",
+    "db:release-lock": "tsx scripts/release-lock.ts",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:setup": "prisma migrate deploy && tsx prisma/seed.ts"

@@ -42,7 +42,7 @@ async function resetDatabase() {
 
     if (tables.length === 0) {
       console.log("ℹ️  No tables found, database is already empty");
-      await pool.end();
+      console.log("✅ Database is already reset!");
       return;
     }
 
