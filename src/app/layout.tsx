@@ -4,6 +4,7 @@ import { Cinzel, Roboto } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Analytics } from "@vercel/analytics/next"
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -106,6 +107,7 @@ export default function RootLayout({
       <body
         className={`${roboto.className} ${cinzel.variable} dark antialiased bg-[url('/BG_Bahion.webp')] bg-cover`}
       >
+        <Analytics />
         <Providers>
           <Layout>
             {children}

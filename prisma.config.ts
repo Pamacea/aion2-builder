@@ -4,18 +4,47 @@ import { config } from "dotenv";
 import { resolve } from "path";
 import { defineConfig } from "prisma/config";
 
-// Charger explicitement le fichier .env à la racine
+// Charger explicitement les fichiers .env.local puis .env
+config({ path: resolve(process.cwd(), ".env.local") });
 config({ path: resolve(process.cwd(), ".env") });
 
-// Utiliser DATABASE_URL en priorité, ou BAHIONDB_POSTGRES_URL en fallback
+// Pour les migrations, utiliser l'URL NON-POOLÉE pour éviter les problèmes de lock
+// Les poolers peuvent causer des timeouts lors de l'acquisition de locks de migration
 // IMPORTANT: Ne PAS utiliser les URLs Prisma Accelerate (prisma:// ou prisma+postgres://)
-const databaseUrl = process.env.DATABASE_URL || 
-                    process.env.BAHIONDB_POSTGRES_URL || 
-                    "postgresql://placeholder:placeholder@localhost:5432/placeholder";
+let databaseUrl = process.env.DATABASE_URL_UNPOOLED ||
+                  process.env.BAHIONDB_POSTGRES_URL_NON_POOLING ||
+                  process.env.DATABASE_URL || 
+                  process.env.BAHIONDB_POSTGRES_URL || 
+                  "postgresql://placeholder:placeholder@localhost:5432/placeholder";
 
-// Debug: vérifier si DATABASE_URL est chargée
+// Ajouter des paramètres de timeout pour les migrations (éviter les timeouts sur Neon)
+if (!databaseUrl.includes("placeholder") && (databaseUrl.startsWith("postgresql://") || databaseUrl.startsWith("postgres://"))) {
+  try {
+    const url = new URL(databaseUrl);
+    // Augmenter le timeout pour l'acquisition de lock (30 secondes au lieu de 10)
+    url.searchParams.set("connect_timeout", "30");
+    // Timeout pour les requêtes (60 secondes)
+    url.searchParams.set("statement_timeout", "60000");
+    // Keepalive pour maintenir la connexion
+    url.searchParams.set("keepalive", "true");
+    databaseUrl = url.toString();
+  } catch (e) {
+    // Si l'URL n'est pas valide, continuer avec l'URL originale
+    console.warn("Could not parse database URL for timeout configuration:", e);
+  }
+}
+
+// Debug: vérifier si une URL de base de données est chargée
 if (databaseUrl.includes("placeholder")) {
-  console.warn("⚠️  DATABASE_URL not found. Please set DATABASE_URL environment variable");
+  console.warn("⚠️  No database URL found. Using placeholder.");
+  console.warn("⚠️  Please set DATABASE_URL or BAHIONDB_POSTGRES_URL environment variable");
+} else {
+  // Log quelle URL est utilisée (masquer les credentials)
+  const urlObj = new URL(databaseUrl);
+  const isNonPooled = databaseUrl.includes("DATABASE_URL_UNPOOLED") || 
+                      databaseUrl.includes("BAHIONDB_POSTGRES_URL_NON_POOLING") ||
+                      !databaseUrl.includes("-pooler.");
+  console.log(`ℹ️  Using ${isNonPooled ? "non-pooled" : "pooled"} database URL for migrations: ${urlObj.hostname}`);
 }
 
 export default defineConfig({
