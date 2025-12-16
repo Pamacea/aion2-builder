@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { LikeButton, ShareButton } from "./client/buttons";
 import { AuthButton } from "./client/buttons/auth-button";
 import { Bahion } from "./Header/Bahion";
+import { Navbar } from "./Header/NavBar";
 import { Buildbar } from "./Header/buildBar";
-import { Navbar } from "./Header/navBar";
 
 export const Header = () => {
   const pathname = usePathname();
