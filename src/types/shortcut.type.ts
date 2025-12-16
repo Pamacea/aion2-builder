@@ -37,4 +37,5 @@ export type ShortcutSkill = {
     className?: string;
     isReserved?: boolean; // If true, this slot is reserved and cannot be dragged from or have other skills dropped in
     isStigmaOnly?: boolean; // If true, this slot only accepts stigmas
+    disabled?: boolean; // If true, cannot drag, drop or modify shortcuts (e.g., when not owner)
   };

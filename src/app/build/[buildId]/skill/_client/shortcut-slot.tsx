@@ -10,7 +10,7 @@ import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dn
 import { useShortcutContext } from "../_context/ShortcutContext";
 
 
-export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
+export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false, disabled = false }: ShortcutSlotProps) => {
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const { build } = useBuildStore();
   const [imageError, setImageError] = useState(false);
@@ -20,7 +20,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: { skill, slotId },
-    canDrag: () => !isStarter && !!skill && !isReserved, // Cannot drag if starter build or from reserved slot
+    canDrag: () => !disabled && !isStarter && !!skill && !isReserved, // Cannot drag if disabled, starter build or from reserved slot
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -29,8 +29,8 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const [{ isOver }, drop] = useDrop({
     accept: "skill",
     canDrop: (item: { skill?: ShortcutSlotProps["skill"]; slotId?: number }) => {
-      // Cannot drop if starter build
-      if (isStarter) {
+      // Cannot drop if disabled or starter build
+      if (disabled || isStarter) {
         return false;
       }
 
@@ -43,6 +43,11 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
       
       // Check if skillToDrop has a type property
       if (!("type" in skillToDrop)) {
+        return false;
+      }
+      
+      // Exception : l'ability ID 12 ne peut jamais être droppée dans les shortcuts
+      if (skillToDrop.type === "ability" && skillToDrop.ability?.id === 12) {
         return false;
       }
       
@@ -152,8 +157,8 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default context menu
     
-    // Cannot modify shortcuts if starter build
-    if (isStarter) {
+    // Cannot modify shortcuts if disabled or starter build
+    if (disabled || isStarter) {
       return;
     }
     
@@ -216,9 +221,10 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
         relative w-6 h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 xl:w-14 xl:h-14
         border-2 border-foreground/30 bg-background/80
         flex items-center justify-center
-        transition-all cursor-move
-        ${isDragging ? "opacity-50" : ""}
-        ${isOver ? "border-orange-500 bg-orange-500/20" : ""}
+        transition-all
+        ${disabled ? "cursor-not-allowed" : "cursor-move"}
+        ${isDragging && !disabled ? "opacity-50" : ""}
+        ${isOver && !disabled ? "border-orange-500 bg-orange-500/20" : ""}
         ${skill ? "border-foreground/80" : "border-foreground/30"}
         ${className}
       `}

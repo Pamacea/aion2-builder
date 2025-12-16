@@ -1,8 +1,8 @@
 
-// Structure: 20 slots (4x5) pour "Cast" à gauche, 10 slots (2x5) au milieu, 5 slots (1x5) à droite, 12 slots en bas
-export const LEFT_SLOTS_COUNT = 20; // 4x5 grid
-export const MIDDLE_SLOTS_COUNT = 10; // 2x5 grid
-export const RIGHT_SLOTS_COUNT = 5; // 1x5 grid
+// Structure: 12 slots (4x3) pour "Cast" à gauche, 6 slots (2x3) au milieu, 3 slots (1x3) à droite, 12 slots en bas
+export const LEFT_SLOTS_COUNT = 12; // 4x3 grid
+export const MIDDLE_SLOTS_COUNT = 6; // 2x3 grid
+export const RIGHT_SLOTS_COUNT = 3; // 1x3 grid
 export const BOTTOM_SLOTS_COUNT = 12; // 1x12 row
 // Slot 11 (index 10) of Main Bar is reserved for the first ability
 export const RESERVED_SLOT_ID = LEFT_SLOTS_COUNT + 10; // Slot 30 (index 10 of Main Bar)

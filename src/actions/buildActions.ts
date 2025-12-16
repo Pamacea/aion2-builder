@@ -246,6 +246,14 @@ export async function updateBuild(
     include: fullBuildInclude,
   });
 
+  // Invalider le cache si les shortcuts ont été modifiés
+  if ("shortcuts" in data && data.shortcuts !== undefined) {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}`, 'page');
+    revalidatePath(`/build/${buildId}/profile`, 'page');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
+  }
+
   return BuildSchema.parse(updated);
 }
 

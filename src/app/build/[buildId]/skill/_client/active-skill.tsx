@@ -64,6 +64,9 @@ export const ActiveSkill = ({
     }
   }, [currentLevel, isSelectedForShortcut, isInBuild, isStarter, setSelectedSkill]);
 
+  // Exception : l'ability ID 12 ne peut jamais être draguée pour les shortcuts
+  const isAbility12 = ability.id === 12;
+  
   const [{ isDragging }, drag] = useDrag({
     type: "skill",
     item: {
@@ -73,15 +76,15 @@ export const ActiveSkill = ({
         buildAbility,
       },
     },
-    canDrag: () => !isStarter && isInBuild && currentLevel > 0, // Cannot drag if starter build, level is 0 (locked)
+    canDrag: () => !isStarter && !isAbility12 && (!isInBuild || currentLevel > 0), // Cannot drag if ability ID 12, can drag otherwise if not in build or if in build with level > 0
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
   const handleClick = () => {
-    // Handle left click (only if not dragging and not locked)
-    if (!isDragging && isInBuild && currentLevel > 0 && !isStarter) {
+    // Handle left click (only if not dragging, not locked, and not starter build)
+    if (!isDragging && !isStarter && !isAbility12 && (!isInBuild || currentLevel > 0)) {
       // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -117,7 +120,7 @@ export const ActiveSkill = ({
         }
       }
     } else {
-      // If not in build or locked or starter build, just show details
+      // If locked or starter build, just show details
       if (onSelect) {
         onSelect();
       } else {
@@ -128,8 +131,8 @@ export const ActiveSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Handle right click for selection - toggle behavior (only if not locked and not starter build)
-    if (isInBuild && currentLevel > 0 && !isStarter) {
+    // Handle right click for selection - toggle behavior (only if not locked, not starter build, and not ability ID 12)
+    if (isInBuild && currentLevel > 0 && !isStarter && !isAbility12) {
       // Toggle selection: if already selected, deselect it
       if (isSelectedForShortcut) {
         setSelectedSkill(null);
@@ -153,9 +156,15 @@ export const ActiveSkill = ({
   return (
     <div
       ref={dragRef}
-      className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
+      className={`relative transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
-      } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
+      } ${
+        isAbility12 || isStarter
+          ? "cursor-not-allowed"
+          : isInBuild
+            ? "cursor-move"
+            : "cursor-pointer"
+      }`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
