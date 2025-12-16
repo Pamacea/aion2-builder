@@ -6,7 +6,9 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "types": [
+      "node"
+    ],
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -51,7 +53,8 @@
       "@/actions/*": [
         "actions/*"
       ]
-    }
+    },
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",
@@ -59,8 +62,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
-, "src/types/schema.ts"  ],
+    "**/*.mts",
+    "src/types/schema.ts"
+  ],
   "exclude": [
     "node_modules"
   ]
