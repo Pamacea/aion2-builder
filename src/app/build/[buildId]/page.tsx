@@ -2,6 +2,9 @@ import { BuildType } from "@/types/schema";
 import { getBuildById } from "actions/buildActions";
 import { redirect } from "next/navigation";
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export default async function BuildPage(props: {
   params: Promise<{ buildId: string }>;
 }) {

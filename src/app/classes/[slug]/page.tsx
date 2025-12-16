@@ -2,6 +2,9 @@ import { Class } from "./_components/Class";
 import { ExploreOthersClasses } from "./_components/exploreOtherClasses";
 import { getClassPageData } from "./_utils/getClassPageData";
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export default async function ClassPage(props: {
   params: Promise<{ slug: string }>;
 }) {

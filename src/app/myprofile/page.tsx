@@ -3,6 +3,9 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { MyProfile } from "./_components/MyProfile";
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export default async function MyProfilePage() {
   const session = await auth();
 
