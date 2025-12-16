@@ -1,6 +1,5 @@
 "use client";
 
-import { getClassByName } from "@/actions/classActions";
 import {
   BuildAbilityType,
   BuildPassiveType,
@@ -9,11 +8,10 @@ import {
 } from "@/types/schema";
 import { isBuildOwner, isStarterBuild, syncChainSkills } from "@/utils/buildUtils";
 import { filterChainSkills } from "@/utils/chainSkillsUtils";
-import { loadBuildAction, saveBuildAction } from "actions/buildActions";
 import { create } from "zustand";
 
 export const useBuildStore = create<BuildState>((set, get) => {
-  let saveTimeout: NodeJS.Timeout | null = null;
+  let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const autoSave = async () => {
     const build = get().build;
@@ -26,6 +24,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     set({ saving: true });
     try {
+      // Use dynamic import to avoid bundling server actions in client
+      const { saveBuildAction } = await import("actions/buildActions");
       await saveBuildAction(build.id, build);
     } catch (error) {
       console.error("Error saving build:", error);
@@ -51,6 +51,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     loadBuild: async (buildId) => {
       set({ loading: true });
+      // Use dynamic import to avoid bundling server actions in client
+      const { loadBuildAction } = await import("actions/buildActions");
       const data = await loadBuildAction(buildId);
       set({ build: data, loading: false });
       
@@ -121,6 +123,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
 
+      // Use dynamic import to avoid bundling server actions in client
+      const { getClassByName } = await import("@/actions/classActions");
       const newClass = await getClassByName(className);
       if (!newClass) return;
 

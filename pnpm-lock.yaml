@@ -94,7 +94,7 @@ importers:
         specifier: ^4
         version: 4.1.18
       '@types/node':
-        specifier: ^25.0.0
+        specifier: ^25.0.2
         version: 25.0.2
       '@types/react':
         specifier: ^19
