@@ -19,7 +19,7 @@ export const HomeButton = () => {
       suppressHydrationWarning
     >
       <Image
-        src="/icons/home-logo.webp"
+        src="/icons/IC_Page_Home.webp"
         alt="Bahion Logo"
         width={32}
         height={32}

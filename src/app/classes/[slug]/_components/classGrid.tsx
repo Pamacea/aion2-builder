@@ -10,7 +10,9 @@ export const ClassGrid = ({ classes }: ClassGridProps) => {
         <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`}>
           <div className="p-6 rounded-xl h-40 w-40 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform cursor-pointer text-foreground/70 hover:text-foreground">
             <Image
-              src={`${CLASS_PATH}${cls.iconUrl || "default-icon.webp"}`}
+              src={cls.iconUrl?.startsWith("IC_") 
+                ? `${CLASS_PATH}${cls.iconUrl}` 
+                : `${CLASS_PATH}IC_Class_${cls.name.charAt(0).toUpperCase() + cls.name.slice(1)}.webp`}
               alt={`${cls.name} icon`}
               width={64}
               height={64}

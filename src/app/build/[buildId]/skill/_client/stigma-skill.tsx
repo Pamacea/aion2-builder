@@ -63,7 +63,7 @@ export const StigmaSkill = ({
     ? `${ABILITY_PATH}${classNameForPath}/${iconUrl}`
     : "/icons/default-spell-icon.webp";
   const imageSrc = imageError 
-    ? "/icons/default-spell-icon.webp"
+    ? "/icons/IC_Ability_Default.webp"
     : baseImageSrc;
 
   // Create a unique key for the image component to force remount when image changes
@@ -254,7 +254,7 @@ export const StigmaSkill = ({
       {(currentLevel === 0 || isLockedByLimit) && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Image
-            src="/icons/lock-logo.webp"
+            src="/icons/IC_Speciality_Locked.webp"
             alt="Lock Icon"
             width={24}
             height={24}
@@ -273,7 +273,7 @@ export const StigmaSkill = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-full h-full bg-background/50 flex items-center justify-center border-2 border-foreground/50">
             <Image
-              src="/icons/skill-selected-icon.webp"
+              src="/icons/IC_Feature_SelectnDrop.webp"
               alt="Selected Icon"
               width={32}
               height={32}

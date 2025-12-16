@@ -1,7 +1,7 @@
 "use client";
 
 import { CreateButton } from "@/components/client/buttons/create-button";
-import { CLASS_PATH } from "@/constants/paths";
+import { BANNER_PATH } from "@/constants/paths";
 import { useAuth } from "@/hooks/useAuth";
 import { BuildCardProps } from "@/types/schema";
 import { Heart } from "lucide-react";
@@ -79,7 +79,9 @@ export const BuildCard = ({ build }: BuildCardProps) => {
       {/* Banner Background */}
       <div className="relative h-48 w-full">
         <Image
-          src={`${CLASS_PATH}${bannerUrl.toLowerCase()}`}
+          src={bannerUrl.startsWith("BA_") 
+            ? `${BANNER_PATH}${bannerUrl}`
+            : `${BANNER_PATH}BA_${build.class?.name.charAt(0).toUpperCase() + build.class?.name.slice(1)}.webp`}
           alt={`${build.class?.name} banner`}
           fill
           className="object-cover scale-125 opacity-60 group-hover:opacity-80 transition-opacity"

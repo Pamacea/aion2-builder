@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     siteName: "Bahion",
     images: [
       {
-        url: "/bahion.webp",
+        url: "/LO_Bahion.webp",
         width: 1200,
         height: 630,
         alt: "Aperçu du site",
@@ -104,7 +104,7 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning>
       <body
-        className={`${roboto.className} ${cinzel.variable} dark antialiased bg-[url('/aion-background.webp')] bg-cover`}
+        className={`${roboto.className} ${cinzel.variable} dark antialiased bg-[url('/BG_Bahion.webp')] bg-cover`}
       >
         <Providers>
           <Layout>

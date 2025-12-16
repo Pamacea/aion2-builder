@@ -19,7 +19,7 @@ export const SphereButton = () => {
       )}
     >
       <Image
-        src="/icons/spherier-logo.webp"
+        src="/icons/IC_Builder_Sphere.webp"
         alt="Class Logo"
         width={40}
         height={32}

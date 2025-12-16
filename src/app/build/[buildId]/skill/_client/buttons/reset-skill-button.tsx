@@ -158,7 +158,7 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
 
   return (
     <IconButton
-      icon="/icons/reset-logo.webp"
+      icon="/icons/IC_Feaure_Reset.webp"
       alt="Reset Icon"
       onClick={handleReset}
       disabled={!hasSelectedSkill || disabled || isLocked}

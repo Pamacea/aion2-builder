@@ -19,7 +19,7 @@ export const MoreBuildButton = () => {
       suppressHydrationWarning
     >
       <Image
-        src="/icons/more-build.webp"
+        src="/icons/IC_Page_Catalog.webp"
         alt="Bahion Logo"
         width={32}
         height={32}

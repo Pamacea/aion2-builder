@@ -2,9 +2,9 @@ import type { ClassData } from "./types";
 
 export const clericData: ClassData = {
   name: "cleric",
-  iconUrl: "cleric-icon.webp",
-  bannerUrl: "cleric-banner.webp",
-  characterURL: "cleric-character.webp",
+  iconUrl: "IC_CLass_Clericx.webp",
+  bannerUrl: "BA_Cleric.webp",
+  characterURL: "CH_Cleric.webp",
   description:
     "Primary healer with potent recovery, barriers, and group-saving utility.",
   tags: ["distance", "heal", "buff"],

@@ -19,7 +19,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
         <div className="relative w-24 h-24 rounded-full overflow-hidden ">
           <Image
-            src={user.image || "/icons/bahion.webp"}
+            src={user.image || "/LO_Bahion.webp"}
             alt={user.name || "User avatar"}
             fill
             className="object-cover"

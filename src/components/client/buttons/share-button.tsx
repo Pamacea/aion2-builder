@@ -41,7 +41,7 @@ export const ShareButton = () => {
       className="h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
     >
       <Image
-        src="/icons/share-logo.webp"
+        src="/icons/IC_Feature_Share.webp"
         alt="Bahion Logo"
         width={32}
         height={32}

@@ -19,7 +19,7 @@ export const SkillButton = () => {
       )}
     >
       <Image
-        src="/icons/skill-logo.webp"
+        src="/icons/IC_Builder_Skill.webp"
         alt="Class Logo"
         width={32}
         height={32}

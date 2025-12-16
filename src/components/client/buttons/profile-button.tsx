@@ -18,7 +18,7 @@ export const ProfileButton = () => {
       )}
     >
       <Image
-        src="/icons/profile-logo.webp"
+        src="/icons/IC_Builder_Profile.webp"
         alt="Profile Logo"
         width={24}
         height={24}

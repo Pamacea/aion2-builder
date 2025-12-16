@@ -19,7 +19,7 @@ export const GearButton = () => {
       )}
     >
       <Image
-        src="/icons/gear-logo.webp"
+        src="/icons/IC_Builder_Gear.webp"
         alt="Class Logo"
         width={32}
         height={32}

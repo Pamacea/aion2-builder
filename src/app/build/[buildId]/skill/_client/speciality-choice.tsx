@@ -39,17 +39,17 @@ export const SpecialtyChoice = ({
         <div className="relative size-4 flex items-center justify-center">
           {isLocked && (
             <>
-              <Image src="/icons/lock-logo.webp" alt="Lock Icon" width={12} height={12} className="absolute z-0" />
+              <Image src="/icons/IC_Speciality_Locked.webp" alt="Lock Icon" width={12} height={12} className="absolute z-0" />
               <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-red-500 z-10">
                 {specialtyChoice.unlockLevel}
               </span>
             </>
           )}
           {!isLocked && (
-            <Image src="/icons/avaiable-speciality.webp" alt="Lock Icon" width={24} height={24} className="absolute z-0" />
+            <Image src="/icons/IC_Speciality_Avaible.webp" alt="Lock Icon" width={24} height={24} className="absolute z-0" />
           )}
           {!isLocked && isActive && (
-            <Image src="/icons/activate-speciality.webp" alt="Active Icon" width={24} height={24} className="absolute z-0" />
+            <Image src="/icons/IC_Speciality_Activated.webp" alt="Active Icon" width={24} height={24} className="absolute z-0" />
           )}
         </div>
         <p className={`text-xs uppercase font-semibold ${isLocked ? "text-foreground/50" : ""}`}>

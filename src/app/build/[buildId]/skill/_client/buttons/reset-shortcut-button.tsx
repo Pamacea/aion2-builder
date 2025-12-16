@@ -10,7 +10,7 @@ export const ResetShortcutButton = ({
   className = "",
 }: ResetShortcutButtonProps) => (
   <IconButton
-    icon="/icons/reset-logo.webp"
+    icon="/icons/IC_Feaure_Reset.webp"
     alt="Reset Icon"
     onClick={onClick}
     className={`w-14 h-13 bg-background/80 border-y-2 border-foreground/50 hover:border-foreground ${className}`}

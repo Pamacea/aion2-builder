@@ -7,7 +7,7 @@ export const SaveButton = () => {
       className="h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
     >
       <Image
-        src="/icons/save-logo-2.webp"
+        src="/icons/IC_Feature_Create.webp"
         alt="Bahion Logo"
         width={24}
         height={24}

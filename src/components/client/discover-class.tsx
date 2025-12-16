@@ -14,7 +14,9 @@ export const DiscoverClass = async () => {
           <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`} suppressHydrationWarning>
             <div className="bg-background/30 p-6 h-80 w-64 flex flex-col items-center justify-center gap-4 border-y-2 border-foreground/50 hover:border-primary hover:scale-105 transition-transform cursor-pointer">
               <Image
-                src={`${CLASS_PATH}${cls.iconUrl || "default-icon.webp"}`}
+                src={cls.iconUrl?.startsWith("IC_") 
+                  ? `${CLASS_PATH}${cls.iconUrl}` 
+                  : `${CLASS_PATH}IC_Class_${cls.name.charAt(0).toUpperCase() + cls.name.slice(1)}.webp`}
                 alt={`${cls.name} icon`}
                 width={96}
                 height={96}

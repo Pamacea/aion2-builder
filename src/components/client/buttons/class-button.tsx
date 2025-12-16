@@ -20,7 +20,7 @@ export const ClassButton = () => {
       suppressHydrationWarning
     >
       <Image
-        src="/icons/class-logo.webp"
+        src="/icons/IC_Page_Classes.webp"
         alt="Class Logo"
         width={32}
         height={32}

@@ -2,12 +2,12 @@
 
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
+import { ShortcutSlotProps } from "@/types/shortcut.type";
 import { isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { useShortcutContext } from "../_context/ShortcutContext";
-import { ShortcutSlotProps } from "@/types/shortcut.type";
 
 
 export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", isReserved = false, isStigmaOnly = false }: ShortcutSlotProps) => {
@@ -143,7 +143,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
   
   // Build image path with fallback
   const imageSrc = imageError 
-    ? "/icons/default-spell-icon.webp"
+    ? "/icons/IC_Ability_Default.webp"
     : iconSrc || "/icons/default-spell-icon.webp";
   
   // Create a key for the image to reset error state when skill changes

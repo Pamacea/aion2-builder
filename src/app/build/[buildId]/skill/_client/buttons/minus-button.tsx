@@ -7,7 +7,7 @@ type MinusButtonProps = {
 
 export const MinusButton = ({ onClick, disabled = false }: MinusButtonProps) => (
   <IconButton
-    icon="/icons/minus-logo.webp"
+    icon="/icons/IC_Feature_Minus.webp"
     alt="Minus Icon"
     onClick={onClick}
     disabled={disabled}

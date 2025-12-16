@@ -35,7 +35,7 @@ export const PassiveSkill = ({
   const classNameForPath = passive.class?.name || "default";
   const iconUrl = passive.iconUrl || "default-icon.webp";
   const imageSrc = imageError 
-    ? "/icons/default-spell-icon.webp"
+    ? "/icons/IC_Ability_Default.webp"
     : `${ABILITY_PATH}${classNameForPath}/${iconUrl}`;
 
   const [{ isDragging }, drag] = useDrag({
@@ -105,7 +105,7 @@ export const PassiveSkill = ({
       {currentLevel === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Image
-            src="/icons/lock-logo.webp"
+            src="/icons/IC_Speciality_Locked.webp"
             alt="Lock Icon"
             width={24}
             height={24}
