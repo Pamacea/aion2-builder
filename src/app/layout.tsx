@@ -1,21 +1,25 @@
 import { Layout } from "@/components/Layout";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Cinzel, Roboto } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Analytics } from "@vercel/analytics/next"
 
 const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-cinzel",
+  display: "swap", // Optimisation : affiche le texte immédiatement avec une police de secours
+  preload: true,
 });
 
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
   variable: "--font-roboto",
+  display: "swap", // Optimisation : affiche le texte immédiatement avec une police de secours
+  preload: true,
 });
 
 export const metadata: Metadata = {

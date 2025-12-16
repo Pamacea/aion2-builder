@@ -1,22 +1,9 @@
 "use client";
 
-import { useBuildStore } from "@/store/useBuildEditor";
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useBuildLoader } from "../_utils/useBuildLoader";
 
 export default function BuildSpherePage() {
-  const params = useParams();
-  const buildId = params?.buildId as string;
-  const { build, loadBuild, loading } = useBuildStore();
-
-  useEffect(() => {
-    if (buildId) {
-      const numericBuildId = Number(buildId);
-      if (!isNaN(numericBuildId)) {
-        loadBuild(numericBuildId);
-      }
-    }
-  }, [buildId, loadBuild]);
+  const { build, loading } = useBuildLoader();
 
   if (loading || !build) return <p>Loading...</p>;
 

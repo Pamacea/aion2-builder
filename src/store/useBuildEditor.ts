@@ -13,7 +13,14 @@ import { create } from "zustand";
 export const useBuildStore = create<BuildState>((set, get) => {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  let isSaving = false;
+
   const autoSave = async () => {
+    // Empêcher les sauvegardes multiples simultanées
+    if (isSaving) {
+      return;
+    }
+
     const build = get().build;
     if (!build) return;
 
@@ -22,6 +29,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       return;
     }
 
+    isSaving = true;
     set({ saving: true });
     try {
       // Use dynamic import to avoid bundling server actions in client
@@ -30,13 +38,14 @@ export const useBuildStore = create<BuildState>((set, get) => {
     } catch (error) {
       console.error("Error saving build:", error);
     } finally {
+      isSaving = false;
       set({ saving: false });
     }
   };
 
   const scheduleSave = () => {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(autoSave, 100);
+    saveTimeout = setTimeout(autoSave, 300);
   };
 
   return {
@@ -49,23 +58,24 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
     setBuild: (build) => set({ build }),
 
-    loadBuild: async (buildId) => {
+    loadBuild: async (buildId, userId = null) => {
       set({ loading: true });
+      // Utiliser le userId fourni ou laisser null (sera défini par les composants qui utilisent useAuth)
+      if (userId) {
+        set({ currentUserId: userId });
+      }
+      
       // Use dynamic import to avoid bundling server actions in client
       const { loadBuildAction } = await import("actions/buildActions");
       const data = await loadBuildAction(buildId);
-      set({ build: data, loading: false });
       
-      // Charger l'ID de l'utilisateur actuel si disponible
-      try {
-        const sessionRes = await fetch("/api/auth/session");
-        const session = await sessionRes.json();
-        if (session?.user?.id) {
-          set({ currentUserId: session.user.id });
-        }
-      } catch (error) {
-        console.error("Error fetching session:", error);
+      // Annuler toutes les sauvegardes en attente avant de charger un nouveau build
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
       }
+      
+      set({ build: data, loading: false });
     },
 
     updateBuild: (partial) => {

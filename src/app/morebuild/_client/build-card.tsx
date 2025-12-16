@@ -7,12 +7,11 @@ import { BuildCardProps } from "@/types/schema";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ShowBuildButton } from "./show-build-button";
 
 
-export const BuildCard = ({ build }: BuildCardProps) => {
-  const bannerUrl = build.class?.bannerUrl || "default-banner.webp";
+export const BuildCard = memo(({ build }: BuildCardProps) => {
   const { isAuthenticated, userId } = useAuth();
   
   // Le bouton Create Build sera caché si l'utilisateur n'est pas connecté
@@ -31,15 +30,14 @@ export const BuildCard = ({ build }: BuildCardProps) => {
     }
   }, [userId, build.likes]);
 
-  const handleLike = async (e: React.MouseEvent) => {
+  // Mémoriser le handler de like pour éviter les re-renders
+  const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || isLiking) {
       return;
     }
-
-    if (isLiking) return;
 
     setIsLiking(true);
     try {
@@ -57,7 +55,20 @@ export const BuildCard = ({ build }: BuildCardProps) => {
     } finally {
       setIsLiking(false);
     }
-  };
+  }, [isAuthenticated, isLiking, build.id]);
+
+  // Mémoriser les valeurs calculées
+  const bannerUrl = useMemo(() => 
+    build.class?.bannerUrl || "default-banner.webp",
+    [build.class?.bannerUrl]
+  );
+
+  const displayBannerPath = useMemo(() => 
+    bannerUrl.startsWith("BA_") 
+      ? `${BANNER_PATH}${bannerUrl}`
+      : `${BANNER_PATH}BA_${build.class?.name.charAt(0).toUpperCase() + build.class?.name.slice(1)}.webp`,
+    [bannerUrl, build.class?.name]
+  );
 
   return (
     <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all hover:scale-110">
@@ -79,12 +90,12 @@ export const BuildCard = ({ build }: BuildCardProps) => {
       {/* Banner Background */}
       <div className="relative h-48 w-full">
         <Image
-          src={bannerUrl.startsWith("BA_") 
-            ? `${BANNER_PATH}${bannerUrl}`
-            : `${BANNER_PATH}BA_${build.class?.name.charAt(0).toUpperCase() + build.class?.name.slice(1)}.webp`}
+          src={displayBannerPath}
           alt={`${build.class?.name} banner`}
           fill
           className="object-cover scale-125 opacity-60 group-hover:opacity-80 transition-opacity"
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-linear-to-t from-background via-background/80 to-transparent" />
@@ -92,7 +103,7 @@ export const BuildCard = ({ build }: BuildCardProps) => {
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-4  backdrop-blur-sm">
-        <Link href={`/build/${build.id}/profile`}>
+        <Link href={`/build/${build.id}/profile`} prefetch={true}>
           <h3 className="text-lg font-bold text-foreground mb-2 truncate hover:text-primary transition-colors cursor-pointer">
             {build.name}
           </h3>
@@ -122,4 +133,6 @@ export const BuildCard = ({ build }: BuildCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+BuildCard.displayName = "BuildCard";

@@ -1,11 +1,14 @@
+"use client";
+
 import { BuildType } from "@/types/schema";
+import { memo } from "react";
 import { BuildCard } from "../_client/build-card";
 
 type BuildGridProps = {
   builds: BuildType[];
 };
 
-export const BuildGrid = ({ builds }: BuildGridProps) => {
+export const BuildGrid = memo(({ builds }: BuildGridProps) => {
   if (builds.length === 0) {
     return (
       <div className="text-center py-12 text-foreground/50">
@@ -21,5 +24,7 @@ export const BuildGrid = ({ builds }: BuildGridProps) => {
       ))}
     </div>
   );
-};
+});
+
+BuildGrid.displayName = "BuildGrid";
 

@@ -1,15 +1,27 @@
 "use client";
 
 import { TagsList } from "@/app/classes/[slug]/_components/tagsList";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
 import { useBuildLoader } from "../_utils/useBuildLoader";
-import { BuildName } from "./_client/build-name";
 import { ProfilelassBanner } from "./_client/class-banner";
-import { ClassSelect } from "./_client/class-select";
 import { useClassTags } from "./_utils/useClassTags";
+
+// Code splitting : charger les composants de manière lazy
+const BuildName = dynamic(() => import("./_client/build-name").then(mod => ({ default: mod.BuildName })), {
+  loading: () => <div className="w-full">Loading...</div>,
+});
+
+const ClassSelect = dynamic(() => import("./_client/class-select").then(mod => ({ default: mod.ClassSelect })), {
+  loading: () => <div className="w-full">Loading...</div>,
+});
 
 export default function BuildProfilePage() {
   const { build, loading } = useBuildLoader();
   const classTags = useClassTags();
+
+  // Mémoriser la bannière pour éviter les recalculs
+  const classBanner = useMemo(() => build?.class.bannerUrl, [build?.class.bannerUrl]);
 
   if (loading || !build) return <p>Loading...</p>;
 
@@ -22,7 +34,7 @@ export default function BuildProfilePage() {
       <div className="w-1/2">
         <TagsList tags={classTags} />
       </div>
-      <ProfilelassBanner classBanner={build.class.bannerUrl} />
+      {classBanner && <ProfilelassBanner classBanner={classBanner} />}
     </main>
   );
 }

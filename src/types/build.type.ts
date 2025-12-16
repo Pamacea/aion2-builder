@@ -80,7 +80,7 @@ export type BuildState = {
   // Chain Skills management
   updateChainSkill: (skillId: number, chainSkillIds: number[], type: "ability" | "stigma") => void;
   
-  loadBuild: (buildId: number) => Promise<void>;
+  loadBuild: (buildId: number, userId?: string | null) => Promise<void> | void;
 };
 
 // ---------------------------

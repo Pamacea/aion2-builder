@@ -2,6 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ClassType } from "@/types/schema";
+import { memo, useCallback } from "react";
 import { FilterByClass } from "../_client/filter-by-class";
 import { FilterByName } from "../_client/filter-by-name";
 
@@ -15,7 +16,7 @@ type FiltersSectionProps = {
   onSortChange: (sortBy: "likes" | "newest" | "oldest") => void;
 };
 
-export const FiltersSection = ({
+export const FiltersSection = memo(({
   classes,
   selectedClassId,
   searchQuery,
@@ -24,6 +25,10 @@ export const FiltersSection = ({
   onSearchChange,
   onSortChange,
 }: FiltersSectionProps) => {
+  // Mémoriser le handler pour éviter les re-renders
+  const handleSortValueChange = useCallback((value: string) => {
+    onSortChange(value as "likes" | "newest" | "oldest");
+  }, [onSortChange]);
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 pb-4 border-b-2 border-background/20">
       <FilterByClass
@@ -52,5 +57,7 @@ export const FiltersSection = ({
       </div>
     </div>
   );
-};
+});
+
+FiltersSection.displayName = "FiltersSection";
 

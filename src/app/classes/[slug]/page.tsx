@@ -1,6 +1,14 @@
-import { Class } from "./_components/Class";
-import { ExploreOthersClasses } from "./_components/exploreOtherClasses";
+import dynamic from "next/dynamic";
 import { getClassPageData } from "./_utils/getClassPageData";
+
+// Code splitting : charger les composants de manière lazy
+const Class = dynamic(() => import("./_components/Class").then(mod => ({ default: mod.Class })), {
+  loading: () => <div>Loading class...</div>,
+});
+
+const ExploreOthersClasses = dynamic(() => import("./_components/exploreOtherClasses").then(mod => ({ default: mod.ExploreOthersClasses })), {
+  loading: () => <div>Loading...</div>,
+});
 
 // Utiliser ISR (Incremental Static Regeneration) pour de meilleures performances
 export const revalidate = 300; // Revalidate toutes les 5 minutes

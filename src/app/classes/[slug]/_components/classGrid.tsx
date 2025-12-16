@@ -1,30 +1,58 @@
+"use client";
+
 import { CLASS_PATH } from "@/constants/paths";
 import { ClassGridProps } from "@/types/schema";
 import Image from "next/image";
 import Link from "next/link";
+import { memo, useMemo } from "react";
 
-export const ClassGrid = ({ classes }: ClassGridProps) => {
+type ClassGridItemProps = {
+  classData: ClassGridProps["classes"][number];
+};
+
+const ClassGridItem = memo(({ classData }: ClassGridItemProps) => {
+  const iconUrl = useMemo(() => {
+    if (classData.iconUrl?.startsWith("IC_")) {
+      return `${CLASS_PATH}${classData.iconUrl}`;
+    }
+    return `${CLASS_PATH}IC_Class_${classData.name.charAt(0).toUpperCase() + classData.name.slice(1)}.webp`;
+  }, [classData.iconUrl, classData.name]);
+
+  const classUrl = useMemo(() => 
+    `/classes/${classData.name.toLowerCase()}`,
+    [classData.name]
+  );
+
+  return (
+    <Link href={classUrl} prefetch={true}>
+      <div className="p-6 rounded-xl h-40 w-40 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform cursor-pointer text-foreground/70 hover:text-foreground">
+        <Image
+          src={iconUrl}
+          alt={`${classData.name} icon`}
+          width={64}
+          height={64}
+          className="rounded-md"
+          loading="lazy"
+        />
+        <h2 className="text-lg text-center uppercase font-medium">
+          {classData.name}
+        </h2>
+      </div>
+    </Link>
+  );
+});
+
+ClassGridItem.displayName = "ClassGridItem";
+
+export const ClassGrid = memo(({ classes }: ClassGridProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-8 justify-center">
       {classes.map((cls) => (
-        <Link key={cls.id} href={`/classes/${cls.name.toLowerCase()}`}>
-          <div className="p-6 rounded-xl h-40 w-40 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform cursor-pointer text-foreground/70 hover:text-foreground">
-            <Image
-              src={cls.iconUrl?.startsWith("IC_") 
-                ? `${CLASS_PATH}${cls.iconUrl}` 
-                : `${CLASS_PATH}IC_Class_${cls.name.charAt(0).toUpperCase() + cls.name.slice(1)}.webp`}
-              alt={`${cls.name} icon`}
-              width={64}
-              height={64}
-              className="rounded-md"
-            />
-            <h2 className="text-lg text-center uppercase font-medium">
-              {cls.name}
-            </h2>
-          </div>
-        </Link>
+        <ClassGridItem key={cls.id} classData={cls} />
       ))}
     </div>
   );
-};
+});
+
+ClassGrid.displayName = "ClassGrid";
 
