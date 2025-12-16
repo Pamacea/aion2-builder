@@ -4,58 +4,85 @@ import { CreateButton } from "@/components/client/buttons/create-button";
 import { BANNER_PATH } from "@/constants/paths";
 import { useAuth } from "@/hooks/useAuth";
 import { useBuildLike } from "@/hooks/useBuildLike";
-import { BuildCardProps } from "@/types/schema";
+import { BuildCardProps, BuildType, LikeType } from "@/types/schema";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { memo, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ShowBuildButton } from "./show-build-button";
 
 
-export const BuildCard = memo(({ build }: BuildCardProps) => {
+export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
   const { isAuthenticated, userId } = useAuth();
-  const { toggleLikeAsync, isLiking } = useBuildLike(build.id);
+  const { toggleLikeAsync, isLiking } = useBuildLike(initialBuild.id);
   
+  // State local pour mettre à jour immédiatement le like (optimistic update)
+  const [localBuild, setLocalBuild] = useState<BuildType>(initialBuild);
+  
+  // Synchroniser avec les props initiales si elles changent (pour les refetch)
+  useEffect(() => {
+    setLocalBuild(initialBuild);
+  }, [initialBuild]);
+  
+  // Utiliser le build local
+  const build = localBuild;
+
   // Le bouton Create Build sera caché si l'utilisateur n'est pas connecté
   const isCreateButtonHidden = isAuthenticated === false;
 
   // Vérifier si l'utilisateur actuel a liké ce build
-  const isLiked = useMemo(() => {
-    if (!userId || !build.likes) return false;
-    return build.likes.some((like) => like.userId === userId);
-  }, [userId, build.likes]);
+  const isLiked = userId && build.likes 
+    ? build.likes.some((like) => like.userId === userId)
+    : false;
 
-  const likesCount = useMemo(() => build.likes?.length || 0, [build.likes?.length]);
+  const likesCount = build.likes?.length || 0;
 
-  // Handler de like optimisé avec TanStack Query
+  // Handler de like avec optimistic update immédiat
   const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!isAuthenticated || isLiking) {
+    if (!isAuthenticated || isLiking || !userId) {
       return;
     }
 
+    // Utiliser la fonction de mise à jour pour avoir accès au state actuel
+    setLocalBuild((currentBuild) => {
+      // Optimistic update immédiat
+      const currentLiked = currentBuild.likes?.some((like) => like.userId === userId) || false;
+      const newLikes: LikeType[] = currentLiked
+        ? (currentBuild.likes || []).filter((like) => like.userId !== userId)
+        : [
+            ...(currentBuild.likes || []), 
+            { 
+              id: 0, 
+              buildId: currentBuild.id, 
+              userId, 
+              createdAt: new Date() 
+            }
+          ];
+
+      return {
+        ...currentBuild,
+        likes: newLikes,
+      };
+    });
+
     try {
       await toggleLikeAsync();
-      // Le cache sera automatiquement invalidé et mis à jour par TanStack Query
+      // TanStack Query invalidera et refetchera les données, mais on garde l'update optimiste
     } catch (error) {
       console.error("Error toggling like:", error);
+      // Rollback en cas d'erreur
+      setLocalBuild(initialBuild);
     }
-  }, [isAuthenticated, isLiking, toggleLikeAsync]);
+  }, [isAuthenticated, isLiking, userId, initialBuild, toggleLikeAsync]);
 
-  // Mémoriser les valeurs calculées
-  const bannerUrl = useMemo(() => 
-    build.class?.bannerUrl || "default-banner.webp",
-    [build.class?.bannerUrl]
-  );
-
-  const displayBannerPath = useMemo(() => 
-    bannerUrl.startsWith("BA_") 
-      ? `${BANNER_PATH}${bannerUrl}`
-      : `${BANNER_PATH}BA_${build.class?.name.charAt(0).toUpperCase() + build.class?.name.slice(1)}.webp`,
-    [bannerUrl, build.class?.name]
-  );
+  // Calculer les valeurs une seule fois par render (pas besoin de useMemo pour des calculs simples)
+  const bannerUrl = build.class?.bannerUrl || "default-banner.webp";
+  const displayBannerPath = bannerUrl.startsWith("BA_") 
+    ? `${BANNER_PATH}${bannerUrl}`
+    : `${BANNER_PATH}BA_${build.class?.name.charAt(0).toUpperCase() + build.class?.name.slice(1)}.webp`;
 
   return (
     <div className="relative group overflow-hidden  border-y-2 border-foreground/30 hover:border-primary transition-all hover:scale-110">
@@ -120,6 +147,6 @@ export const BuildCard = memo(({ build }: BuildCardProps) => {
       </div>
     </div>
   );
-});
+};
 
 BuildCard.displayName = "BuildCard";

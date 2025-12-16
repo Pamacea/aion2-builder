@@ -1,5 +1,3 @@
-"use server";
-
 import { toggleLikeBuild } from "@/actions/buildActions";
 import { NextRequest, NextResponse } from "next/server";
 

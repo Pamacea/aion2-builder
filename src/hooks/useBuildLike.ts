@@ -19,10 +19,14 @@ export function useBuildLike(buildId: number) {
     mutationFn: async (): Promise<LikeResponse> => {
       const response = await fetch(`/api/builds/${buildId}/like`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to toggle like");
+        const error = await response.json().catch(() => ({ error: "Failed to toggle like" }));
+        throw new Error(error.error || "Failed to toggle like");
       }
 
       return response.json();
@@ -35,12 +39,25 @@ export function useBuildLike(buildId: number) {
 
       // Snapshot des valeurs précédentes
       const previousBuild = queryClient.getQueryData<BuildType>(queryKeys.builds.detail(buildId));
+      const previousBuildsList = queryClient.getQueryData<BuildType[]>(queryKeys.builds.lists());
 
-      return { previousBuild };
+      return { previousBuild, previousBuildsList };
     },
     // Mise à jour optimiste du cache
-    onSuccess: () => {
-      // Invalider pour refetch avec les vraies données
+    onSuccess: (data) => {
+      // Mettre à jour le cache du build détaillé si présent
+      const currentBuild = queryClient.getQueryData<BuildType>(queryKeys.builds.detail(buildId));
+      if (currentBuild) {
+        // Simuler la mise à jour optimiste avec les nouvelles données
+        queryClient.setQueryData<BuildType>(queryKeys.builds.detail(buildId), (old) => {
+          if (!old) return old;
+          // On invalide plutôt que de faire une mise à jour partielle complexe
+          // car la structure des likes peut être complexe
+          return old;
+        });
+      }
+
+      // Invalider pour refetch avec les vraies données du serveur
       queryClient.invalidateQueries({ queryKey: queryKeys.builds.lists() });
       queryClient.invalidateQueries({ queryKey: queryKeys.builds.detail(buildId) });
     },
@@ -48,6 +65,9 @@ export function useBuildLike(buildId: number) {
     onError: (_err, _variables, context) => {
       if (context?.previousBuild) {
         queryClient.setQueryData<BuildType>(queryKeys.builds.detail(buildId), context.previousBuild);
+      }
+      if (context?.previousBuildsList) {
+        queryClient.setQueryData<BuildType[]>(queryKeys.builds.lists(), context.previousBuildsList);
       }
     },
   });

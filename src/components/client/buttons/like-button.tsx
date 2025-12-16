@@ -7,6 +7,7 @@ import { Heart } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { Button } from "../../ui/button";
+import { LikeType } from "@/types/build.type";
 
 export const LikeButton = () => {
   const params = useParams();
@@ -17,27 +18,54 @@ export const LikeButton = () => {
     return !isNaN(numId) ? numId : null;
   }, [buildId]);
   
-  const { build } = useBuildStore();
+  const { build, loadBuild } = useBuildStore();
   const { isAuthenticated, userId } = useAuth();
   const { toggleLikeAsync, isLiking } = useBuildLike(numericBuildId || 0);
 
-  // Calculer les likes depuis le build avec useMemo
-  const likesCount = useMemo(() => build?.likes?.length || 0, [build?.likes?.length]);
-  const isLiked = useMemo(() => {
-    if (!userId || !build?.likes) return false;
-    return build.likes.some((like) => like.userId === userId);
-  }, [userId, build?.likes]);
+  // Calculer les likes directement (pas besoin de useMemo pour des calculs simples)
+  const likesCount = build?.likes?.length || 0;
+  const isLiked = userId && build?.likes 
+    ? build.likes.some((like) => like.userId === userId)
+    : false;
 
   const handleLike = async () => {
-    if (!isAuthenticated || !numericBuildId || isLiking) {
+    if (!isAuthenticated || !numericBuildId || isLiking || !build || !userId) {
       return;
     }
 
+    // Optimistic update immédiat dans le store
+    const currentLiked = build.likes?.some((like) => like.userId === userId) || false;
+    const newLikes: LikeType[] = currentLiked
+      ? (build.likes || []).filter((like) => like.userId !== userId)
+      : [
+          ...(build.likes || []), 
+          { 
+            id: 0, 
+            buildId: build.id, 
+            userId, 
+            createdAt: new Date() 
+          }
+        ];
+
+    // Mettre à jour le store immédiatement
+    const { setBuild } = useBuildStore.getState();
+    setBuild({
+      ...build,
+      likes: newLikes,
+    });
+
     try {
       await toggleLikeAsync();
-      // Le cache sera automatiquement invalidé et mis à jour par TanStack Query
+      // Recharger le build pour synchroniser avec les vraies données
+      if (numericBuildId && userId) {
+        await loadBuild(numericBuildId, userId);
+      }
     } catch (error) {
       console.error("Error toggling like:", error);
+      // Rollback en cas d'erreur
+      if (numericBuildId && userId) {
+        await loadBuild(numericBuildId, userId);
+      }
     }
   };
 
