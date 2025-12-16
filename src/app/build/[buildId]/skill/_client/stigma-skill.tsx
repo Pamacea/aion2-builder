@@ -3,7 +3,7 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
-import { isStarterBuild } from "@/utils/buildUtils";
+import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -24,11 +24,13 @@ export const StigmaSkill = ({
   onSelect,
   className = "",
 }: StigmaSkillProps) => {
-  const { build } = useBuildStore();
+  const { build, currentUserId, addStigma, updateStigmaLevel } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const hasClickedOnceRef = useRef(false);
+  const lastClickTimeRef = useRef<number>(0);
+  const clickButtonRef = useRef<"left" | "right" | null>(null);
 
   // Get class name from build first, then from stigma classes, never use "default"
   const classNameForPath = build?.class?.name || stigma.classes?.[0]?.name;
@@ -43,6 +45,7 @@ export const StigmaSkill = ({
   const currentLevel = buildStigma?.level ?? 0;
   const isInBuild = buildStigma !== undefined;
   const isStarter = isStarterBuild(build);
+  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
 
   // Count stigmas with level >= 1 to check if limit is reached
   const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
@@ -56,6 +59,19 @@ export const StigmaSkill = ({
   const isLockedByLimit = 
     (currentLevel === 0 || !isInBuild) && 
     stigmaCountAtLevelOneOrMore >= maxStigmasAllowed;
+
+  // Check if skill is locked/not in build/level 0 (eligible for double-click to add)
+  const isLockedOrNotInBuild = !isInBuild || currentLevel === 0;
+  
+  // Check if we can add/increment this stigma (limit of 4 stigmas with level >= 1)
+  const canAddOrIncrementStigma = () => {
+    if (isInBuild && currentLevel >= 1) {
+      // Already in build with level >= 1, can increment
+      return true;
+    }
+    // Not in build or at level 0, check if we have space
+    return stigmaCountAtLevelOneOrMore < maxStigmasAllowed;
+  };
 
   // Build image path with fallback
   const iconUrl = stigma.iconUrl || "default-icon.webp";
@@ -125,9 +141,26 @@ export const StigmaSkill = ({
   });
 
   const handleClick = () => {
-    // Handle left click (only if not dragging and not locked)
-    // Allow selection if not in build (for shortcut placement)
-    // But prevent selection if in build with level 0 (locked) or if starter build
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    const isDoubleClick = timeSinceLastClick < 300 && clickButtonRef.current === "left";
+    
+    lastClickTimeRef.current = now;
+    clickButtonRef.current = "left";
+
+    // Handle double-click to add skill to build (locked/not in build/level 0)
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner && !isLockedByLimit && canAddOrIncrementStigma()) {
+      if (!isInBuild) {
+        // Add stigma to build with level 1
+        addStigma(stigma.id, 1);
+      } else if (currentLevel === 0) {
+        // Update existing stigma from level 0 to level 1
+        updateStigmaLevel(stigma.id, 1);
+      }
+      return; // Prevent normal click handling on double-click
+    }
+
+    // Handle left click (only if not dragging, not locked, and not starter build)
     if (!isDragging && !isStarter && (!isInBuild || currentLevel > 0)) {
       // If already selected for shortcut, deselect on click
       if (isSelectedForShortcut) {
@@ -164,7 +197,7 @@ export const StigmaSkill = ({
         }
       }
     } else {
-      // If not in build or locked or starter build, just show details
+      // If locked or starter build, just show details
       if (onSelect) {
         onSelect();
       } else {
@@ -175,23 +208,28 @@ export const StigmaSkill = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Handle right click for selection - toggle behavior
-    // Allow selection if not in build (for shortcut placement)
-    // But prevent selection if in build with level 0 (locked) or if starter build
-    if (!isStarter && (!isInBuild || currentLevel > 0)) {
-      // Toggle selection: if already selected, deselect it
-      if (isSelectedForShortcut) {
-        setSelectedSkill(null);
-        hasClickedOnceRef.current = selected; // Keep track of details state
-      } else {
-        setSelectedSkill({
-          type: "stigma",
-          stigma,
-          buildStigma,
-        });
-        hasClickedOnceRef.current = false;
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    const isDoubleClick = timeSinceLastClick < 300 && clickButtonRef.current === "right";
+    
+    lastClickTimeRef.current = now;
+    clickButtonRef.current = "right";
+
+    // Handle double right-click to add skill to build (locked/not in build/level 0)
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner && !isLockedByLimit && canAddOrIncrementStigma()) {
+      if (!isInBuild) {
+        // Add stigma to build with level 1
+        addStigma(stigma.id, 1);
+      } else if (currentLevel === 0) {
+        // Update existing stigma from level 0 to level 1
+        updateStigmaLevel(stigma.id, 1);
       }
+      return; // Prevent normal right-click handling on double-click
     }
+
+    // For stigmas, the first right-click does nothing (should not select directly)
+    // Only double right-click adds to build, and left-click handles selection
   };
 
   // Create ref callback for drag

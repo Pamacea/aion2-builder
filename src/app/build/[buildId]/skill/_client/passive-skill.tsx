@@ -3,9 +3,9 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
-import { isStarterBuild } from "@/utils/buildUtils";
+import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 
 type PassiveSkillProps = {
@@ -23,13 +23,19 @@ export const PassiveSkill = ({
   onSelect,
   className = "",
 }: PassiveSkillProps) => {
-  const { build } = useBuildStore();
+  const { build, currentUserId, addPassive, updatePassiveLevel } = useBuildStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
+  const lastClickTimeRef = useRef<number>(0);
+  const clickButtonRef = useRef<"left" | "right" | null>(null);
 
   const currentLevel = buildPassive?.level ?? 0;
   const isInBuild = buildPassive !== undefined;
   const isStarter = isStarterBuild(build);
+  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
+
+  // Check if skill is locked/not in build/level 0 (eligible for double-click to add)
+  const isLockedOrNotInBuild = !isInBuild || currentLevel === 0;
 
   // Build image path with fallback
   const classNameForPath = passive.class?.name || "default";
@@ -53,11 +59,53 @@ export const PassiveSkill = ({
     }),
   });
 
-  const handleSelect = () => {
+  const handleClick = () => {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    const isDoubleClick = timeSinceLastClick < 300 && clickButtonRef.current === "left";
+    
+    lastClickTimeRef.current = now;
+    clickButtonRef.current = "left";
+
+    // Handle double-click to add skill to build (locked/not in build/level 0)
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner) {
+      if (!isInBuild) {
+        // Add passive to build with level 1
+        addPassive(passive.id, 1);
+      } else if (currentLevel === 0) {
+        // Update existing passive from level 0 to level 1
+        updatePassiveLevel(passive.id, 1);
+      }
+      return; // Prevent normal click handling on double-click
+    }
+
+    // Normal click handling
     if (onSelect) {
       onSelect();
     } else {
       setLocalSelected(!localSelected);
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    const isDoubleClick = timeSinceLastClick < 300 && clickButtonRef.current === "right";
+    
+    lastClickTimeRef.current = now;
+    clickButtonRef.current = "right";
+
+    // Handle double right-click to add skill to build (locked/not in build/level 0)
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner) {
+      if (!isInBuild) {
+        // Add passive to build with level 1
+        addPassive(passive.id, 1);
+      } else if (currentLevel === 0) {
+        // Update existing passive from level 0 to level 1
+        updatePassiveLevel(passive.id, 1);
+      }
     }
   };
 
@@ -74,7 +122,8 @@ export const PassiveSkill = ({
       className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
       } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
-      onClick={handleSelect}
+      onClick={handleClick}
+      onContextMenu={handleContextMenu}
     >
       {/* Icon with gold border */}
       <div
