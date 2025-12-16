@@ -2,10 +2,36 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { classesData } from "data/classes/index";
 import { spellTagsList } from "data/spellTags";
 import { tagsList } from "data/tags";
+import { config } from "dotenv";
 import { PrismaClient } from "generated/prisma/client";
+import { resolve } from "path";
+
+// Charger les variables d'environnement depuis .env.local puis .env
+config({ path: resolve(process.cwd(), ".env.local") });
+config({ path: resolve(process.cwd(), ".env") });
+
+// Utiliser DATABASE_URL en priorité, ou BAHIONDB_POSTGRES_URL en fallback
+// IMPORTANT: Ne PAS utiliser les URLs Prisma Accelerate avec PrismaPg adapter
+const connectionString = process.env.DATABASE_URL || 
+                        process.env.BAHIONDB_POSTGRES_URL || 
+                        "";
+
+if (!connectionString || connectionString === "") {
+  console.error("❌ No DATABASE_URL found!");
+  console.error("Required: DATABASE_URL environment variable with postgres:// or postgresql://");
+  console.error("Do NOT use Prisma Accelerate URL (prisma://) with PrismaPg adapter");
+  process.exit(1);
+}
+
+// Vérifier que ce n'est pas une URL Prisma Accelerate
+if (connectionString.startsWith("prisma://") || connectionString.startsWith("prisma+postgres://")) {
+  console.error("❌ Prisma Accelerate URL detected. PrismaPg adapter requires direct PostgreSQL URL.");
+  console.error("Please use BAHION_POSTGRES_URL or DATABASE_URL with postgres:// or postgresql://");
+  process.exit(1);
+}
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
 });
 
 const prisma = new PrismaClient({ adapter });

@@ -7,15 +7,15 @@ import { defineConfig } from "prisma/config";
 // Charger explicitement le fichier .env à la racine
 config({ path: resolve(process.cwd(), ".env") });
 
-// Utiliser la variable d'environnement de Vercel, ou DATABASE_URL en fallback
-const databaseUrl = process.env.BAHION_POSTGRES_URL || 
-                    process.env.BAHIONDB_PRISMA_DATABASE_URL || 
-                    process.env.DATABASE_URL || 
+// Utiliser DATABASE_URL en priorité, ou BAHIONDB_POSTGRES_URL en fallback
+// IMPORTANT: Ne PAS utiliser les URLs Prisma Accelerate (prisma:// ou prisma+postgres://)
+const databaseUrl = process.env.DATABASE_URL || 
+                    process.env.BAHIONDB_POSTGRES_URL || 
                     "postgresql://placeholder:placeholder@localhost:5432/placeholder";
 
-// Debug: vérifier si une URL de base de données est chargée
+// Debug: vérifier si DATABASE_URL est chargée
 if (databaseUrl.includes("placeholder")) {
-  console.warn("⚠️  Database URL not found. Checking: BAHION_POSTGRES_URL, BAHIONDB_PRISMA_DATABASE_URL, DATABASE_URL");
+  console.warn("⚠️  DATABASE_URL not found. Please set DATABASE_URL environment variable");
 }
 
 export default defineConfig({

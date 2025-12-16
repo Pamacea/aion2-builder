@@ -4,9 +4,19 @@ import { ClassType, TagTypeBase } from "@/types/schema";
 import { prisma } from "../lib/prisma";
 
 export const getAllClass = async (): Promise<ClassType[]> => {
-  return prisma.class.findMany({
-    include: { tags: true },
-  });
+  try {
+    return await prisma.class.findMany({
+      include: { tags: true },
+    });
+  } catch (error) {
+    console.error("Error in getAllClass:", error);
+    // Si erreur de connexion, retourner un tableau vide plutôt que de casser l'app
+    if (error instanceof Error && error.message.includes("ETIMEDOUT")) {
+      console.error("Database connection timeout - check DATABASE_URL configuration");
+      throw new Error("Database connection timeout. Please check your database configuration.");
+    }
+    throw error;
+  }
 };
 
 export const getClassByName = async (name: string): Promise<ClassType | null> => {
