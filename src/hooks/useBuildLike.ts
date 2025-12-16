@@ -1,5 +1,6 @@
 "use client";
 
+import { toggleLikeBuildAction } from "@/actions/buildActions";
 import { BuildType } from "@/types/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "./queries";
@@ -11,25 +12,15 @@ type LikeResponse = {
 
 /**
  * Hook pour gérer les likes de builds avec TanStack Query
+ * Utilise directement une Server Action au lieu d'une route API
  */
 export function useBuildLike(buildId: number) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (): Promise<LikeResponse> => {
-      const response = await fetch(`/api/builds/${buildId}/like`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: "Failed to toggle like" }));
-        throw new Error(error.error || "Failed to toggle like");
-      }
-
-      return response.json();
+      // Appel direct de la Server Action
+      return await toggleLikeBuildAction(buildId);
     },
     // Optimistic update pour une meilleure UX
     onMutate: async () => {
@@ -43,20 +34,8 @@ export function useBuildLike(buildId: number) {
 
       return { previousBuild, previousBuildsList };
     },
-    // Mise à jour optimiste du cache
-    onSuccess: (data) => {
-      // Mettre à jour le cache du build détaillé si présent
-      const currentBuild = queryClient.getQueryData<BuildType>(queryKeys.builds.detail(buildId));
-      if (currentBuild) {
-        // Simuler la mise à jour optimiste avec les nouvelles données
-        queryClient.setQueryData<BuildType>(queryKeys.builds.detail(buildId), (old) => {
-          if (!old) return old;
-          // On invalide plutôt que de faire une mise à jour partielle complexe
-          // car la structure des likes peut être complexe
-          return old;
-        });
-      }
-
+    // Mise à jour du cache après succès
+    onSuccess: () => {
       // Invalider pour refetch avec les vraies données du serveur
       queryClient.invalidateQueries({ queryKey: queryKeys.builds.lists() });
       queryClient.invalidateQueries({ queryKey: queryKeys.builds.detail(buildId) });

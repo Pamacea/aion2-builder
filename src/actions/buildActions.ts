@@ -317,8 +317,9 @@ export async function createBuildFromStarter(
 // ======================================
 // LIKE/UNLIKE BUILD
 // ======================================
-export async function toggleLikeBuild(buildId: number): Promise<{ liked: boolean; likesCount: number }> {
+export async function toggleLikeBuildAction(buildId: number): Promise<{ liked: boolean; likesCount: number }> {
   const session = await auth();
+  
   if (!session?.user?.id) {
     throw new Error("Vous devez être connecté pour liker un build");
   }
@@ -350,13 +351,17 @@ export async function toggleLikeBuild(buildId: number): Promise<{ liked: boolean
     });
   }
 
-  // Compter le nombre total de likes
+  // Compter le nombre total de likes après l'action
   const likesCount = await prisma.like.count({
     where: { buildId },
   });
 
+  // Le statut après l'action : si on a supprimé (existingLike existait), on a unliké (false)
+  // Si on a créé (existingLike n'existait pas), on a liké (true)
+  const liked = !existingLike;
+
   return {
-    liked: !existingLike,
+    liked,
     likesCount,
   };
 }
