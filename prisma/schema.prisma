@@ -1,8 +1,14 @@
 // ================================================================
-// Prisma Schema - MMORPG Build System
+// Prisma Schema - Système de Build MMORPG pour Aion 2
 // ================================================================
-// Ce schéma définit les modèles de base pour les Classes, Sorts,
-// Passifs, Stigmas, ainsi que le système de Build pour les joueurs.
+// 
+// Ce schéma définit l'architecture complète d'un système de création
+// et de gestion de builds pour un MMORPG. Il couvre :
+// - L'authentification utilisateur (NextAuth.js)
+// - Les classes de personnages et leurs compétences
+// - Le système de builds personnalisables
+// - Les interactions sociales (likes)
+//
 // Documentation Prisma : https://pris.ly/d/prisma-schema
 // ================================================================
 
@@ -25,248 +31,280 @@ datasource db {
 }
 
 // ================================================================
-// 0. Users and Accounts
+// 0. Authentification et Utilisateurs (NextAuth.js)
 // ================================================================
+// 
+// Modèles standards NextAuth.js pour la gestion des utilisateurs,
+// comptes OAuth (Discord), sessions et tokens de vérification.
 
+/// Utilisateur de l'application
+/// Stocke les informations de profil et gère les relations avec les builds
 model User {
   id            String   @id @default(cuid())
-  name          String?
-  email         String?  @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  builds        Build[] // Builds créés par l'utilisateur
-  likes         Like[] // Builds likés par l'utilisateur
+  name          String?  // Nom d'affichage (depuis Discord)
+  email         String?  @unique // Email unique (optionnel)
+  emailVerified DateTime? // Date de vérification de l'email
+  image         String?  // URL de l'avatar (Discord CDN)
+  
+  // Relations
+  accounts      Account[] // Comptes OAuth liés (Discord)
+  sessions      Session[] // Sessions actives
+  builds        Build[]   // Builds créés par cet utilisateur
+  likes         Like[]    // Builds que l'utilisateur a likés
 }
 
+/// Compte OAuth lié à un utilisateur (Discord, Google, etc.)
+/// Stocke les tokens d'accès et les informations du fournisseur OAuth
 model Account {
   id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
+  userId            String  // Référence vers l'utilisateur
+  type              String  // Type de compte OAuth
+  provider          String  // Nom du fournisseur (discord, google, etc.)
+  providerAccountId String  // ID du compte chez le fournisseur
+  refresh_token     String? // Token de rafraîchissement
+  access_token      String? // Token d'accès
+  expires_at        Int?    // Date d'expiration (timestamp)
+  token_type        String? // Type de token (Bearer, etc.)
+  scope             String? // Scopes OAuth autorisés
+  id_token          String? // Token d'identité
+  session_state     String? // État de session OAuth
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId]) // Un compte OAuth unique par fournisseur
 }
 
+/// Session utilisateur active
+/// Gère l'authentification persistante via cookies
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
+  sessionToken String   @unique // Token unique de session
+  userId       String   // Référence vers l'utilisateur
+  expires      DateTime // Date d'expiration de la session
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// Token de vérification pour l'email
+/// Utilisé pour valider les adresses email lors de l'inscription
 model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+  identifier String   // Identifiant (email, etc.)
+  token      String   @unique // Token unique de vérification
+  expires    DateTime // Date d'expiration du token
 
-  @@unique([identifier, token])
+  @@unique([identifier, token]) // Combinaison unique identifier + token
 }
 
 // ================================================================
-// I. Modèles de Base (Classes, Tags, Abilities, Passives, Stigmas)
+// I. Modèles de Base - Contenu du Jeu
 // ================================================================
+// 
+// Définit les classes de personnages, leurs compétences (abilities),
+// passifs et stigmas. Ces modèles représentent le contenu statique
+// du jeu qui sert de base pour créer des builds personnalisés.
 
-// ---------------------------
-// 1. Classes
-// ---------------------------
+/// Classe de personnage jouable
+/// Chaque classe possède des compétences uniques, des passifs et peut équiper certains stigmas
 model Class {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  name String @unique // Nom unique de la classe (ex: "Cleric", "Warrior")
 
-  iconUrl      String?
-  bannerUrl    String?
-  characterUrl String?
+  // Assets visuels
+  iconUrl      String? // Icône de la classe
+  bannerUrl    String? // Bannière de présentation
+  characterUrl String? // Image du personnage représentatif
 
-  description String?
+  description String? // Description textuelle de la classe
 
   // Relations
-  tags      Tag[] // Catégories attribuées à la classe
-  abilities Ability[] // Sorts de base (12 par classe)
-  passives  Passive[] // Passifs de base (10 par classe)
-  stigmas   Stigma[] // Stigmas spécifiques ou communs
-  builds    Build[] // Builds créés pour cette classe
+  tags      Tag[]      // Catégories/archétypes de la classe (DPS, Tank, Healer, etc.)
+  abilities Ability[]  // Compétences actives de base (12 par classe)
+  passives  Passive[]  // Passifs de base (10 par classe)
+  stigmas   Stigma[]   // Stigmas équipables par cette classe
+  builds    Build[]    // Builds créés pour cette classe
 }
 
-// ---------------------------
-// 2. Tags (Catégories de Classes)
-// ---------------------------
+/// Tag/Catégorie pour classifier les classes
+/// Permet de regrouper les classes par archétype (DPS, Tank, Healer, Support, etc.)
 model Tag {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  name String @unique // Nom du tag (ex: "DPS", "Tank", "Healer")
 
-  // Relation plusieurs-à-plusieurs avec les classes
+  // Relation plusieurs-à-plusieurs : une classe peut avoir plusieurs tags
   classes Class[]
 }
 
-// ---------------------------
-// 3. Sorts (Abilities)
-// ---------------------------
-
+/// Tag de sort pour classifier les compétences
+/// Permet de regrouper les compétences par type (Offensive, Défensive, Soin, etc.)
 model SpellTag {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  name String @unique // Nom du tag (ex: "Offensive", "Heal", "Buff")
 
+  // Relations : un tag peut être associé à plusieurs compétences
   abilities Ability[]
   passives Passive[]
   stigmas Stigma[]
 }
 
+/// Compétence active (Ability)
+/// Représente une compétence de base d'une classe, améliorable jusqu'au niveau 10
+/// Chaque compétence a des statistiques qui évoluent avec le niveau
 model Ability {
   id          Int     @id @default(autoincrement())
-  name        String
-  iconUrl     String?
-  description String?
-  baseCost Int @default(1)
-  baseCostModifier Int @default(2)
+  name        String  // Nom de la compétence
+  iconUrl     String? // URL de l'icône
+  description String? // Description textuelle
+  baseCost    Int     @default(1)  // Coût de base en Skill Points (SP)
+  baseCostModifier Int @default(2) // Modificateur de coût par niveau
+  maxLevel    Int     @default(10) // Niveau maximum atteignable
 
-  maxLevel Int @default(10)
-
-  // Stats et Coûts
-  damageMin         Int?
-  damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
-  damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
-
-  damageMax         Int?
-  damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
-  damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
-
-  damageBoost       Int?
-  damageBoostModifier Int?
-  damageBoostModifiers Json? // Tableau de modifiers par niveau
-
-  damageTolerance   Int?
-  damageToleranceModifier Int?
-  damageToleranceModifiers Json? // Tableau de modifiers par niveau
-
-  healMin      Int?
-  healMinModifier Int?
-  healMinModifiers Json? // Tableau de modifiers par niveau
-
-  healMax      Int?
-  healMaxModifier Int?
-  healMaxModifiers Json? // Tableau de modifiers par niveau
-
-  healBoost    Int?
-  healBoostModifier Int?
-  healBoostModifiers Int? // Tableau de modifiers par niveau
-
-  incomingHeal Int?
-  incomingHealModifier Int?
-  incomingHealModifiers Int? // Tableau de modifiers par niveau
+  // ========== Statistiques de Combat ==========
+  // Chaque stat peut avoir :
+  // - Une valeur de base (ex: damageMin)
+  // - Un modificateur fixe par niveau (ex: damageMinModifier) OU
+  // - Un tableau de modificateurs personnalisés par niveau (ex: damageMinModifiers)
+  // Si damageMinModifiers est défini, il prend priorité sur damageMinModifier
   
-  minMP        Int?
+  // Dommages
+  damageMin         Int?  // Dommage minimum de base
+  damageMinModifier Int?  // Modificateur fixe par niveau
+  damageMinModifiers Json? // Modificateurs personnalisés [niv2, niv3, ..., niv10]
+  
+  damageMax         Int?  // Dommage maximum de base
+  damageMaxModifier Int?  // Modificateur fixe par niveau
+  damageMaxModifiers Json? // Modificateurs personnalisés
+  
+  damageBoost       Int?  // Boost de dommage
+  damageBoostModifier Int?
+  damageBoostModifiers Json?
+  
+  damageTolerance   Int?  // Tolérance aux dommages
+  damageToleranceModifier Int?
+  damageToleranceModifiers Json?
+
+  // Soins
+  healMin      Int?  // Soin minimum
+  healMinModifier Int?
+  healMinModifiers Json?
+  
+  healMax      Int?  // Soin maximum
+  healMaxModifier Int?
+  healMaxModifiers Json?
+  
+  healBoost    Int?  // Boost de soin
+  healBoostModifier Int?
+  healBoostModifiers Int?
+  
+  incomingHeal Int?  // Soin entrant
+  incomingHealModifier Int?
+  incomingHealModifiers Int?
+
+  // Points de vie/mana
+  minMP        Int?  // Mana minimum requis
   minMPModifier Int?
-  minMPModifiers Json? // Tableau de modifiers par niveau
-
-  maxHP        Int?
+  minMPModifiers Json?
+  
+  maxHP        Int?  // Points de vie maximum
   maxHPModifier Int?
-  maxHPModifiers Json? // Tableau de modifiers par niveau
-
-  minHP        Int?
+  maxHPModifiers Json?
+  
+  minHP        Int?  // Points de vie minimum requis
   minHPModifier Int?
-  minHPModifiers Json? // Tableau de modifiers par niveau
-  maxMP        Int?
+  minHPModifiers Json?
+  
+  maxMP        Int?  // Mana maximum
   maxMPModifier Int?
-  maxMPModifiers Json? // Tableau de modifiers par niveau
+  maxMPModifiers Json?
 
-  criticalHitResist  Int?
+  // Résistances
+  criticalHitResist  Int?  // Résistance aux coups critiques
   criticalHitResistModifier Int?
-  statusEffectResist Int?
+  statusEffectResist Int?  // Résistance aux effets de statut
   statusEffectResistModifier Int?
-  impactTypeResist   Int?
+  impactTypeResist   Int?  // Résistance au type d'impact
   impactTypeResistModifier Int?
 
-  attack  Int?
+  // Attaque/Défense
+  attack  Int?  // Points d'attaque
   attackModifier Int?
-  defense Int?
+  defense Int?  // Points de défense
   defenseModifier Int?
 
-  blockDamage Int?
+  // Blocage
+  blockDamage Int?  // Dommage bloqué
   blockDamageModifier Int?
-  blockDamageModifiers Json? // Tableau de modifiers par niveau
+  blockDamageModifiers Json?
 
+  // Dommages par seconde
   damagePerSecond Int?
   damagePerSecondModifier Int?
-  damagePerSecondModifiers Json? // Tableau de modifiers par niveau
+  damagePerSecondModifiers Json?
 
+  // Dommage d'étourdissement
   staggerDamage Int?
 
-  manaCost  Int?
-  manaRegen Int?
+  // Coûts et régénération
+  manaCost  Int?  // Coût en mana
+  manaRegen Int?  // Régénération de mana
 
-  range Int? @default(20)
-  area  Int? @default(4)
+  // Portée et zone d'effet
+  range Int? @default(20) // Portée en mètres
+  area  Int? @default(4)   // Zone d'effet en mètres
 
-  castingDuration String? @default("Instant Cast")
-  cooldown        String? @default("Instant Cast")
+  // Temps de lancement et recharge
+  castingDuration String? @default("Instant Cast") // Durée de lancement
+  cooldown        String? @default("Instant Cast") // Temps de recharge
 
-  target String? @default("Single Target")
+  // Cible
+  target String? @default("Single Target") // Type de cible (Single Target, AoE, Self, etc.)
 
-  // Conditions du sort (ex: ["Nontarget Skill", "Mobile"])
-  condition String[] @default([])
+  // Conditions d'activation
+  condition String[] @default([]) // Conditions requises (ex: ["Nontarget Skill", "Mobile"])
 
-  // Conditions d'effet
-  effectCondition String? 
-  chargeLevels String?
+  // Conditions d'effet et niveaux de charge
+  effectCondition String?  // Condition pour que l'effet s'applique
+  chargeLevels    String?  // Niveaux de charge disponibles
 
-  // Relation vers les tags  du sort
-  spellTag SpellTag[]
-
-  // Relation vers la classe
-  classId Int
-  class   Class @relation(fields: [classId], references: [id])
-
-  // Relations avec le système de spécialités et les builds
-  specialtyChoices SpecialtyChoice[]
-  buildAbilities   BuildAbility[]
+  // Relations
+  spellTag         SpellTag[]        // Tags de classification du sort
+  classId          Int               // Classe propriétaire
+  class             Class             @relation(fields: [classId], references: [id])
+  specialtyChoices SpecialtyChoice[] // Choix de spécialités disponibles
+  buildAbilities   BuildAbility[]    // Utilisations dans les builds
   
-  // Chain Skills (compétences enchaînées)
-  chainSkills      ChainSkill[] @relation("AbilityChainSkills")
-  parentAbilities   ChainSkill[] @relation("AbilityParentSkills")
+  // Chain Skills : compétences qui peuvent être enchaînées après cette compétence
+  chainSkills      ChainSkill[]      @relation("AbilityChainSkills")
+  // Compétences parentes : compétences qui peuvent précéder cette compétence en chain
+  parentAbilities  ChainSkill[]      @relation("AbilityParentSkills")
 }
 
-// ---------------------------
-// 4. Chain Skills (Compétences enchaînées pour Abilities)
-// ---------------------------
+/// Relation de Chain Skill entre deux Abilities
+/// Définit qu'une compétence peut être enchaînée après une autre
+/// avec des conditions spécifiques (ex: après un "Nontarget Skill" en mouvement)
 model ChainSkill {
-  id            Int     @id @default(autoincrement())
-  parentAbilityId Int   // Ability parente
-  chainAbilityId   Int   // Ability chain skill
+  id              Int     @id @default(autoincrement())
+  parentAbilityId Int     // Compétence parente (qui déclenche la chain)
+  chainAbilityId  Int     // Compétence enchaînée (qui suit)
   
-  // Conditions spécifiques pour cette relation chain skill (ex: ["Nontarget Skill", "Mobile"])
+  // Conditions spécifiques pour activer cette chain skill
+  // (ex: ["Nontarget Skill", "Mobile"] = doit être un sort sans cible en mouvement)
   condition String[] @default([])
   
   parentAbility Ability @relation("AbilityParentSkills", fields: [parentAbilityId], references: [id], onDelete: Cascade)
   chainAbility  Ability @relation("AbilityChainSkills", fields: [chainAbilityId], references: [id], onDelete: Cascade)
   
-  @@unique([parentAbilityId, chainAbilityId])
-  @@index([parentAbilityId])
+  @@unique([parentAbilityId, chainAbilityId]) // Une relation unique par paire
+  @@index([parentAbilityId]) // Index pour recherches rapides
 }
 
-// ---------------------------
-// 5. Chain Skills (Compétences enchaînées pour Stigmas)
-// ---------------------------
+/// Relation de Chain Skill entre deux Stigmas
+/// Même principe que ChainSkill mais pour les stigmas
 model ChainSkillStigma {
-  id            Int     @id @default(autoincrement())
-  parentStigmaId Int   // Stigma parent
-  chainStigmaId   Int   // Stigma chain skill
+  id             Int     @id @default(autoincrement())
+  parentStigmaId Int     // Stigma parent
+  chainStigmaId  Int     // Stigma enchaîné
   
-  // Conditions spécifiques pour cette relation chain skill (ex: ["Nontarget Skill", "Mobile"])
-  condition String[] @default([])
+  condition String[] @default([]) // Conditions d'activation
   
   parentStigma Stigma @relation("StigmaParentSkills", fields: [parentStigmaId], references: [id], onDelete: Cascade)
   chainStigma  Stigma @relation("StigmaChainSkills", fields: [chainStigmaId], references: [id], onDelete: Cascade)
@@ -275,37 +313,35 @@ model ChainSkillStigma {
   @@index([parentStigmaId])
 }
 
-// ---------------------------
-// 6. Choix de Spécialité (SpecialtyChoice)
-// ---------------------------
+/// Choix de spécialité pour une compétence
+/// Permet de personnaliser une compétence à certains niveaux (ex: niveau 8, 12, 16)
+/// Chaque choix modifie le comportement ou les statistiques de la compétence
 model SpecialtyChoice {
   id          Int    @id @default(autoincrement())
-  description String
-  unlockLevel Int // Niveau requis pour débloquer (ex: 8, 12, 16)
+  description String // Description du choix de spécialité
+  unlockLevel Int    // Niveau requis pour débloquer ce choix (ex: 8, 12, 16)
 
-  // Relation vers le sort correspondant (optionnel - soit ability soit stigma)
+  // Relation vers la compétence concernée (soit Ability soit Stigma, jamais les deux)
   abilityId Int?
   ability   Ability? @relation(fields: [abilityId], references: [id])
 
-  // Relation vers le stigma correspondant (optionnel - soit ability soit stigma)
   stigmaId Int?
   stigma   Stigma? @relation(fields: [stigmaId], references: [id])
 }
 
-// ---------------------------
-// 5. Passifs (Passive)
-// ---------------------------
+/// Compétence passive
+/// Améliore les statistiques de base du personnage de manière permanente
+/// Structure similaire à Ability mais sans coût de mana ni temps de recharge
 model Passive {
   id          Int     @id @default(autoincrement())
-  name        String
-  iconUrl     String?
-  description String?
-  baseCost Int @default(1)
-  baseCostModifier Int @default(2)
+  name        String  // Nom du passif
+  iconUrl     String? // URL de l'icône
+  description String? // Description textuelle
+  baseCost    Int     @default(1)  // Coût de base en Skill Points (SP)
+  baseCostModifier Int @default(2) // Modificateur de coût par niveau
+  maxLevel    Int     @default(10)  // Niveau maximum
 
-  maxLevel Int @default(10)
-
-  // Stats et Coûts
+  // Statistiques identiques à Ability (voir documentation Ability pour les détails)
   damageMin         Int?
   damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
   damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
@@ -386,242 +422,223 @@ model Passive {
 
   target String? @default("Single Target")
 
-  // Conditions d'effet
+  // Conditions d'effet et niveaux de charge
   effectCondition String? 
-  chargeLevels String?
-
-  // Relation vers les tags  du sort
-  spellTag SpellTag[]
-
-  // Relation vers la classe
-  classId Int
-  class   Class @relation(fields: [classId], references: [id])
-
-  // Relation vers les builds
-  buildPassives BuildPassive[]
-}
-
-// ---------------------------
-// 6. Stigmas
-// ---------------------------
-model Stigma {
-  id          Int     @id @default(autoincrement())
-  name        String
-  iconUrl     String?
-  maxLevel    Int     @default(20)
-  description String?
-
-  // Conditions d'effet
-  effectCondition String? 
-  chargeLevels String
-
-  // Stats et Coûts
-  damageMin         Int?
-  damageMinModifier Int? // Modifier fixe (utilisé si damageMinModifiers est null)
-  damageMinModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
-
-  damageMax         Int?
-  damageMaxModifier Int? // Modifier fixe (utilisé si damageMaxModifiers est null)
-  damageMaxModifiers Json? // Tableau de modifiers par niveau [modifierNiveau2, modifierNiveau3, ...]
-
-  damageBoost       Int?
-  damageBoostModifier Int?
-  damageBoostModifiers Json? // Tableau de modifiers par niveau
-
-  damageTolerance   Int?
-  damageToleranceModifier Int?
-  damageToleranceModifiers Json? // Tableau de modifiers par niveau
-
-  healMin      Int?
-  healMinModifier Int?
-  healMinModifiers Json? // Tableau de modifiers par niveau
-
-  healMax      Int?
-  healMaxModifier Int?
-  healMaxModifiers Json? // Tableau de modifiers par niveau
-
-  healBoost    Int?
-  healBoostModifier Int?
-  healBoostModifiers Int? // Tableau de modifiers par niveau
-
-  incomingHeal Int?
-  incomingHealModifier Int?
-  incomingHealModifiers Int? // Tableau de modifiers par niveau
-  
-  minMP        Int?
-  minMPModifier Int?
-  minMPModifiers Json? // Tableau de modifiers par niveau
-
-  maxHP        Int?
-  maxHPModifier Int?
-  maxHPModifiers Json? // Tableau de modifiers par niveau
-
-  minHP        Int?
-  minHPModifier Int?
-  minHPModifiers Json? // Tableau de modifiers par niveau
-  maxMP        Int?
-  maxMPModifier Int?
-  maxMPModifiers Json? // Tableau de modifiers par niveau
-
-  criticalHitResist  Int?
-  criticalHitResistModifier Int?
-  statusEffectResist Int?
-  statusEffectResistModifier Int?
-  impactTypeResist   Int?
-  impactTypeResistModifier Int?
-
-  attack  Int?
-  attackModifier Int?
-  defense Int?
-  defenseModifier Int?
-
-  blockDamage Int?
-  blockDamageModifier Int?
-  blockDamageModifiers Json? // Tableau de modifiers par niveau
-
-  damagePerSecond Int?
-  damagePerSecondModifier Int?
-  damagePerSecondModifiers Json? // Tableau de modifiers par niveau
-
-  staggerDamage Int?
-
-  manaCost  Int?
-  manaRegen Int?
-
-  range Int? @default(20)
-  area  Int? @default(4)
-
-  castingDuration String? @default("Instant Cast")
-  cooldown        String? @default("Instant Cast")
-
-  target String? @default("Single Target")
-
-  // Conditions du stigma (ex: ["Nontarget Skill", "Mobile"])
-  condition String[] @default([])
-
-  baseCost Int     @default(1) // Coût par défaut en Stigma Points (STP)
-  baseCostModifier Int @default(2)
+  chargeLevels    String?
 
   // Relations
-  spellTag SpellTag[]
-  classes      Class[] // Classes pouvant équiper ce stigma
-  buildStigmas BuildStigma[] // Relation vers les builds
-  specialtyChoices SpecialtyChoice[] // Choix de spécialité pour ce stigma
-  
-  // Chain Skills (compétences enchaînées)
-  chainSkills      ChainSkillStigma[] @relation("StigmaChainSkills")
-  parentStigmas    ChainSkillStigma[] @relation("StigmaParentSkills")
+  spellTag      SpellTag[]     // Tags de classification
+  classId       Int            // Classe propriétaire
+  class          Class          @relation(fields: [classId], references: [id])
+  buildPassives BuildPassive[] // Utilisations dans les builds
+}
+
+/// Stigma (compétence avancée équipable)
+/// Compétence spéciale équipable par certaines classes, améliorable jusqu'au niveau 20
+/// Coûte des Stigma Points (STP) pour être équipé dans un build
+model Stigma {
+  id          Int     @id @default(autoincrement())
+  name        String  // Nom du stigma
+  iconUrl     String? // URL de l'icône
+  maxLevel    Int     @default(20) // Niveau maximum (supérieur aux abilities)
+  description String? // Description textuelle
+
+  // Conditions d'effet et niveaux de charge
+  effectCondition String?  // Condition pour que l'effet s'applique
+  chargeLevels    String   // Niveaux de charge disponibles (non-nullable)
+
+  // Statistiques identiques à Ability (voir documentation Ability pour les détails)
+  damageMin         Int?
+  damageMinModifier Int?
+  damageMinModifiers Json?
+  damageMax         Int?
+  damageMaxModifier Int?
+  damageMaxModifiers Json?
+  damageBoost       Int?
+  damageBoostModifier Int?
+  damageBoostModifiers Json?
+  damageTolerance   Int?
+  damageToleranceModifier Int?
+  damageToleranceModifiers Json?
+  healMin      Int?
+  healMinModifier Int?
+  healMinModifiers Json?
+  healMax      Int?
+  healMaxModifier Int?
+  healMaxModifiers Json?
+  healBoost    Int?
+  healBoostModifier Int?
+  healBoostModifiers Int?
+  incomingHeal Int?
+  incomingHealModifier Int?
+  incomingHealModifiers Int?
+  minMP        Int?
+  minMPModifier Int?
+  minMPModifiers Json?
+  maxHP        Int?
+  maxHPModifier Int?
+  maxHPModifiers Json?
+  minHP        Int?
+  minHPModifier Int?
+  minHPModifiers Json?
+  maxMP        Int?
+  maxMPModifier Int?
+  maxMPModifiers Json?
+  criticalHitResist  Int?
+  criticalHitResistModifier Int?
+  statusEffectResist Int?
+  statusEffectResistModifier Int?
+  impactTypeResist   Int?
+  impactTypeResistModifier Int?
+  attack  Int?
+  attackModifier Int?
+  defense Int?
+  defenseModifier Int?
+  blockDamage Int?
+  blockDamageModifier Int?
+  blockDamageModifiers Json?
+  damagePerSecond Int?
+  damagePerSecondModifier Int?
+  damagePerSecondModifiers Json?
+  staggerDamage Int?
+  manaCost  Int?
+  manaRegen Int?
+  range Int? @default(20)
+  area  Int? @default(4)
+  castingDuration String? @default("Instant Cast")
+  cooldown        String? @default("Instant Cast")
+  target String? @default("Single Target")
+  condition String[] @default([]) // Conditions d'activation
+
+  // Coût en Stigma Points (STP) pour équiper ce stigma dans un build
+  baseCost        Int     @default(1)  // Coût de base
+  baseCostModifier Int     @default(2) // Modificateur de coût par niveau
+
+  // Relations
+  spellTag         SpellTag[]           // Tags de classification
+  classes          Class[]              // Classes pouvant équiper ce stigma (plusieurs-à-plusieurs)
+  buildStigmas     BuildStigma[]        // Utilisations dans les builds
+  specialtyChoices SpecialtyChoice[]   // Choix de spécialités disponibles
+  chainSkills      ChainSkillStigma[]   @relation("StigmaChainSkills")  // Stigmas enchaînables après celui-ci
+  parentStigmas    ChainSkillStigma[]   @relation("StigmaParentSkills") // Stigmas qui peuvent précéder celui-ci
 }
 
 // ================================================================
-// II. Modèles du Builder (Build, BuildAbility, BuildPassive, BuildStigma)
+// II. Système de Build - Configurations Personnalisables
 // ================================================================
+// 
+// Les builds représentent des configurations personnalisées créées par les joueurs.
+// Chaque build définit les niveaux des compétences, passifs et stigmas équipés,
+// ainsi que les choix de spécialités et chain skills sélectionnés.
 
-// ---------------------------
-// 7. Builds (Configuration de Classe)
-// ---------------------------
+/// Build personnalisé créé par un utilisateur
+/// Représente une configuration complète de compétences pour une classe
+/// Peut être un "starter build" (sans propriétaire) ou un build utilisateur
 model Build {
   id   Int    @id @default(autoincrement())
-  name String
+  name String // Nom du build (ex: "Build - Cleric - Yanis")
 
-  // Classe associée
+  // Classe ciblée par ce build
   classId Int
   class   Class @relation(fields: [classId], references: [id])
 
-  // Propriétaire du build (optionnel pour les starter builds)
+  // Propriétaire du build
+  // null = starter build (build de référence non modifiable)
+  // String = ID de l'utilisateur propriétaire
   userId String?
   user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Points de compétence
+  // Points de compétence (Skill Points)
   baseSP  Int @default(231) // Points de base après leveling
-  extraSP Int @default(0) // Points supplémentaires (Wisdom Stone)
+  extraSP Int @default(0)   // Points supplémentaires (Wisdom Stone, etc.)
 
-  // Points de stigma
+  // Points de stigma (Stigma Points)
   baseSTP  Int @default(40) // Points de base
-  extraSTP Int @default(0) // Points supplémentaires farmables
+  extraSTP Int @default(0)  // Points supplémentaires farmables
 
-  // Shortcuts (barre de raccourcis) - JSON: { slotId: { type, abilityId/stigmaId, buildAbilityId/buildStigmaId } }
+  // Barre de raccourcis (shortcuts)
+  // Format JSON: { slotId: { type: "ability"|"stigma", abilityId?, stigmaId?, buildAbilityId?, buildStigmaId? } }
   shortcuts Json?
 
   // Relations détaillées
-  abilities BuildAbility[]
-  passives  BuildPassive[]
-  stigmas   BuildStigma[]
-  likes     Like[] // Likes reçus par ce build
+  abilities BuildAbility[] // Compétences actives configurées
+  passives  BuildPassive[] // Passifs configurés
+  stigmas   BuildStigma[]  // Stigmas équipés
+  likes     Like[]         // Likes reçus par ce build
 }
 
-// ---------------------------
-// 11. Like (Système de likes pour les builds)
-// ---------------------------
+/// Like d'un build par un utilisateur
+/// Permet aux utilisateurs de marquer leur appréciation pour un build
+/// Un utilisateur ne peut liker un build qu'une seule fois
 model Like {
-  id     Int    @id @default(autoincrement())
-  buildId Int
-  build  Build  @relation(fields: [buildId], references: [id], onDelete: Cascade)
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  buildId   Int      // Build liké
+  build     Build    @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  userId    String   // Utilisateur qui a liké
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) // Date de création du like
 
-  createdAt DateTime @default(now())
-
-  @@unique([buildId, userId]) // Un utilisateur ne peut liker qu'une fois un build
-  @@index([buildId])
-  @@index([userId])
+  @@unique([buildId, userId]) // Contrainte : un utilisateur ne peut liker un build qu'une fois
+  @@index([buildId])          // Index pour recherches rapides par build
+  @@index([userId])           // Index pour recherches rapides par utilisateur
 }
 
-// ---------------------------
-// 8. BuildAbility (Niveau et spécialités actives)
-// ---------------------------
+/// Configuration d'une compétence active dans un build
+/// Stocke le niveau choisi, les spécialités activées et les chain skills sélectionnés
 model BuildAbility {
   id        Int     @id @default(autoincrement())
-  buildId   Int
+  buildId   Int     // Build contenant cette compétence
   build     Build   @relation(fields: [buildId], references: [id])
-  abilityId Int
+  abilityId Int     // Compétence configurée
   ability   Ability @relation(fields: [abilityId], references: [id])
 
-  // Niveau choisi par l'utilisateur
+  // Niveau de la compétence dans ce build (0 = verrouillée, 1-10 = niveau actif)
   level    Int @default(1)
-  maxLevel Int @default(20)
+  maxLevel Int @default(20) // Niveau maximum possible (hérité de Ability)
 
-  // Spécialités actives (référencent SpecialtyChoice.id)
+  // IDs des choix de spécialités activés pour cette compétence
+  // (référencent SpecialtyChoice.id)
   activeSpecialtyChoiceIds Int[]
   
-  // Chain Skills sélectionnés (IDs des chain skills choisis, max 2)
+  // IDs des chain skills sélectionnés (maximum 2 chain skills par compétence)
   selectedChainSkillIds Int[] @default([])
 }
 
-// ---------------------------
-// 9. BuildPassive (Niveau du passif)
-// ---------------------------
+/// Configuration d'un passif dans un build
+/// Stocke uniquement le niveau choisi (les passifs n'ont pas de spécialités ni chain skills)
 model BuildPassive {
   id        Int     @id @default(autoincrement())
-  buildId   Int
+  buildId   Int     // Build contenant ce passif
   build     Build   @relation(fields: [buildId], references: [id])
-  passiveId Int
+  passiveId Int     // Passif configuré
   passive   Passive @relation(fields: [passiveId], references: [id])
 
-  // Niveau choisi par l'utilisateur
+  // Niveau du passif dans ce build (0 = verrouillé, 1-10 = niveau actif)
   level    Int @default(1)
-  maxLevel Int @default(20)
+  maxLevel Int @default(20) // Niveau maximum possible (hérité de Passive)
 }
 
-// ---------------------------
-// 10. BuildStigma (Stigmas équipés)
-// ---------------------------
+/// Configuration d'un stigma équipé dans un build
+/// Stocke le niveau, le coût en STP, les spécialités activées et les chain skills sélectionnés
+/// Un build peut équiper un maximum de 4 stigmas actifs (niveau >= 1)
 model BuildStigma {
   id       Int    @id @default(autoincrement())
-  buildId  Int
+  buildId  Int    // Build contenant ce stigma
   build    Build  @relation(fields: [buildId], references: [id])
-  stigmaId Int
+  stigmaId Int    // Stigma équipé
   stigma   Stigma @relation(fields: [stigmaId], references: [id])
 
+  // Niveau du stigma dans ce build (0 = non équipé, 1-20 = niveau actif)
   level    Int @default(1)
-  maxLevel Int @default(20)
+  maxLevel Int @default(20) // Niveau maximum possible (hérité de Stigma)
 
-  // Coût du stigma pour ce build (peut différer du baseCost)
+  // Coût en Stigma Points (STP) pour équiper ce stigma dans ce build
+  // Peut différer du baseCost du stigma selon les modifications
   stigmaCost Int @default(10)
 
-  // Spécialités actives (référencent SpecialtyChoice.id)
+  // IDs des choix de spécialités activés pour ce stigma
   activeSpecialtyChoiceIds Int[]
   
-  // Chain Skills sélectionnés (IDs des chain skills choisis, max 2)
+  // IDs des chain skills sélectionnés (maximum 2 chain skills par stigma)
   selectedChainSkillIds Int[] @default([])
 }

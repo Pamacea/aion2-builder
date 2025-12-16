@@ -3,7 +3,6 @@
 import { AuthContextType, AuthProviderProps } from "@/types/auth-context.type";
 import { createContext, useContext, useEffect, useState } from "react";
 
-
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: null,
   isLoading: true,
