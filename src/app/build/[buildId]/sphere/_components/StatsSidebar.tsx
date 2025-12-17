@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
 import { DaevanionStats } from "@/types/daevanion.type";
 import { useState } from "react";
 
@@ -51,16 +52,16 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
   const isOverLimit = pointsUsed > maxPoints;
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      <h2 className="text-xl font-bold">Stat Bonuses</h2>
+    <div className="h-full flex flex-col gap-4 pt-4">
+      <h2 className="text-xl font-bold text-center bg-background/50 py-2 border-y-2 border-y-foreground/30 uppercase">Bonus</h2>
       
       {/* Barre de recherche */}
-      <input
+      <Input
         type="text"
         placeholder="Search for stats.."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+        className="w-full px-3 py-2 border-b-2 border-b-background/30"
       />
 
       {/* Liste des stats */}
@@ -90,7 +91,7 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
       </div>
 
       {/* Section des points en bas */}
-      <div className="border-t border-border pt-4 mt-auto">
+      <div className="border-t border-border pt-4 pb-2 mt-auto">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium">{pointsType}:</span>

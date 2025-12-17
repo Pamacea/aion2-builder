@@ -208,7 +208,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   }, [runes, path]);
 
   return (
-    <div className="w-full h-full p-4 overflow-auto">
+    <div className="w-full h-full p-4 overflow-auto flex justify-center items-start">
       <div className="inline-block">
         {gridRunes.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-2">
@@ -247,20 +247,29 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
               const rarityLabel = getRarityLabel(rune.rarity, isStartNode);
               const rarityColor = getRarityColor(rune.rarity, isStartNode);
               const showTooltip = hoveredRune?.slotId === rune.slotId;
+              
+              // Déterminer si le tooltip doit s'afficher en dessous (pour les runes du haut)
+              // Si la rune est dans les 3 premières lignes, afficher le tooltip en dessous
+              const isTopRow = rune.position && rune.position.y < 3;
+              const tooltipPositionClass = isTopRow 
+                ? "top-full left-1/2 transform -translate-x-1/2 mt-2" 
+                : "bottom-full left-1/2 transform -translate-x-1/2 mb-2";
 
               return (
-                <div key={rune.slotId} className="relative group">
+                <div 
+                  key={rune.slotId} 
+                  className="relative group"
+                  onMouseEnter={() => handleMouseEnter(rune)}
+                  onMouseLeave={handleMouseLeave}
+                >
                   <button
                     onClick={() => handleRuneClick(rune)}
-                    onMouseEnter={() => handleMouseEnter(rune)}
-                    onMouseLeave={handleMouseLeave}
                     disabled={!canActivateRune && !isActive}
                     className={`
                       relative w-16 h-16 transition-all
                       ${opacityClass}
                       ${canActivateRune || isActive ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
                       ${borderClass}
-                      ${showTooltip ? "border-b-4 border-b-primary" : ""}
                     `}
                   >
                     <Image
@@ -276,7 +285,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                   {/* Tooltip */}
                   {showTooltip && (
                     <div
-                      className="absolute z-50 bg-background border-2 border-primary p-3 rounded-md shadow-lg min-w-[200px] pointer-events-none bottom-full left-1/2 transform -translate-x-1/2 mb-2"
+                      className={`absolute z-100 bg-background border-2 border-primary p-3 rounded-md shadow-lg min-w-[200px] pointer-events-none ${tooltipPositionClass}`}
                     >
                       <div className="border-b-2 border-primary pb-2 mb-2">
                         <div className={`font-bold ${rarityColor}`}>{rarityLabel}</div>

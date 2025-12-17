@@ -12,6 +12,7 @@ interface DaevanionStore {
   getPointsType: (path: DaevanionPath) => string;
   resetPath: (path: DaevanionPath) => void;
   resetAll: () => void;
+  activateAllRunes: (path: DaevanionPath) => Promise<void>;
   loadFromBuild: (daevanion: DaevanionBuild | null | undefined) => void;
 }
 
@@ -461,6 +462,23 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
   resetAll: () => {
     set({ daevanionBuild: initialBuild });
     scheduleSave();
+  },
+
+  activateAllRunes: async (path) => {
+    const allRunes = await getRunesForPath(path);
+    // Filtrer les null et récupérer tous les slotIds
+    const allSlotIds = allRunes
+      .filter((rune): rune is DaevanionRune => rune !== null)
+      .map((rune) => rune.slotId);
+    
+    set((state) => {
+      const newDaevanionBuild = {
+        ...state.daevanionBuild,
+        [path]: allSlotIds,
+      };
+      scheduleSave();
+      return { daevanionBuild: newDaevanionBuild };
+    });
   },
   }
 });

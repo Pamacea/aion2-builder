@@ -3,9 +3,10 @@
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath } from "@/types/daevanion.type";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RuneGrid } from "./RuneGrid";
+import { RuneGrid } from "../_client/RuneGrid";
+import { useDaevanionStore } from "../_store/useDaevanionStore";
+import { DaevanionManager } from "./DaevanionManager";
 import { StatsSidebar } from "./StatsSidebar";
-import { useDaevanionStore } from "./useDaevanionStore";
 
 const DAEVANION_PATHS: { id: DaevanionPath; name: string }[] = [
   { id: "nezekan", name: "Nezekan" },
@@ -26,7 +27,7 @@ const MAX_POINTS_BY_TYPE: Record<string, number> = {
 export function DaevanionPlanner() {
   const [activePath, setActivePath] = useState<DaevanionPath>("nezekan");
   const { build } = useBuildStore();
-  const { daevanionBuild, toggleRune, getTotalStats, getPointsUsed, getPointsType, loadFromBuild } = useDaevanionStore();
+  const { daevanionBuild, toggleRune, getTotalStats, getPointsUsed, getPointsType, loadFromBuild, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
   const hasLoadedRef = useRef(false);
   const lastBuildIdRef = useRef<number | null>(null);
 
@@ -105,11 +106,10 @@ export function DaevanionPlanner() {
   }, [getTotalStats, getPointsUsed, activePath, daevanionBuild]);
 
   return (
-    <div className="w-full h-full flex flex-row gap-4">
-      {/* Zone principale avec onglets et grille */}
-      <div className="flex-1 flex flex-col gap-4">
-        {/* Onglets */}
-        <div className="flex gap-2 border-b border-border">
+    <div className="w-full h-full flex flex-col ">
+      {/* Onglets en pleine largeur, centrés */}
+      <div className="w-full flex justify-center border-b border-background/30">
+        <div className="flex gap-2">
           {DAEVANION_PATHS.map((path) => {
             const pathRunes = daevanionBuild[path.id] || [];
             const pathRuneCount = pathRunes.length;
@@ -130,25 +130,40 @@ export function DaevanionPlanner() {
             );
           })}
         </div>
-
-        {/* Grille de runes */}
-        <div className="flex-1 overflow-auto">
-          <RuneGrid
-            path={activePath}
-            activeRunes={activeRunes}
-            onToggleRune={(slotId: number) => toggleRune(activePath, slotId)}
-          />
-        </div>
       </div>
 
-      {/* Barre latérale des stats */}
-      <div className="w-80 border-l border-border pl-4">
-        <StatsSidebar 
-          stats={totalStats} 
-          pointsUsed={pointsUsed}
-          pointsType={pointsType}
-          maxPoints={maxPoints}
-        />
+      {/* Zone principale avec manager à gauche, planner centré et stats à droite */}
+      <div className="flex-1 flex flex-row gap-4">
+        {/* Daevanion Manager à gauche */}
+        <div className="w-80 border-r border-border pr-4">
+          <DaevanionManager
+            activePath={activePath}
+            onResetPath={() => resetPath(activePath)}
+            onResetAll={() => resetAll()}
+            onActivateAll={() => activateAllRunes(activePath)}
+          />
+        </div>
+
+        {/* Planner centré */}
+        <div className="flex-1 flex justify-center items-center overflow-auto py-8">
+          <div className="w-full h-full flex justify-center items-center">
+            <RuneGrid
+              path={activePath}
+              activeRunes={activeRunes}
+              onToggleRune={(slotId: number) => toggleRune(activePath, slotId)}
+            />
+          </div>
+        </div>
+
+        {/* Barre latérale des stats à droite */}
+        <div className="w-80 border-l border-border pl-4">
+          <StatsSidebar 
+            stats={totalStats} 
+            pointsUsed={pointsUsed}
+            pointsType={pointsType}
+            maxPoints={maxPoints}
+          />
+        </div>
       </div>
     </div>
   );
