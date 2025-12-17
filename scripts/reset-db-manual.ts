@@ -48,17 +48,15 @@ async function resetDatabase() {
 
     console.log(`📋 Found ${tables.length} tables to drop`);
 
-    // Désactiver les contraintes de clé étrangère temporairement
-    await pool.query("SET session_replication_role = 'replica';");
-
-    // Supprimer toutes les tables
+    // Supprimer toutes les tables (CASCADE gère automatiquement les contraintes de clé étrangère)
     for (const table of tables) {
       console.log(`🗑️  Dropping table: ${table}`);
-      await pool.query(`DROP TABLE IF EXISTS "${table}" CASCADE;`);
+      try {
+        await pool.query(`DROP TABLE IF EXISTS "${table}" CASCADE;`);
+      } catch (error) {
+        console.warn(`⚠️  Could not drop table ${table}:`, error);
+      }
     }
-
-    // Réactiver les contraintes
-    await pool.query("SET session_replication_role = 'origin';");
 
     console.log("✅ All tables dropped successfully");
     console.log("✅ Database reset complete!");
