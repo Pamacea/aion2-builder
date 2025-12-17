@@ -4,6 +4,66 @@ import { DaevanionPath, DaevanionRune } from "@/types/daevanion.type";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
+// Helper pour formater les stats pour l'affichage
+const formatStats = (stats: DaevanionRune["stats"]): string[] => {
+  if (!stats || Object.keys(stats).length === 0) return [];
+  
+  const statLabels: Record<string, string> = {
+    attack: "Attack Bonus",
+    criticalHit: "Critical Hit",
+    criticalHitResist: "Critical Hit Resist",
+    mp: "MP",
+    maxHP: "Max HP",
+    defense: "Defense",
+    cooldownReduction: "Cooldown Reduction",
+    combatSpeed: "Combat Speed",
+    damageBoost: "Damage Boost",
+    damageTolerance: "Damage Tolerance",
+    criticalDamageTolerance: "Critical Damage Tolerance",
+    criticalDamageBoost: "Critical Damage Boost",
+    multiHitResist: "Multi Hit Resist",
+    multiHitChance: "Multi Hit Chance",
+    pveDamageTolerance: "PvE Damage Tolerance",
+    pveDamageBoost: "PvE Damage Boost",
+    pvpDamageBoost: "PvP Damage Boost",
+    pvpDamageTolerance: "PvP Damage Tolerance",
+    passiveLevelBoost: "Passive Level Boost",
+    activeSkillLevelBoost: "Active Skill Level Boost",
+  };
+  
+  return Object.entries(stats)
+    .filter(([, value]) => value !== undefined && value !== 0)
+    .map(([key, value]) => `${statLabels[key] || key}: +${value}`);
+};
+
+// Helper pour obtenir le label de rareté
+const getRarityLabel = (rarity: string, isStartNode: boolean = false): string => {
+  if (isStartNode) {
+    return "Node Start";
+  }
+  const labels: Record<string, string> = {
+    common: "Node Common",
+    rare: "Node Rare",
+    legend: "Node Legend",
+    unique: "Node Unique",
+  };
+  return labels[rarity.toLowerCase()] || `Node ${rarity}`;
+};
+
+// Helper pour obtenir la couleur selon la rareté
+const getRarityColor = (rarity: string, isStartNode: boolean = false): string => {
+  if (isStartNode) {
+    return "text-white";
+  }
+  const colors: Record<string, string> = {
+    common: "text-gray-400",
+    rare: "text-green-500",
+    legend: "text-blue-500",
+    unique: "text-orange-500",
+  };
+  return colors[rarity.toLowerCase()] || "text-foreground";
+};
+
 interface RuneGridProps {
   path: DaevanionPath;
   activeRunes: number[]; // Array de slotIds
@@ -80,10 +140,19 @@ const getRuneImage = (rune: DaevanionRune, isActive: boolean): string => {
 
 export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   const [runes, setRunes] = useState<(DaevanionRune | null)[]>([]);
+  const [hoveredRune, setHoveredRune] = useState<DaevanionRune | null>(null);
   
   useEffect(() => {
     getRunesForPath(path).then(setRunes);
   }, [path]);
+  
+  const handleMouseEnter = (rune: DaevanionRune) => {
+    setHoveredRune(rune);
+  };
+  
+  const handleMouseLeave = () => {
+    setHoveredRune(null);
+  };
 
   const canActivate = (rune: DaevanionRune): boolean => {
     if (activeRunes.includes(rune.slotId)) return true; // Déjà activée
@@ -174,28 +243,58 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                 borderClass = "";
               }
 
+              const statsList = formatStats(rune.stats);
+              const rarityLabel = getRarityLabel(rune.rarity, isStartNode);
+              const rarityColor = getRarityColor(rune.rarity, isStartNode);
+              const showTooltip = hoveredRune?.slotId === rune.slotId;
+
               return (
-                <button
-                  key={rune.slotId}
-                  onClick={() => handleRuneClick(rune)}
-                  disabled={!canActivateRune && !isActive}
-                  className={`
-                    relative w-16 h-16 transition-all
-                    ${opacityClass}
-                    ${canActivateRune || isActive ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
-                    ${borderClass}
-                  `}
-                  title={rune.name}
-                >
-                  <Image
-                    src={getRuneImage(rune, isActive)}
-                    alt={rune.name}
-                    width={64}
-                    height={64}
-                    className="w-full h-full"
-                    unoptimized
-                  />
-                </button>
+                <div key={rune.slotId} className="relative group">
+                  <button
+                    onClick={() => handleRuneClick(rune)}
+                    onMouseEnter={() => handleMouseEnter(rune)}
+                    onMouseLeave={handleMouseLeave}
+                    disabled={!canActivateRune && !isActive}
+                    className={`
+                      relative w-16 h-16 transition-all
+                      ${opacityClass}
+                      ${canActivateRune || isActive ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
+                      ${borderClass}
+                      ${showTooltip ? "border-b-4 border-b-primary" : ""}
+                    `}
+                  >
+                    <Image
+                      src={getRuneImage(rune, isActive)}
+                      alt={rune.name}
+                      width={64}
+                      height={64}
+                      className="w-full h-full"
+                      unoptimized
+                    />
+                  </button>
+                  
+                  {/* Tooltip */}
+                  {showTooltip && (
+                    <div
+                      className="absolute z-50 bg-background border-2 border-primary p-3 rounded-md shadow-lg min-w-[200px] pointer-events-none bottom-full left-1/2 transform -translate-x-1/2 mb-2"
+                    >
+                      <div className="border-b-2 border-primary pb-2 mb-2">
+                        <div className={`font-bold ${rarityColor}`}>{rarityLabel}</div>
+                      </div>
+                      {statsList.length > 0 ? (
+                        <div className="space-y-1">
+                          {statsList.map((stat, index) => (
+                            <div key={index} className="text-sm text-foreground">
+                              {stat}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">Aucune stats</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

@@ -21,6 +21,10 @@ const getRunesForPath = async (path: DaevanionPath): Promise<(DaevanionRune | nu
     const { nezekanRunes } = await import("@/data/daevanion/nezekan");
     return nezekanRunes;
   }
+  if (path === "zikel") {
+    const { zikelRunes } = await import("@/data/daevanion/zikel");
+    return zikelRunes;
+  }
   // Pour les autres chemins, retourner un tableau vide pour l'instant
   return [];
 };
@@ -79,6 +83,7 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const autoSave = async () => {
+    // Toujours lire l'état le plus récent au moment de la sauvegarde
     const daevanionBuild = get().daevanionBuild;
     const buildStore = useBuildStore.getState();
     const build = buildStore.build;
@@ -100,19 +105,43 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
     try {
       // Use dynamic import to avoid bundling server actions in client
       const { saveBuildAction } = await import("actions/buildActions");
+      
+      // Log pour debug
+      const totalRunes = 
+        (daevanionBuild.nezekan?.length || 0) +
+        (daevanionBuild.zikel?.length || 0) +
+        (daevanionBuild.vaizel?.length || 0) +
+        (daevanionBuild.triniel?.length || 0) +
+        (daevanionBuild.ariel?.length || 0) +
+        (daevanionBuild.azphel?.length || 0);
+      console.log(`[Daevanion] Sauvegarde de ${totalRunes} runes actives:`, {
+        nezekan: daevanionBuild.nezekan?.length || 0,
+        zikel: daevanionBuild.zikel?.length || 0,
+        vaizel: daevanionBuild.vaizel?.length || 0,
+        triniel: daevanionBuild.triniel?.length || 0,
+        ariel: daevanionBuild.ariel?.length || 0,
+        azphel: daevanionBuild.azphel?.length || 0,
+      });
+      
       await saveBuildAction(build.id, {
         ...build,
         daevanion: {
           id: build.daevanion?.id || 0,
           buildId: build.id,
-          nezekan: daevanionBuild.nezekan,
-          zikel: daevanionBuild.zikel,
-          vaizel: daevanionBuild.vaizel,
-          triniel: daevanionBuild.triniel,
-          ariel: daevanionBuild.ariel,
-          azphel: daevanionBuild.azphel,
+          nezekan: daevanionBuild.nezekan || [],
+          zikel: daevanionBuild.zikel || [],
+          vaizel: daevanionBuild.vaizel || [],
+          triniel: daevanionBuild.triniel || [],
+          ariel: daevanionBuild.ariel || [],
+          azphel: daevanionBuild.azphel || [],
         },
       });
+      
+      console.log(`[Daevanion] Sauvegarde réussie`);
+      
+      // Ne pas mettre à jour le build dans le store après la sauvegarde
+      // car les données locales sont déjà à jour et cela éviterait un rechargement inutile
+      // qui causerait un flash visuel. Le build sera mis à jour au prochain chargement de page.
     } catch (error) {
       console.error("Error saving daevanion:", error);
     }
@@ -120,33 +149,56 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
 
   const scheduleSave = () => {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(autoSave, 300);
+    // Augmenter le délai à 1000ms pour réduire le nombre de requêtes
+    // et permettre de collecter plusieurs modifications avant de sauvegarder
+    saveTimeout = setTimeout(autoSave, 1000);
   };
 
   return {
     daevanionBuild: initialBuild,
 
     loadFromBuild: (daevanion) => {
+      const currentState = get();
+      const currentBuild = currentState.daevanionBuild;
+      
       if (daevanion) {
         // S'assurer que le start node (slotId 61) est toujours activé pour Nezekan
         const nezekanRunes = daevanion.nezekan || [];
         if (!nezekanRunes.includes(61)) {
           nezekanRunes.push(61);
         }
-        set({ 
-          daevanionBuild: {
-            ...daevanion,
-            nezekan: nezekanRunes,
-          }
-        });
+        
+        // Comparer les données pour éviter les rechargements inutiles
+        const newBuild = {
+          ...daevanion,
+          nezekan: nezekanRunes,
+        };
+        
+        // Vérifier si les données ont vraiment changé
+        const hasChanged = 
+          JSON.stringify(currentBuild.nezekan?.sort()) !== JSON.stringify(newBuild.nezekan?.sort()) ||
+          JSON.stringify(currentBuild.zikel?.sort()) !== JSON.stringify(newBuild.zikel?.sort()) ||
+          JSON.stringify(currentBuild.vaizel?.sort()) !== JSON.stringify(newBuild.vaizel?.sort()) ||
+          JSON.stringify(currentBuild.triniel?.sort()) !== JSON.stringify(newBuild.triniel?.sort()) ||
+          JSON.stringify(currentBuild.ariel?.sort()) !== JSON.stringify(newBuild.ariel?.sort()) ||
+          JSON.stringify(currentBuild.azphel?.sort()) !== JSON.stringify(newBuild.azphel?.sort());
+        
+        // Ne mettre à jour que si les données ont changé
+        if (hasChanged) {
+          set({ 
+            daevanionBuild: newBuild
+          });
+        }
       } else {
-        // Initialiser avec le start node activé
-        set({ 
-          daevanionBuild: {
-            ...initialBuild,
-            nezekan: [61], // Start node (slotId 61) toujours activé
-          }
-        });
+        // Initialiser avec le start node activé seulement si ce n'est pas déjà fait
+        if (JSON.stringify(currentBuild.nezekan?.sort()) !== JSON.stringify([61])) {
+          set({ 
+            daevanionBuild: {
+              ...initialBuild,
+              nezekan: [61], // Start node (slotId 61) toujours activé
+            }
+          });
+        }
       }
     },
 
@@ -256,17 +308,21 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
           // Ne garder que les runes qui ont encore un chemin vers le start
           const finalPathRunes = newPathRunes.filter((id) => connectedRunes.includes(id));
           
+          // Toujours lire l'état le plus récent avant de mettre à jour
+          const currentState = get();
           set({
             daevanionBuild: {
-              ...state.daevanionBuild,
+              ...currentState.daevanionBuild,
               [path]: finalPathRunes,
             },
           });
         } else {
           // Pas de start node ou start node désactivé, désactiver toutes les runes
+          // Toujours lire l'état le plus récent avant de mettre à jour
+          const currentState = get();
           set({
             daevanionBuild: {
-              ...state.daevanionBuild,
+              ...currentState.daevanionBuild,
               [path]: startNodeId ? [startNodeId] : [],
             },
           });
@@ -275,13 +331,19 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         scheduleSave();
       } else {
         // Activer la rune
-        set({
-          daevanionBuild: {
-            ...state.daevanionBuild,
-            [path]: [...pathRunes, slotId],
-          },
-        });
-        scheduleSave();
+        // Toujours lire l'état le plus récent avant de mettre à jour
+        const currentState = get();
+        const currentPathRunes = currentState.daevanionBuild[path] || [];
+        // Vérifier que la rune n'est pas déjà active (au cas où elle aurait été activée entre temps)
+        if (!currentPathRunes.includes(slotId)) {
+          set({
+            daevanionBuild: {
+              ...currentState.daevanionBuild,
+              [path]: [...currentPathRunes, slotId],
+            },
+          });
+          scheduleSave();
+        }
       }
     },
 

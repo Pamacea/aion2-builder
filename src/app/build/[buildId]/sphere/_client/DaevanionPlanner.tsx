@@ -2,7 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath } from "@/types/daevanion.type";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RuneGrid } from "./RuneGrid";
 import { StatsSidebar } from "./StatsSidebar";
 import { useDaevanionStore } from "./useDaevanionStore";
@@ -27,10 +27,21 @@ export function DaevanionPlanner() {
   const [activePath, setActivePath] = useState<DaevanionPath>("nezekan");
   const { build } = useBuildStore();
   const { daevanionBuild, toggleRune, getTotalStats, getPointsUsed, getPointsType, loadFromBuild } = useDaevanionStore();
+  const hasLoadedRef = useRef(false);
+  const lastBuildIdRef = useRef<number | null>(null);
 
   // Charger les données daevanion depuis le build au chargement
+  // Ne charger qu'une seule fois au montage ou si le buildId change
   useEffect(() => {
-    if (build) {
+    if (!build) return;
+    
+    const currentBuildId = build.id;
+    
+    // Ne charger que si c'est la première fois ou si le buildId a changé
+    if (!hasLoadedRef.current || lastBuildIdRef.current !== currentBuildId) {
+      hasLoadedRef.current = true;
+      lastBuildIdRef.current = currentBuildId;
+      
       if (build.daevanion) {
         loadFromBuild({
           nezekan: build.daevanion.nezekan || [],
@@ -78,9 +89,19 @@ export function DaevanionPlanner() {
   const pointsType = getPointsType(activePath);
   const maxPoints = MAX_POINTS_BY_TYPE[pointsType] || 500;
 
+  // Calculer les stats de manière optimisée
   useEffect(() => {
-    getTotalStats(activePath).then(setTotalStats);
-    getPointsUsed(activePath).then(setPointsUsed);
+    const updateStats = async () => {
+      const [stats, points] = await Promise.all([
+        getTotalStats(activePath),
+        getPointsUsed(activePath)
+      ]);
+      setTotalStats(stats);
+      setPointsUsed(points);
+    };
+    
+    // Calculer immédiatement sans délai pour une meilleure réactivité
+    updateStats();
   }, [getTotalStats, getPointsUsed, activePath, daevanionBuild]);
 
   return (

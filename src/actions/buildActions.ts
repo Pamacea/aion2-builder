@@ -260,6 +260,31 @@ export async function updateBuild(
     };
   }
 
+  // Handle daevanion update
+  if ("daevanion" in data && data.daevanion !== undefined) {
+    const daevanionData = data.daevanion as NonNullable<BuildType["daevanion"]>;
+    updateData.daevanion = {
+      upsert: {
+        create: {
+          nezekan: daevanionData.nezekan || [],
+          zikel: daevanionData.zikel || [],
+          vaizel: daevanionData.vaizel || [],
+          triniel: daevanionData.triniel || [],
+          ariel: daevanionData.ariel || [],
+          azphel: daevanionData.azphel || [],
+        },
+        update: {
+          nezekan: daevanionData.nezekan || [],
+          zikel: daevanionData.zikel || [],
+          vaizel: daevanionData.vaizel || [],
+          triniel: daevanionData.triniel || [],
+          ariel: daevanionData.ariel || [],
+          azphel: daevanionData.azphel || [],
+        },
+      },
+    };
+  }
+
   const updated = await prisma.build.update({
     where: { id: buildId },
     data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
@@ -272,6 +297,13 @@ export async function updateBuild(
     revalidatePath(`/build/${buildId}`, 'page');
     revalidatePath(`/build/${buildId}/profile`, 'page');
     revalidatePath(`/build/${buildId}/skill`, 'page');
+  }
+
+  // Invalider le cache si daevanion a été modifié
+  if ("daevanion" in data && data.daevanion !== undefined) {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}`, 'page');
+    revalidatePath(`/build/${buildId}/sphere`, 'page');
   }
 
   return BuildSchema.parse(updated);
