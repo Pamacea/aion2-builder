@@ -36,9 +36,12 @@ export interface DaevanionRune {
     pvpDamageTolerance?: number;
     
     // Augmentations de niveau (Rare - vert, Legend - bleu)
-    passiveLevelBoost?: number; // Rare
-    activeSkillLevelBoost?: number; // Legend
+    passiveLevelBoost?: number; // Rare - boost générique (déprécié, utiliser passiveId)
+    activeSkillLevelBoost?: number; // Legend - boost générique (déprécié, utiliser abilityId)
   };
+  // IDs pour les boosts spécifiques (Rare et Legend)
+  passiveId?: number; // Pour les nodes Rare : ID du passif à augmenter
+  abilityId?: number; // Pour les nodes Legend : ID de l'ability à augmenter
   // Position dans la grille (pour le layout)
   position?: {
     x: number;
@@ -55,6 +58,12 @@ export interface DaevanionBuild {
   triniel: number[];
   ariel: number[];
   azphel: number[];
+}
+
+export interface DaevanionSkillLevelUp {
+  name: string;
+  type: "ability" | "passive";
+  id: number; // abilityId ou passiveId
 }
 
 export interface DaevanionStats {
@@ -83,4 +92,7 @@ export interface DaevanionStats {
   // Augmentations de niveau
   passiveLevelBoost: number;
   activeSkillLevelBoost: number;
+  
+  // Liste des skills/passives augmentés
+  skillLevelUps: DaevanionSkillLevelUp[];
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath, DaevanionRune } from "@/types/daevanion.type";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -141,11 +142,45 @@ const getRuneImage = (rune: DaevanionRune, isActive: boolean): string => {
 export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   const [runes, setRunes] = useState<(DaevanionRune | null)[]>([]);
   const [hoveredRune, setHoveredRune] = useState<DaevanionRune | null>(null);
+  const { build } = useBuildStore();
   
   useEffect(() => {
     getRunesForPath(path).then(setRunes);
   }, [path]);
-  
+
+  // Helper pour obtenir le nom du skill/passive boosté par une rune
+  const getSkillLevelUpInfo = (rune: DaevanionRune): { name: string; type: "ability" | "passive" } | null => {
+    if (!build) return null;
+
+    // Récupérer les abilities et passives triés par ID pour l'indexation
+    const sortedAbilities = build.class?.abilities
+      ? [...build.class.abilities].sort((a, b) => a.id - b.id)
+      : [];
+    const sortedPassives = build.class?.passives
+      ? [...build.class.passives].sort((a, b) => a.id - b.id)
+      : [];
+
+    // Traiter les nodes rare (passiveId)
+    if (rune.rarity === "rare" && rune.passiveId) {
+      const passiveIndex = rune.passiveId - 1;
+      if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
+        const passive = sortedPassives[passiveIndex];
+        return { name: passive.name, type: "passive" };
+      }
+    }
+
+    // Traiter les nodes legend (abilityId)
+    if (rune.rarity === "legend" && rune.abilityId) {
+      const abilityIndex = rune.abilityId - 1;
+      if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
+        const ability = sortedAbilities[abilityIndex];
+        return { name: ability.name, type: "ability" };
+      }
+    }
+
+    return null;
+  };
+
   const handleMouseEnter = (rune: DaevanionRune) => {
     setHoveredRune(rune);
   };
@@ -247,6 +282,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
               const rarityLabel = getRarityLabel(rune.rarity, isStartNode);
               const rarityColor = getRarityColor(rune.rarity, isStartNode);
               const showTooltip = hoveredRune?.slotId === rune.slotId;
+              const skillLevelUp = getSkillLevelUpInfo(rune);
               
               // Déterminer si le tooltip doit s'afficher en dessous (pour les runes du haut)
               // Si la rune est dans les 3 premières lignes, afficher le tooltip en dessous
@@ -290,6 +326,19 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                       <div className="border-b-2 border-primary pb-2 mb-2">
                         <div className={`font-bold ${rarityColor}`}>{rarityLabel}</div>
                       </div>
+                      
+                      {/* Afficher le skill level up pour les nodes rare et legend */}
+                      {skillLevelUp && (
+                        <div className="mb-2 pb-2 border-b border-primary/30">
+                          <div className="text-sm font-semibold text-primary">
+                            Skill Level Up - {skillLevelUp.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {skillLevelUp.type === "ability" ? "Ability" : "Passive"} +1 Level
+                          </div>
+                        </div>
+                      )}
+                      
                       {statsList.length > 0 ? (
                         <div className="space-y-1">
                           {statsList.map((stat, index) => (
@@ -299,7 +348,9 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                           ))}
                         </div>
                       ) : (
-                        <div className="text-sm text-muted-foreground">Aucune stats</div>
+                        !skillLevelUp && (
+                          <div className="text-sm text-muted-foreground">Aucune stats</div>
+                        )
                       )}
                     </div>
                   )}

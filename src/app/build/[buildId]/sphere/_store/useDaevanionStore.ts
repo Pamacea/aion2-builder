@@ -54,6 +54,181 @@ const getRuneCost = (rarity: string): number => {
   }
 };
 
+// Helper pour mettre à jour les niveaux de skills/passifs basés sur les runes activées
+// Cette fonction recalcule tous les boosts et ajuste les niveaux en conséquence
+const updateSkillLevelsFromRunes = async (
+  path: DaevanionPath,
+  activeRunes: number[],
+  previousActiveRunes: number[] = []
+) => {
+  const buildStore = useBuildStore.getState();
+  const build = buildStore.build;
+  if (!build) return;
+
+  console.log(`[Daevanion Skill Update] Début - activeRunes:`, activeRunes, `previousActiveRunes:`, previousActiveRunes);
+
+  // Récupérer toutes les runes du chemin
+  const allRunes = await getRunesForPath(path);
+  
+  // Les abilities et passives de la classe ne changent pas, on peut les récupérer une fois
+  const sortedAbilities = build.class?.abilities
+    ? [...build.class.abilities].sort((a, b) => a.id - b.id)
+    : [];
+  const sortedPassives = build.class?.passives
+    ? [...build.class.passives].sort((a, b) => a.id - b.id)
+    : [];
+
+  // Compter les boosts actuels
+  const currentAbilityBoosts = new Map<number, number>();
+  const currentPassiveBoosts = new Map<number, number>();
+
+  activeRunes.forEach((slotId) => {
+    const rune = allRunes.find((r) => r?.slotId === slotId);
+    if (!rune) return;
+
+    // Ignorer le start node
+    if (rune.slotId === 61 && rune.path === "nezekan") return;
+
+    // Traiter les nodes rare (passiveId)
+    if (rune.rarity === "rare" && rune.passiveId) {
+      const passiveIndex = rune.passiveId - 1;
+      if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
+        const passive = sortedPassives[passiveIndex];
+        currentPassiveBoosts.set(passive.id, (currentPassiveBoosts.get(passive.id) || 0) + 1);
+      }
+    }
+
+    // Traiter les nodes legend (abilityId)
+    if (rune.rarity === "legend" && rune.abilityId) {
+      const abilityIndex = rune.abilityId - 1;
+      if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
+        const ability = sortedAbilities[abilityIndex];
+        currentAbilityBoosts.set(ability.id, (currentAbilityBoosts.get(ability.id) || 0) + 1);
+      }
+    }
+  });
+
+  // Compter les boosts précédents
+  const previousAbilityBoosts = new Map<number, number>();
+  const previousPassiveBoosts = new Map<number, number>();
+
+  previousActiveRunes.forEach((slotId) => {
+    const rune = allRunes.find((r) => r?.slotId === slotId);
+    if (!rune) return;
+
+    // Ignorer le start node
+    if (rune.slotId === 61 && rune.path === "nezekan") return;
+
+    // Traiter les nodes rare (passiveId)
+    if (rune.rarity === "rare" && rune.passiveId) {
+      const passiveIndex = rune.passiveId - 1;
+      if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
+        const passive = sortedPassives[passiveIndex];
+        previousPassiveBoosts.set(passive.id, (previousPassiveBoosts.get(passive.id) || 0) + 1);
+      }
+    }
+
+    // Traiter les nodes legend (abilityId)
+    if (rune.rarity === "legend" && rune.abilityId) {
+      const abilityIndex = rune.abilityId - 1;
+      if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
+        const ability = sortedAbilities[abilityIndex];
+        previousAbilityBoosts.set(ability.id, (previousAbilityBoosts.get(ability.id) || 0) + 1);
+      }
+    }
+  });
+
+  // Pour chaque ability, calculer le niveau de base (sans les boosts Daevanion) et ajouter les boosts actuels
+  const allAbilityIds = new Set([...currentAbilityBoosts.keys(), ...previousAbilityBoosts.keys()]);
+  for (const abilityId of allAbilityIds) {
+    const currentBoost = currentAbilityBoosts.get(abilityId) || 0;
+    const previousBoost = previousAbilityBoosts.get(abilityId) || 0;
+    const boostDiff = currentBoost - previousBoost;
+
+    if (boostDiff === 0) continue; // Pas de changement
+
+    console.log(`[Daevanion Skill Update] Ability ${abilityId}: currentBoost=${currentBoost}, previousBoost=${previousBoost}, boostDiff=${boostDiff}`);
+
+    // Récupérer le build à jour
+    const currentBuild = buildStore.build;
+    if (!currentBuild) continue;
+
+    const buildAbility = currentBuild.abilities?.find((a) => a.abilityId === abilityId);
+    
+    if (buildAbility) {
+      // Calculer le niveau de base en soustrayant les boosts précédents
+      const baseLevel = buildAbility.level - previousBoost;
+      // Le nouveau niveau = niveau de base + boosts actuels
+      const newLevel = Math.max(0, Math.min(baseLevel + currentBoost, buildAbility.maxLevel));
+      
+      console.log(`[Daevanion Skill Update] Ability ${abilityId}: buildAbility.level=${buildAbility.level}, baseLevel=${baseLevel}, newLevel=${newLevel}`);
+      
+      if (newLevel !== buildAbility.level) {
+        buildStore.updateAbilityLevel(abilityId, newLevel);
+        // Attendre que le store soit mis à jour
+        await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        console.log(`[Daevanion Skill Update] Ability ${abilityId} level unchanged (${buildAbility.level})`);
+      }
+    } else if (currentBoost > 0) {
+      // L'ability n'existe pas mais on a un boost positif, l'ajouter
+      const classAbility = sortedAbilities.find((a) => a.id === abilityId);
+      if (classAbility) {
+        console.log(`[Daevanion Skill Update] Adding ability ${abilityId} with level ${Math.min(currentBoost, classAbility.maxLevel || 20)}`);
+        buildStore.addAbility(abilityId, Math.min(currentBoost, classAbility.maxLevel || 20));
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    } else {
+      console.log(`[Daevanion Skill Update] Ability ${abilityId} not in build and currentBoost is 0, skipping`);
+    }
+  }
+
+  // Pour chaque passive, calculer le niveau de base (sans les boosts Daevanion) et ajouter les boosts actuels
+  const allPassiveIds = new Set([...currentPassiveBoosts.keys(), ...previousPassiveBoosts.keys()]);
+  for (const passiveId of allPassiveIds) {
+    const currentBoost = currentPassiveBoosts.get(passiveId) || 0;
+    const previousBoost = previousPassiveBoosts.get(passiveId) || 0;
+    const boostDiff = currentBoost - previousBoost;
+
+    if (boostDiff === 0) continue; // Pas de changement
+
+    console.log(`[Daevanion Skill Update] Passive ${passiveId}: currentBoost=${currentBoost}, previousBoost=${previousBoost}, boostDiff=${boostDiff}`);
+
+    // Récupérer le build à jour
+    const currentBuild = buildStore.build;
+    if (!currentBuild) continue;
+
+    const buildPassive = currentBuild.passives?.find((p) => p.passiveId === passiveId);
+    
+    if (buildPassive) {
+      // Calculer le niveau de base en soustrayant les boosts précédents
+      const baseLevel = buildPassive.level - previousBoost;
+      // Le nouveau niveau = niveau de base + boosts actuels
+      const newLevel = Math.max(0, Math.min(baseLevel + currentBoost, buildPassive.maxLevel));
+      
+      console.log(`[Daevanion Skill Update] Passive ${passiveId}: buildPassive.level=${buildPassive.level}, baseLevel=${baseLevel}, newLevel=${newLevel}`);
+      
+      if (newLevel !== buildPassive.level) {
+        buildStore.updatePassiveLevel(passiveId, newLevel);
+        // Attendre que le store soit mis à jour
+        await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        console.log(`[Daevanion Skill Update] Passive ${passiveId} level unchanged (${buildPassive.level})`);
+      }
+    } else if (currentBoost > 0) {
+      // Le passive n'existe pas mais on a un boost positif, l'ajouter
+      const classPassive = sortedPassives.find((p) => p.id === passiveId);
+      if (classPassive) {
+        console.log(`[Daevanion Skill Update] Adding passive ${passiveId} with level ${Math.min(currentBoost, classPassive.maxLevel || 10)}`);
+        buildStore.addPassive(passiveId, Math.min(currentBoost, classPassive.maxLevel || 10));
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    } else {
+      console.log(`[Daevanion Skill Update] Passive ${passiveId} not in build and currentBoost is 0, skipping`);
+    }
+  }
+};
+
 // Obtenir le type de points selon le chemin
 const getPointsType = (path: DaevanionPath): string => {
   switch (path) {
@@ -217,6 +392,10 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         // Désactiver la rune
         const newPathRunes = pathRunes.filter((id) => id !== slotId);
         
+        console.log(`[Daevanion] Désactivation de la rune ${slotId}`);
+        console.log(`[Daevanion] Runes avant désactivation:`, pathRunes);
+        console.log(`[Daevanion] Runes après filtrage initial:`, newPathRunes);
+        
         // Trouver toutes les runes qui ont encore un chemin valide vers le start node
         const allRunes = await getRunesForPath(path);
         const startNodeId = path === "nezekan" ? 61 : null;
@@ -326,6 +505,11 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
           // Ne garder que les runes qui ont encore un chemin vers le start
           const finalPathRunes = newPathRunes.filter((id) => connectedRunes.includes(id));
           
+          console.log(`[Daevanion] Runes finales après cascade:`, finalPathRunes);
+          console.log(`[Daevanion] Appel updateSkillLevelsFromRunes avec:`);
+          console.log(`  - activeRunes (finalPathRunes):`, finalPathRunes);
+          console.log(`  - previousActiveRunes (pathRunes):`, pathRunes);
+          
           // Toujours lire l'état le plus récent avant de mettre à jour
           const currentState = get();
           set({
@@ -334,16 +518,23 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
               [path]: finalPathRunes,
             },
           });
+          
+          // Mettre à jour les niveaux de skills/passifs après la désactivation
+          await updateSkillLevelsFromRunes(path, finalPathRunes, pathRunes);
         } else {
           // Pas de start node ou start node désactivé, désactiver toutes les runes
           // Toujours lire l'état le plus récent avant de mettre à jour
           const currentState = get();
+          const finalPathRunes = startNodeId ? [startNodeId] : [];
           set({
             daevanionBuild: {
               ...currentState.daevanionBuild,
-              [path]: startNodeId ? [startNodeId] : [],
+              [path]: finalPathRunes,
             },
           });
+          
+          // Mettre à jour les niveaux de skills/passifs après la désactivation
+          await updateSkillLevelsFromRunes(path, finalPathRunes, pathRunes);
         }
         
         scheduleSave();
@@ -354,12 +545,17 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         const currentPathRunes = currentState.daevanionBuild[path] || [];
         // Vérifier que la rune n'est pas déjà active (au cas où elle aurait été activée entre temps)
         if (!currentPathRunes.includes(slotId)) {
+          const newPathRunes = [...currentPathRunes, slotId];
           set({
             daevanionBuild: {
               ...currentState.daevanionBuild,
-              [path]: [...currentPathRunes, slotId],
+              [path]: newPathRunes,
             },
           });
+          
+          // Mettre à jour les niveaux de skills/passifs après l'activation
+          await updateSkillLevelsFromRunes(path, newPathRunes, currentPathRunes);
+          
           scheduleSave();
         }
       }
@@ -368,6 +564,8 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
   getTotalStats: async (path) => {
     const state = get();
     const activeRunes = state.daevanionBuild[path] || [];
+    const buildStore = useBuildStore.getState();
+    const build = buildStore.build;
     
     const stats: DaevanionStats = {
       // Stats de base
@@ -395,23 +593,69 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       // Augmentations de niveau
       passiveLevelBoost: 0,
       activeSkillLevelBoost: 0,
+      
+      // Liste des skills/passives augmentés
+      skillLevelUps: [],
     };
 
     // Charger toutes les runes en parallèle
     const runePromises = activeRunes.map((slotId) => getRuneData(path, slotId));
     const runes = await Promise.all(runePromises);
 
+    // Récupérer les abilities et passives triés par ID pour l'indexation
+    const sortedAbilities = build?.class?.abilities
+      ? [...build.class.abilities].sort((a, b) => a.id - b.id)
+      : [];
+    const sortedPassives = build?.class?.passives
+      ? [...build.class.passives].sort((a, b) => a.id - b.id)
+      : [];
+
     runes.forEach((rune) => {
+      if (!rune) return;
+      
       // Ignorer le start node (slotId 61 pour Nezekan) - il ne donne aucune stats
-      if (rune && rune.slotId === 61 && rune.path === "nezekan") {
+      if (rune.slotId === 61 && rune.path === "nezekan") {
         return; // Skip le start node
       }
-      if (rune && rune.stats && Object.keys(rune.stats).length > 0) {
+      
+      // Traiter les stats de base
+      if (rune.stats && Object.keys(rune.stats).length > 0) {
         Object.entries(rune.stats).forEach(([key, value]) => {
-          if (value !== undefined && value !== 0 && key in stats) {
-            stats[key as keyof DaevanionStats] += value;
+          if (value !== undefined && value !== 0 && key in stats && key !== "skillLevelUps") {
+            const statKey = key as keyof DaevanionStats;
+            if (typeof stats[statKey] === "number" && typeof value === "number") {
+              (stats[statKey] as number) += value;
+            }
           }
         });
+      }
+      
+      // Traiter les nodes rare (passiveId)
+      if (rune.rarity === "rare" && rune.passiveId) {
+        // L'ID est 1-based, donc on utilise index = passiveId - 1
+        const passiveIndex = rune.passiveId - 1;
+        if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
+          const passive = sortedPassives[passiveIndex];
+          stats.skillLevelUps.push({
+            name: passive.name,
+            type: "passive",
+            id: passive.id,
+          });
+        }
+      }
+      
+      // Traiter les nodes legend (abilityId)
+      if (rune.rarity === "legend" && rune.abilityId) {
+        // L'ID est 1-based, donc on utilise index = abilityId - 1
+        const abilityIndex = rune.abilityId - 1;
+        if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
+          const ability = sortedAbilities[abilityIndex];
+          stats.skillLevelUps.push({
+            name: ability.name,
+            type: "ability",
+            id: ability.id,
+          });
+        }
       }
     });
 

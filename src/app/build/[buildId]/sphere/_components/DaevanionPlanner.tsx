@@ -84,6 +84,7 @@ export function DaevanionPlanner() {
     pvpDamageTolerance: 0,
     passiveLevelBoost: 0,
     activeSkillLevelBoost: 0,
+    skillLevelUps: [],
   });
 
   const [pointsUsed, setPointsUsed] = useState(0);
@@ -141,6 +142,9 @@ export function DaevanionPlanner() {
             onResetPath={() => resetPath(activePath)}
             onResetAll={() => resetAll()}
             onActivateAll={() => activateAllRunes(activePath)}
+            pointsUsed={pointsUsed}
+            pointsType={pointsType}
+            maxPoints={maxPoints}
           />
         </div>
 
@@ -158,10 +162,7 @@ export function DaevanionPlanner() {
         {/* Barre latérale des stats à droite */}
         <div className="w-80 border-l border-border pl-4">
           <StatsSidebar 
-            stats={totalStats} 
-            pointsUsed={pointsUsed}
-            pointsType={pointsType}
-            maxPoints={maxPoints}
+            stats={totalStats}
           />
         </div>
       </div>

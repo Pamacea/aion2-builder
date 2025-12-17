@@ -6,9 +6,6 @@ import { useState } from "react";
 
 interface StatsSidebarProps {
   stats: DaevanionStats;
-  pointsUsed: number;
-  pointsType: string;
-  maxPoints: number;
 }
 
 const STAT_DISPLAY_ORDER: Array<{ key: keyof DaevanionStats; label: string }> = [
@@ -39,7 +36,7 @@ const STAT_DISPLAY_ORDER: Array<{ key: keyof DaevanionStats; label: string }> = 
   { key: "activeSkillLevelBoost", label: "Active Skill Level Boost" },
 ];
 
-export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: StatsSidebarProps) {
+export function StatsSidebar({ stats }: StatsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredStats = STAT_DISPLAY_ORDER.filter((stat) => {
@@ -47,9 +44,11 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
     return stat.label.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const hasStats = Object.values(stats).some((value) => value > 0);
-  const pointsRemaining = maxPoints - pointsUsed;
-  const isOverLimit = pointsUsed > maxPoints;
+  const hasStats = Object.entries(stats).some(([key, value]) => {
+    // Exclure skillLevelUps du calcul
+    if (key === "skillLevelUps") return false;
+    return typeof value === "number" && value > 0;
+  }) || stats.skillLevelUps.length > 0;
 
   return (
     <div className="h-full flex flex-col gap-4 pt-4">
@@ -66,15 +65,35 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
 
       {/* Liste des stats */}
       <div className="flex-1 overflow-y-auto">
-        {!hasStats ? (
+        {!hasStats && stats.skillLevelUps.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             None Selected
           </div>
         ) : (
           <div className="space-y-2">
+            {/* Afficher les skill level ups en premier */}
+            {stats.skillLevelUps.map((skillLevelUp, index) => (
+              <div
+                key={`${skillLevelUp.type}-${skillLevelUp.id}-${index}`}
+                className="flex justify-between items-center p-2 rounded-md bg-muted/50"
+              >
+                <span className="text-sm font-medium">
+                  Skill Level Up - {skillLevelUp.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {skillLevelUp.type === "ability" ? "Ability" : "Passive"}
+                </span>
+              </div>
+            ))}
+            
+            {/* Afficher les stats normales */}
             {filteredStats.map((stat) => {
-              const value = stats[stat.key] || 0;
-              if (value === 0) return null;
+              const value = stats[stat.key];
+              // Vérifier que la valeur est un nombre (exclure skillLevelUps qui est un tableau)
+              if (typeof value !== "number" || value === 0) return null;
+              
+              // TypeScript assertion: on sait que value est un nombre ici
+              const numericValue = value as number;
 
               return (
                 <div
@@ -82,39 +101,12 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
                   className="flex justify-between items-center p-2 rounded-md bg-muted/50"
                 >
                   <span className="text-sm font-medium">{stat.label}:</span>
-                  <span className="text-sm font-bold text-primary">{value}</span>
+                  <span className="text-sm font-bold text-primary">{numericValue}</span>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
-
-      {/* Section des points en bas */}
-      <div className="border-t border-border pt-4 pb-2 mt-auto">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium"> {pointsType === "Daevanion_Common_Points" ? "Common Points" : pointsType === "Daevanion_PvE_Points" ? "PvE Points" : "PvP Points"}:</span>
-            <span className={`text-sm font-bold ${isOverLimit ? "text-destructive" : "text-primary"}`}>
-              {pointsUsed} / {maxPoints}
-            </span>
-          </div>
-          {isOverLimit && (
-            <div className="text-xs text-destructive">
-              ⚠️ Limite dépassée de {Math.abs(pointsRemaining)} points
-            </div>
-          )}
-          {!isOverLimit && pointsRemaining > 0 && (
-            <div className="text-xs text-muted-foreground">
-              {pointsRemaining} points restants
-            </div>
-          )}
-          {!isOverLimit && pointsRemaining === 0 && (
-            <div className="text-xs text-muted-foreground">
-              Tous les points utilisés
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
