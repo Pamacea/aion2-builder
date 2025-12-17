@@ -1,33 +1,21 @@
 "use client";
 
+import { MAX_POINTS_BY_TYPE } from "@/constants/daevanion.constant";
+import { useDaevanionPoints, useDaevanionStats } from "@/hooks/useDaevanionData";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath } from "@/types/daevanion.type";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DaevanionButtons } from "../_client/daevanion-buttons";
+import { DaevanionPoints } from "../_client/daevanion-points";
+import { DaevanionTab } from "../_client/daevanion-tab";
 import { RuneGrid } from "../_client/RuneGrid";
 import { useDaevanionStore } from "../_store/useDaevanionStore";
-import { DaevanionManager } from "./DaevanionManager";
 import { StatsSidebar } from "./StatsSidebar";
-
-const DAEVANION_PATHS: { id: DaevanionPath; name: string }[] = [
-  { id: "nezekan", name: "Nezekan" },
-  { id: "zikel", name: "Zikel" },
-  { id: "vaizel", name: "Vaizel" },
-  { id: "triniel", name: "Triniel" },
-  { id: "ariel", name: "Ariel" },
-  { id: "azphel", name: "Azphel" },
-];
-
-// Points maximums par type de points
-const MAX_POINTS_BY_TYPE: Record<string, number> = {
-  Daevanion_Common_Points: 500, // Partagé entre Nezekan, Zikel, Vaizel, Triniel
-  Daevanion_PvE_Points: 500, // Pour Ariel
-  Daevanion_Pvp_Points: 500, // Pour Azphel
-};
 
 export function DaevanionPlanner() {
   const [activePath, setActivePath] = useState<DaevanionPath>("nezekan");
   const { build } = useBuildStore();
-  const { daevanionBuild, toggleRune, getTotalStats, getPointsUsed, getPointsType, loadFromBuild, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
+  const { daevanionBuild, toggleRune, getPointsType, loadFromBuild, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
   const hasLoadedRef = useRef(false);
   const lastBuildIdRef = useRef<number | null>(null);
 
@@ -59,11 +47,13 @@ export function DaevanionPlanner() {
     }
   }, [build, loadFromBuild]);
 
+  // Mémoriser les runes actives pour éviter les recalculs
   const activeRunes = useMemo(() => {
     return daevanionBuild[activePath] || [];
   }, [daevanionBuild, activePath]);
 
-  const [totalStats, setTotalStats] = useState<ReturnType<typeof getTotalStats> extends Promise<infer T> ? T : never>({
+  // Utiliser TanStack Query pour les stats et points avec cache
+  const { data: totalStats = {
     attack: 0,
     criticalHit: 0,
     criticalHitResist: 0,
@@ -85,67 +75,64 @@ export function DaevanionPlanner() {
     passiveLevelBoost: 0,
     activeSkillLevelBoost: 0,
     skillLevelUps: [],
-  });
+  } } = useDaevanionStats(activePath, activeRunes);
 
-  const [pointsUsed, setPointsUsed] = useState(0);
+  const { data: pointsUsed = 0 } = useDaevanionPoints(activePath, activeRunes);
+
+  // Calculer les valeurs (pas besoin de useMemo pour une fonction simple)
   const pointsType = getPointsType(activePath);
   const maxPoints = MAX_POINTS_BY_TYPE[pointsType] || 500;
 
-  // Calculer les stats de manière optimisée
-  useEffect(() => {
-    const updateStats = async () => {
-      const [stats, points] = await Promise.all([
-        getTotalStats(activePath),
-        getPointsUsed(activePath)
-      ]);
-      setTotalStats(stats);
-      setPointsUsed(points);
-    };
-    
-    // Calculer immédiatement sans délai pour une meilleure réactivité
-    updateStats();
-  }, [getTotalStats, getPointsUsed, activePath, daevanionBuild]);
+  // Callbacks mémorisés pour éviter les re-renders
+  const handlePathChange = useCallback((path: DaevanionPath) => {
+    setActivePath(path);
+  }, []);
+
+  const handleToggleRune = useCallback((slotId: number) => {
+    toggleRune(activePath, slotId);
+  }, [activePath, toggleRune]);
+
+  const handleResetPath = useCallback(() => {
+    resetPath(activePath);
+  }, [activePath, resetPath]);
+
+  const handleResetAll = useCallback(() => {
+    resetAll();
+  }, [resetAll]);
+
+  const handleActivateAll = useCallback(() => {
+    activateAllRunes(activePath);
+  }, [activePath, activateAllRunes]);
 
   return (
-    <div className="w-full h-full flex flex-col ">
+    <div className="w-full h-full flex flex-col">
       {/* Onglets en pleine largeur, centrés */}
-      <div className="w-full flex justify-center border-b border-background/30">
-        <div className="flex gap-2 ">
-          {DAEVANION_PATHS.map((path) => {
-            const pathRunes = daevanionBuild[path.id] || [];
-            const pathRuneCount = pathRunes.length;
-            const isActive = activePath === path.id;
-
-            return (
-              <button
-                key={path.id}
-                onClick={() => setActivePath(path.id)}
-                className={`px-4 py-2 font-semibold transition-colors ${
-                  isActive
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {path.name} ({pathRuneCount})
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <DaevanionTab
+        activePath={activePath}
+        onPathChange={handlePathChange}
+      />
 
       {/* Zone principale avec manager à gauche, planner centré et stats à droite */}
       <div className="flex-1 flex flex-row gap-4">
         {/* Daevanion Manager à gauche */}
-        <div className="w-80 border-r border-border pr-4">
-          <DaevanionManager
-            activePath={activePath}
-            onResetPath={() => resetPath(activePath)}
-            onResetAll={() => resetAll()}
-            onActivateAll={() => activateAllRunes(activePath)}
-            pointsUsed={pointsUsed}
-            pointsType={pointsType}
-            maxPoints={maxPoints}
-          />
+        <div className="w-80 border-r border-border pr-4 flex flex-col">
+          <div className="flex-1">
+            <DaevanionButtons
+              activePath={activePath}
+              onResetPath={handleResetPath}
+              onResetAll={handleResetAll}
+              onActivateAll={handleActivateAll}
+            />
+          </div>
+          
+          {/* Section des points en bas */}
+          <div className="mt-auto">
+            <DaevanionPoints
+              pointsUsed={pointsUsed}
+              pointsType={pointsType}
+              maxPoints={maxPoints}
+            />
+          </div>
         </div>
 
         {/* Planner centré */}
@@ -154,16 +141,14 @@ export function DaevanionPlanner() {
             <RuneGrid
               path={activePath}
               activeRunes={activeRunes}
-              onToggleRune={(slotId: number) => toggleRune(activePath, slotId)}
+              onToggleRune={handleToggleRune}
             />
           </div>
         </div>
 
         {/* Barre latérale des stats à droite */}
         <div className="w-80 border-l border-border pl-4">
-          <StatsSidebar 
-            stats={totalStats}
-          />
+          <StatsSidebar stats={totalStats} />
         </div>
       </div>
     </div>

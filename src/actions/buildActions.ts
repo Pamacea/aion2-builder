@@ -261,7 +261,7 @@ export async function updateBuild(
   }
 
   // Handle daevanion update
-  if ("daevanion" in data && data.daevanion !== undefined) {
+  if ("daevanion" in data && data.daevanion !== undefined && data.daevanion !== null) {
     const daevanionData = data.daevanion as NonNullable<BuildType["daevanion"]>;
     updateData.daevanion = {
       upsert: {

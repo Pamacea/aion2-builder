@@ -96,3 +96,45 @@ export interface DaevanionStats {
   // Liste des skills/passives augmentés
   skillLevelUps: DaevanionSkillLevelUp[];
 }
+
+// Types pour les composants
+export interface DaevanionTabProps {
+  activePath: DaevanionPath;
+  onPathChange: (path: DaevanionPath) => void;
+}
+
+export interface DaevanionButtonsProps {
+  activePath: DaevanionPath;
+  onResetPath: () => void;
+  onResetAll: () => void;
+  onActivateAll: () => void;
+}
+
+export interface DaevanionPointsProps {
+  pointsUsed: number;
+  pointsType: string;
+  maxPoints: number;
+}
+
+export interface StatsSidebarProps {
+  stats: DaevanionStats;
+}
+
+export interface RuneGridProps {
+  path: DaevanionPath;
+  activeRunes: number[];
+  onToggleRune: (slotId: number) => void;
+}
+
+export interface DaevanionStore {
+  daevanionBuild: DaevanionBuild;
+  toggleRune: (path: DaevanionPath, slotId: number) => Promise<void>;
+  getTotalStats: (path: DaevanionPath) => Promise<DaevanionStats>;
+  getPointsUsed: (path: DaevanionPath) => Promise<number>;
+  getPointsType: (path: DaevanionPath) => string;
+  getDaevanionBoostForSkill: (skillId: number, type: "ability" | "passive") => Promise<number>;
+  resetPath: (path: DaevanionPath) => void;
+  resetAll: () => void;
+  activateAllRunes: (path: DaevanionPath) => Promise<void>;
+  loadFromBuild: (daevanion: DaevanionBuild | null | undefined) => void;
+}

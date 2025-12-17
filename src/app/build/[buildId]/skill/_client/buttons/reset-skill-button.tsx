@@ -1,7 +1,9 @@
 "use client";
 
+import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { useEffect } from "react";
+import { flushSync } from "react-dom";
 import { useSelectedSkill } from "../../_context/SelectedSkillContext";
 import { IconButton } from "../../_utils/iconButton";
 
@@ -12,6 +14,7 @@ type ResetSkillButtonProps = {
 export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) => {
   const { selectedSkill, setSelectedSkill } = useSelectedSkill();
   const { updateAbilityLevel, updatePassiveLevel, updateStigmaLevel, build, updateShortcuts } = useBuildStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
 
   // Get the first ability ID (auto-attack) - cannot be reset to level 0
   const firstAbilityId = build?.class?.abilities
@@ -43,31 +46,87 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [build?.abilities, build?.passives, build?.stigmas]);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!selectedSkill || disabled) return;
 
     if (selectedSkill.buildAbility) {
       const abilityId = selectedSkill.buildAbility.abilityId;
+      const currentLevel = selectedSkill.buildAbility.level;
+      
+      // Calculer le boost Daevanion pour ce skill (en parallèle si possible)
+      const daevanionBoost = await getDaevanionBoostForSkill(abilityId, "ability");
+      
+      // Le niveau de base = niveau actuel - boost Daevanion
+      const baseLevel = Math.max(0, currentLevel - daevanionBoost);
+      
       // First ability (auto-attack) cannot be reset to level 0, reset to level 1 instead
       if (abilityId === firstAbilityId) {
-        updateAbilityLevel(abilityId, 1);
+        // Pour le premier ability, on reset à 1 (niveau de base) + boost Daevanion
+        const newLevel = 1 + daevanionBoost;
+        updateAbilityLevel(abilityId, newLevel);
         // Don't remove first ability from shortcuts (it must stay in reserved slot)
       } else {
-        // Reset to level 0 (minimum level) - this will automatically filter specialtyChoices
-        updateAbilityLevel(abilityId, 0);
-        // Remove from shortcuts
-        removeSkillFromShortcuts("ability", abilityId);
+        // Reset le niveau de base à 0, mais garder le boost Daevanion
+        // Le niveau final = baseLevel (0) + boost Daevanion
+        const newLevel = baseLevel + daevanionBoost;
+        updateAbilityLevel(abilityId, newLevel);
+        // Remove from shortcuts si le niveau final est 0 (pas de boost Daevanion)
+        if (newLevel === 0) {
+          removeSkillFromShortcuts("ability", abilityId);
+        }
       }
+      
+      // Forcer la mise à jour immédiate de selectedSkill et du build
+      // Utiliser flushSync pour forcer un re-render immédiat
+      flushSync(() => {
+        const updatedBuild = useBuildStore.getState().build;
+        const updated = updatedBuild?.abilities?.find((a) => a.abilityId === abilityId);
+        if (updated) {
+          setSelectedSkill({ buildAbility: updated });
+        }
+      });
     } else if (selectedSkill.buildPassive) {
       const passiveId = selectedSkill.buildPassive.passiveId;
-      updatePassiveLevel(passiveId, 0);
-      // Remove from shortcuts
-      removeSkillFromShortcuts("passive", passiveId);
+      const currentLevel = selectedSkill.buildPassive.level;
+      
+      // Calculer le boost Daevanion pour ce skill
+      const daevanionBoost = await getDaevanionBoostForSkill(passiveId, "passive");
+      
+      // Le niveau de base = niveau actuel - boost Daevanion
+      const baseLevel = Math.max(0, currentLevel - daevanionBoost);
+      
+      // Reset le niveau de base à 0, mais garder le boost Daevanion
+      // Le niveau final = baseLevel (0) + boost Daevanion
+      const newLevel = baseLevel + daevanionBoost;
+      updatePassiveLevel(passiveId, newLevel);
+      // Remove from shortcuts si le niveau final est 0 (pas de boost Daevanion)
+      if (newLevel === 0) {
+        removeSkillFromShortcuts("passive", passiveId);
+      }
+      
+      // Forcer la mise à jour de selectedSkill après le reset
+      flushSync(() => {
+        const updatedBuild = useBuildStore.getState().build;
+        const updated = updatedBuild?.passives?.find((p) => p.passiveId === passiveId);
+        if (updated) {
+          setSelectedSkill({ buildPassive: updated });
+        }
+      });
     } else if (selectedSkill.buildStigma) {
       const stigmaId = selectedSkill.buildStigma.stigmaId;
+      // Les stigmas ne sont pas affectés par Daevanion
       updateStigmaLevel(stigmaId, 0);
       // Remove from shortcuts
       removeSkillFromShortcuts("stigma", stigmaId);
+      
+      // Forcer la mise à jour de selectedSkill après le reset
+      flushSync(() => {
+        const updatedBuild = useBuildStore.getState().build;
+        const updated = updatedBuild?.stigmas?.find((s) => s.stigmaId === stigmaId);
+        if (updated) {
+          setSelectedSkill({ buildStigma: updated });
+        }
+      });
     }
   };
 

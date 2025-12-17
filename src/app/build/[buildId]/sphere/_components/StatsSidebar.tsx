@@ -1,54 +1,29 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { DaevanionStats } from "@/types/daevanion.type";
-import { useState } from "react";
-
-interface StatsSidebarProps {
-  stats: DaevanionStats;
-}
-
-const STAT_DISPLAY_ORDER: Array<{ key: keyof DaevanionStats; label: string }> = [
-  // Stats de base
-  { key: "attack", label: "Attack Bonus" },
-  { key: "criticalHit", label: "Critical Hit" },
-  { key: "criticalHitResist", label: "Critical Hit Resist" },
-  { key: "mp", label: "MP" },
-  { key: "maxHP", label: "Max HP" },
-  { key: "defense", label: "Defense" },
-  
-  // Stats spéciales (Unique)
-  { key: "cooldownReduction", label: "Cooldown Reduction" },
-  { key: "combatSpeed", label: "Combat Speed" },
-  { key: "damageBoost", label: "Damage Boost" },
-  { key: "damageTolerance", label: "Damage Tolerance" },
-  { key: "criticalDamageTolerance", label: "Critical Damage Tolerance" },
-  { key: "criticalDamageBoost", label: "Critical Damage Boost" },
-  { key: "multiHitResist", label: "Multi Hit Resist" },
-  { key: "multiHitChance", label: "Multi Hit Chance" },
-  { key: "pveDamageTolerance", label: "PvE Damage Tolerance" },
-  { key: "pveDamageBoost", label: "PvE Damage Boost" },
-  { key: "pvpDamageBoost", label: "PvP Damage Boost" },
-  { key: "pvpDamageTolerance", label: "PvP Damage Tolerance" },
-  
-  // Augmentations de niveau
-  { key: "passiveLevelBoost", label: "Passive Level Boost" },
-  { key: "activeSkillLevelBoost", label: "Active Skill Level Boost" },
-];
+import { STAT_DISPLAY_ORDER } from "@/constants/daevanion.constant";
+import { StatsSidebarProps } from "@/types/daevanion.type";
+import { useMemo, useState } from "react";
 
 export function StatsSidebar({ stats }: StatsSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredStats = STAT_DISPLAY_ORDER.filter((stat) => {
-    if (!searchQuery) return true;
-    return stat.label.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Mémoriser les stats filtrées
+  const filteredStats = useMemo(() => {
+    return STAT_DISPLAY_ORDER.filter((stat) => {
+      if (!searchQuery) return true;
+      return stat.label.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [searchQuery]);
 
-  const hasStats = Object.entries(stats).some(([key, value]) => {
-    // Exclure skillLevelUps du calcul
-    if (key === "skillLevelUps") return false;
-    return typeof value === "number" && value > 0;
-  }) || stats.skillLevelUps.length > 0;
+  // Mémoriser le calcul de hasStats
+  const hasStats = useMemo(() => {
+    return Object.entries(stats).some(([key, value]) => {
+      // Exclure skillLevelUps du calcul
+      if (key === "skillLevelUps") return false;
+      return typeof value === "number" && value > 0;
+    }) || stats.skillLevelUps.length > 0;
+  }, [stats]);
 
   return (
     <div className="h-full flex flex-col gap-4 pt-4">

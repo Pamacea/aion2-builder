@@ -36,11 +36,24 @@ export const SkillDetails = ({
 }: SkillDetailsProps) => {
   const { selectedSkill } = useSelectedSkill();
   const { build } = useBuildStore();
-
+  
   // Use selected skill from context if available, otherwise use props
-  const buildAbility = selectedSkill?.buildAbility || propBuildAbility;
-  const buildPassive = selectedSkill?.buildPassive || propBuildPassive;
-  const buildStigma = selectedSkill?.buildStigma || propBuildStigma;
+  // Mais toujours synchroniser avec le build actuel pour garantir que le niveau est à jour
+  // On lit directement depuis le build pour garantir que le niveau est toujours à jour
+  const skillFromContext = selectedSkill?.buildAbility || propBuildAbility;
+  const buildAbility = skillFromContext && build
+    ? build.abilities?.find((a) => a.abilityId === skillFromContext.abilityId) || skillFromContext
+    : skillFromContext;
+  
+  const passiveFromContext = selectedSkill?.buildPassive || propBuildPassive;
+  const buildPassive = passiveFromContext && build
+    ? build.passives?.find((p) => p.passiveId === passiveFromContext.passiveId) || passiveFromContext
+    : passiveFromContext;
+  
+  const stigmaFromContext = selectedSkill?.buildStigma || propBuildStigma;
+  const buildStigma = stigmaFromContext && build
+    ? build.stigmas?.find((s) => s.stigmaId === stigmaFromContext.stigmaId) || stigmaFromContext
+    : stigmaFromContext;
   // Determine which skill type we're displaying
   // If skill is selected from context but not in build, use the direct ability/passive/stigma
   const targetAbility =
