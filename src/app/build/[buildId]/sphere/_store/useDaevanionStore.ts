@@ -222,63 +222,80 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         const startNodeId = path === "nezekan" ? 61 : null;
         
         if (startNodeId && newPathRunes.includes(startNodeId)) {
-          // Fonction pour trouver toutes les runes connectées au start node (approche récursive)
-          // Une rune est connectée si :
-          // 1. C'est le start node
-          // 2. Elle n'a pas de prérequis (adjacente au start)
-          // 3. Au moins un de ses prérequis est connecté (récursivement)
+          // Fonction pour trouver toutes les runes connectées au start node (approche BFS)
+          // On part du start node et on propage la connexion vers toutes les runes accessibles
           const findConnectedRunes = (activeRunes: number[]): number[] => {
+            if (!startNodeId || !activeRunes.includes(startNodeId)) {
+              return [];
+            }
+            
             const connected = new Set<number>();
-            const checked = new Set<number>(); // Pour éviter les boucles infinies
+            const queue: number[] = [startNodeId];
+            connected.add(startNodeId);
             
-            // Fonction récursive pour vérifier si une rune est connectée
-            const isRuneConnected = (runeId: number): boolean => {
-              // Si déjà vérifiée, retourner le résultat
-              if (checked.has(runeId)) {
-                return connected.has(runeId);
-              }
+            // Créer un index inverse : pour chaque rune, quelles runes l'ont comme prérequis
+            const reverseIndex = new Map<number, number[]>();
+            allRunes.forEach(rune => {
+              if (!rune) return;
               
-              checked.add(runeId);
-              
-              // Le start node est toujours connecté
-              if (runeId === startNodeId) {
-                connected.add(runeId);
-                return true;
-              }
-              
-              // Si la rune n'est pas active, elle n'est pas connectée
-              if (!activeRunes.includes(runeId)) {
-                return false;
-              }
-              
-              const rune = allRunes.find(r => r?.slotId === runeId);
-              if (!rune) {
-                return false;
-              }
-              
-              // Si la rune n'a pas de prérequis, elle est adjacente au start et donc connectée
+              // Les runes sans prérequis sont directement accessibles depuis le start
               if (!rune.prerequisites || rune.prerequisites.length === 0) {
-                connected.add(runeId);
-                return true;
+                if (!reverseIndex.has(startNodeId!)) {
+                  reverseIndex.set(startNodeId!, []);
+                }
+                reverseIndex.get(startNodeId!)!.push(rune.slotId);
+              } else {
+                // Pour chaque prérequis, ajouter cette rune à la liste des runes qui en dépendent
+                rune.prerequisites.forEach(prereqId => {
+                  if (!reverseIndex.has(prereqId)) {
+                    reverseIndex.set(prereqId, []);
+                  }
+                  reverseIndex.get(prereqId)!.push(rune.slotId);
+                });
               }
-              
-              // Une rune est connectée si au moins un de ses prérequis est connecté
-              const hasConnectedPrereq = rune.prerequisites.some(prereqId => {
-                return isRuneConnected(prereqId);
-              });
-              
-              if (hasConnectedPrereq) {
-                connected.add(runeId);
-                return true;
-              }
-              
-              return false;
-            };
-            
-            // Vérifier toutes les runes actives
-            activeRunes.forEach(runeId => {
-              isRuneConnected(runeId);
             });
+            
+            // BFS : partir du start node et explorer toutes les runes accessibles
+            while (queue.length > 0) {
+              const currentRuneId = queue.shift()!;
+              
+              // Trouver toutes les runes qui ont currentRuneId comme prérequis
+              const dependentRunes = reverseIndex.get(currentRuneId) || [];
+              
+              dependentRunes.forEach(dependentRuneId => {
+                // Ignorer si déjà connectée
+                if (connected.has(dependentRuneId)) {
+                  return;
+                }
+                
+                // Ignorer si la rune n'est pas active
+                if (!activeRunes.includes(dependentRuneId)) {
+                  return;
+                }
+                
+                const dependentRune = allRunes.find(r => r?.slotId === dependentRuneId);
+                if (!dependentRune) {
+                  return;
+                }
+                
+                // Si la rune n'a pas de prérequis, elle est directement connectée au start
+                if (!dependentRune.prerequisites || dependentRune.prerequisites.length === 0) {
+                  connected.add(dependentRuneId);
+                  queue.push(dependentRuneId);
+                  return;
+                }
+                
+                // Vérifier si au moins un prérequis de cette rune est connecté
+                const hasConnectedPrereq = dependentRune.prerequisites.some(prereqId => {
+                  return activeRunes.includes(prereqId) && connected.has(prereqId);
+                });
+                
+                if (hasConnectedPrereq) {
+                  connected.add(dependentRuneId);
+                  queue.push(dependentRuneId);
+                }
+              });
+            }
             
             return Array.from(connected);
           };

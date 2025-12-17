@@ -109,7 +109,7 @@ export function DaevanionPlanner() {
     <div className="w-full h-full flex flex-col ">
       {/* Onglets en pleine largeur, centrés */}
       <div className="w-full flex justify-center border-b border-background/30">
-        <div className="flex gap-2">
+        <div className="flex gap-2 ">
           {DAEVANION_PATHS.map((path) => {
             const pathRunes = daevanionBuild[path.id] || [];
             const pathRuneCount = pathRunes.length;

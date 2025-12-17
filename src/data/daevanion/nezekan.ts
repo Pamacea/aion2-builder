@@ -108,8 +108,8 @@ nezekanRunes.push(createRune(1, 4, "common", { defense: commonStats.defense }));
 nezekanRunes.push(null); // (1,5) - Vide
 nezekanRunes.push(createRune(1, 6, "common", {mp: commonStats.mp })); // (1,6) - Common
 nezekanRunes.push(createRune(1, 7, "common", {defense: commonStats.defense })); // (1,7) - Common
-nezekanRunes.push(null); // (1,8) - Vide
-nezekanRunes.push(createRune(1, 9, "common", {criticalHitResist: commonStats.criticalHitResist })); // (1,9) - Common
+nezekanRunes.push(createRune(1, 8, "common", {criticalHitResist: commonStats.criticalHitResist })); // (1,9) - Common
+nezekanRunes.push(null); // (1,9) - Vide
 nezekanRunes.push(createRune(1, 10, "common", {mp: commonStats.mp })); // (1,10) - Common
 
 // Ligne 3 (row 2): rare common common vide common legend common vide legend common rare

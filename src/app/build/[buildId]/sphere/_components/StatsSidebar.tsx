@@ -94,7 +94,7 @@ export function StatsSidebar({ stats, pointsUsed, pointsType, maxPoints }: Stats
       <div className="border-t border-border pt-4 pb-2 mt-auto">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">{pointsType}:</span>
+            <span className="text-sm font-medium"> {pointsType === "Daevanion_Common_Points" ? "Common Points" : pointsType === "Daevanion_PvE_Points" ? "PvE Points" : "PvP Points"}:</span>
             <span className={`text-sm font-bold ${isOverLimit ? "text-destructive" : "text-primary"}`}>
               {pointsUsed} / {maxPoints}
             </span>
