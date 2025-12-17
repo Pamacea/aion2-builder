@@ -166,6 +166,20 @@ export type LikeType = {
 };
 
 // ---------------------------
+// BuildDaevanion Type
+// ---------------------------
+export type BuildDaevanionType = {
+  id: number;
+  buildId: number;
+  nezekan: number[];
+  zikel: number[];
+  vaizel: number[];
+  triniel: number[];
+  ariel: number[];
+  azphel: number[];
+};
+
+// ---------------------------
 // Build Type (with relations)
 // ---------------------------
 export type BuildType = BuildTypeBase & {
@@ -179,6 +193,7 @@ export type BuildType = BuildTypeBase & {
   abilities?: BuildAbilityType[];
   passives?: BuildPassiveType[];
   stigmas?: BuildStigmaType[];
+  daevanion?: BuildDaevanionType | null;
   likes?: LikeType[];
   shortcuts?: Record<string, {
     type: "ability" | "stigma";

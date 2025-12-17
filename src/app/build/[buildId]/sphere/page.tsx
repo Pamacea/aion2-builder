@@ -1,6 +1,7 @@
 "use client";
 
 import { useBuildLoader } from "../_utils/useBuildLoader";
+import { DaevanionPlanner } from "./_client/DaevanionPlanner";
 
 export default function BuildSpherePage() {
   const { build, loading } = useBuildLoader();
@@ -9,8 +10,9 @@ export default function BuildSpherePage() {
 
   return (
     <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
-      <div className="flex justify-between items-center w-1/2"></div>
-      <div className="w-1/2"></div>
+      <div className="w-full h-[88vh]">
+        <DaevanionPlanner />
+      </div>
     </main>
   );
 }

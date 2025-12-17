@@ -494,6 +494,38 @@ async function main() {
     }
   }
 
+  console.log("🌱 Seeding DAEVANION RUNES (Nezekan)...");
+
+  // --- Seed DAEVANION RUNES for Nezekan ---
+  const { nezekanRunes } = await import("../src/data/daevanion/nezekan");
+  
+  for (const rune of nezekanRunes) {
+    if (!rune) continue; // Skip null slots
+    
+    await prisma.daevanionRune.upsert({
+      where: {
+        path_slotId: {
+          path: rune.path,
+          slotId: rune.slotId,
+        },
+      },
+      update: {},
+      create: {
+        slotId: rune.slotId,
+        path: rune.path,
+        rarity: rune.rarity,
+        name: rune.name,
+        description: rune.description,
+        positionX: rune.position?.x ?? 0,
+        positionY: rune.position?.y ?? 0,
+        prerequisites: rune.prerequisites || [],
+        stats: rune.stats ? JSON.parse(JSON.stringify(rune.stats)) : null,
+      },
+    });
+  }
+
+  console.log(`✅ ${nezekanRunes.filter(r => r !== null).length} Daevanion runes seeded for Nezekan`);
+
   console.log("🌱 Seeding BUILDS...");
 
     // --- Seed BUILDS ---

@@ -52,7 +52,7 @@ async function resetDatabase() {
     for (const table of tables) {
       console.log(`🗑️  Dropping table: ${table}`);
       try {
-        await pool.query(`DROP TABLE IF EXISTS "${table}" CASCADE;`);
+      await pool.query(`DROP TABLE IF EXISTS "${table}" CASCADE;`);
       } catch (error) {
         console.warn(`⚠️  Could not drop table ${table}:`, error);
       }

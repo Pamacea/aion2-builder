@@ -109,6 +109,7 @@ export const fullBuildInclude = {
   abilities: buildAbilityInclude,
   passives: buildPassiveInclude,
   stigmas: buildStigmaInclude,
+  daevanion: true,
   likes: {
     include: {
       user: {

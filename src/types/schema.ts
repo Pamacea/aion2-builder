@@ -187,6 +187,20 @@ export const LikeSchema: z.ZodType<LikeType> = z.object({
 }) as z.ZodType<LikeType>;
 
 // ---------------------------
+// BuildDaevanion Schema
+// ---------------------------
+export const BuildDaevanionSchema: z.ZodType<BuildType["daevanion"]> = z.object({
+  id: z.number(),
+  buildId: z.number(),
+  nezekan: z.array(z.number()).default([]),
+  zikel: z.array(z.number()).default([]),
+  vaizel: z.array(z.number()).default([]),
+  triniel: z.array(z.number()).default([]),
+  ariel: z.array(z.number()).default([]),
+  azphel: z.array(z.number()).default([]),
+}).nullable().optional() as z.ZodType<BuildType["daevanion"]>;
+
+// ---------------------------
 // Build Schema
 // ---------------------------
 export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
@@ -200,6 +214,7 @@ export const BuildSchema: z.ZodType<BuildType> = BuildSchemaBase.extend({
   abilities: z.array(BuildAbilitySchema).optional(),
   passives: z.array(BuildPassiveSchema).optional(),
   stigmas: z.array(BuildStigmaSchema).optional(),
+  daevanion: BuildDaevanionSchema,
   likes: z.array(LikeSchema).optional(),
 }) as z.ZodType<BuildType>;
 

@@ -196,6 +196,26 @@ export async function updateBuild(
         stigmaCost: number;
       }>;
     };
+    daevanion?: {
+      upsert: {
+        create: {
+          nezekan: number[];
+          zikel: number[];
+          vaizel: number[];
+          triniel: number[];
+          ariel: number[];
+          azphel: number[];
+        };
+        update: {
+          nezekan: number[];
+          zikel: number[];
+          vaizel: number[];
+          triniel: number[];
+          ariel: number[];
+          azphel: number[];
+        };
+      };
+    };
   } = {};
 
   if ("name" in data && data.name !== undefined) {

@@ -403,6 +403,7 @@ model Build {
   passives  BuildPassive[]
   stigmas   BuildStigma[]
   likes     Like[]
+  daevanion BuildDaevanion?
 }
 
 /// Like d'un build par un utilisateur
@@ -461,4 +462,37 @@ model BuildStigma {
   selectedChainSkillIds    Int[]  @default([])
   build                    Build  @relation(fields: [buildId], references: [id])
   stigma                   Stigma @relation(fields: [stigmaId], references: [id])
+}
+
+/// Rune Daevanion
+/// Stocke les informations d'une rune Daevanion (position, rareté, stats, prérequis)
+model DaevanionRune {
+  id            Int                @id @default(autoincrement())
+  slotId        Int
+  path          String             // "nezekan", "zikel", etc.
+  rarity        String             // "common", "rare", "legend", "unique"
+  name          String
+  description   String?
+  positionX     Int
+  positionY     Int
+  prerequisites Int[]              @default([]) // Array de slotIds requis
+  // Stats stockées en JSON pour flexibilité
+  stats         Json?
+  
+  @@unique([path, slotId])
+  @@index([path])
+}
+
+/// Configuration Daevanion pour un build
+/// Stocke les runes activées pour chaque chemin Daevanion
+model BuildDaevanion {
+  id        Int   @id @default(autoincrement())
+  buildId   Int   @unique
+  nezekan   Int[] @default([]) // Array de slotIds activés
+  zikel     Int[] @default([])
+  vaizel    Int[] @default([])
+  triniel   Int[] @default([])
+  ariel     Int[] @default([])
+  azphel    Int[] @default([])
+  build     Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
 }

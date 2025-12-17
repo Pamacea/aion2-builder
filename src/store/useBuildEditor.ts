@@ -65,17 +65,22 @@ export const useBuildStore = create<BuildState>((set, get) => {
         set({ currentUserId: userId });
       }
       
-      // Use dynamic import to avoid bundling server actions in client
-      const { loadBuildAction } = await import("actions/buildActions");
-      const data = await loadBuildAction(buildId);
-      
-      // Annuler toutes les sauvegardes en attente avant de charger un nouveau build
-      if (saveTimeout) {
-        clearTimeout(saveTimeout);
-        saveTimeout = null;
+      try {
+        // Use dynamic import to avoid bundling server actions in client
+        const { loadBuildAction } = await import("actions/buildActions");
+        const data = await loadBuildAction(buildId);
+        
+        // Annuler toutes les sauvegardes en attente avant de charger un nouveau build
+        if (saveTimeout) {
+          clearTimeout(saveTimeout);
+          saveTimeout = null;
+        }
+        
+        set({ build: data, loading: false });
+      } catch (error) {
+        console.error("Error loading build:", error);
+        set({ build: null, loading: false });
       }
-      
-      set({ build: data, loading: false });
     },
 
     updateBuild: (partial) => {
