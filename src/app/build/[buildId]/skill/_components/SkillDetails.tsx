@@ -1,5 +1,6 @@
 "use client";
 
+import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { useBuildStore } from "@/store/useBuildEditor";
 import {
   AbilityType,
@@ -10,6 +11,7 @@ import {
   StigmaType,
 } from "@/types/schema";
 import { SkillDetailsProps } from "@/types/skill.type";
+import { useEffect, useState } from "react";
 import { AvailableSpeciality } from "../_client/avaible-speciality";
 import { AvailableSpecialityStigma } from "../_client/avaible-speciality-stigma.tsx";
 import { ChainSkill } from "../_client/chain-skill";
@@ -36,6 +38,8 @@ export const SkillDetails = ({
 }: SkillDetailsProps) => {
   const { selectedSkill } = useSelectedSkill();
   const { build } = useBuildStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  const [daevanionBoost, setDaevanionBoost] = useState(0);
   
   // Use selected skill from context if available, otherwise use props
   // Mais toujours synchroniser avec le build actuel pour garantir que le niveau est à jour
@@ -135,6 +139,26 @@ export const SkillDetails = ({
     }
   }
 
+  // Calculer le boost Daevanion pour le skill affiché
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBoost = async () => {
+      if (buildAbility) {
+        const boost = await getDaevanionBoostForSkill(buildAbility.abilityId, "ability");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else if (buildPassive) {
+        const boost = await getDaevanionBoostForSkill(buildPassive.passiveId, "passive");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else {
+        if (!cancelled) setDaevanionBoost(0);
+      }
+    };
+    fetchBoost();
+    return () => {
+      cancelled = true;
+    };
+  }, [buildAbility, buildPassive, getDaevanionBoostForSkill]);
+
   // If no skill is provided, show empty state
   if (!targetAbility && !targetPassive && !targetStigma) {
     return (
@@ -146,6 +170,17 @@ export const SkillDetails = ({
     );
   }
 
+  // Calculer le niveau effectif pour l'affichage
+  const baseLevel = (() => {
+    const isChainSkill = (parentAbility || parentStigma) !== undefined;
+    if (isChainSkill) {
+      return parentBuildAbility?.level || parentBuildStigma?.level || 0;
+    }
+    return buildAbility?.level || buildPassive?.level || buildStigma?.level || 0;
+  })();
+  
+  const effectiveLevel = baseLevel + (buildAbility || buildPassive ? daevanionBoost : 0);
+
   return (
     <div className={`flex flex-col  px-2 gap-8 h-full ${className}`}>
       {/* Skill Name with Level */}
@@ -155,18 +190,9 @@ export const SkillDetails = ({
           passive={targetPassive}
           stigma={targetStigma}
         />
-        <span className="text-sm font-semibold text-foreground/50">
-          {/* If this is a chain skill, use parent's level, otherwise use current skill's level */}
+        <div className="text-sm font-semibold text-foreground/50">
           {(() => {
-            // Determine if current skill is a chain skill
             const isChainSkill = (parentAbility || parentStigma) !== undefined;
-            // Get the level to display: parent level if chain skill, otherwise current skill level
-            const displayLevel = isChainSkill
-              ? parentBuildAbility?.level || parentBuildStigma?.level || 0
-              : buildAbility?.level ||
-                buildPassive?.level ||
-                buildStigma?.level ||
-                0;
             const isInBuild = isChainSkill
               ? (parentBuildAbility || parentBuildStigma) !== undefined
               : (buildAbility || buildPassive || buildStigma) !== undefined;
@@ -174,9 +200,20 @@ export const SkillDetails = ({
             if (!isInBuild) {
               return "Not in build";
             }
-            return displayLevel === 0 ? "Locked" : `Lv.${displayLevel}`;
+            if (effectiveLevel === 0) {
+              return "Locked";
+            }
+            if (daevanionBoost > 0) {
+              return (
+                <>
+                  Lv.{effectiveLevel}{" "}
+                  <span className="text-green-500">(+{daevanionBoost})</span>
+                </>
+              );
+            }
+            return `Lv.${effectiveLevel}`;
           })()}
-        </span>
+        </div>
       </div>
 
       {/* Spell Tags */}
@@ -194,6 +231,7 @@ export const SkillDetails = ({
         buildAbility={buildAbility}
         buildPassive={buildPassive}
         buildStigma={buildStigma}
+        daevanionBoost={buildAbility || buildPassive ? daevanionBoost : 0}
       />
 
       {/* Stagger Damage */}
@@ -216,7 +254,7 @@ export const SkillDetails = ({
         <AvailableSpeciality
           buildAbility={buildAbility}
           ability={targetAbility}
-          currentLevel={buildAbility?.level}
+          currentLevel={buildAbility ? effectiveLevel : undefined}
           activeSpecialtyChoiceIds={buildAbility?.activeSpecialtyChoiceIds}
         />
       )}

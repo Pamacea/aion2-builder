@@ -222,12 +222,16 @@ export const SkillDesc = ({
   buildAbility,
   buildPassive,
   buildStigma,
+  daevanionBoost = 0,
   className = "",
-}: SkillDescProps) => {
+}: SkillDescProps & { daevanionBoost?: number }) => {
   const skill = ability || passive || stigma;
   const description = skill?.description;
-  const level =
+  const baseLevel =
     buildAbility?.level || buildPassive?.level || buildStigma?.level || 1;
+  
+  // Utiliser le niveau effectif (base + boost Daevanion) pour le calcul des stats
+  const level = baseLevel + (buildAbility || buildPassive ? daevanionBoost : 0);
 
   if (!description || !skill) {
     return null;

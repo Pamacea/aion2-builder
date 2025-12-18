@@ -1,11 +1,12 @@
 "use client";
 
+import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
 import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 
 type PassiveSkillProps = {
@@ -24,18 +25,38 @@ export const PassiveSkill = ({
   className = "",
 }: PassiveSkillProps) => {
   const { build, currentUserId, addPassive, updatePassiveLevel } = useBuildStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
+  const [daevanionBoost, setDaevanionBoost] = useState(0);
   const lastClickTimeRef = useRef<number>(0);
   const clickButtonRef = useRef<"left" | "right" | null>(null);
 
-  const currentLevel = buildPassive?.level ?? 0;
+  const baseLevel = buildPassive?.level ?? 0;
+  
+  // Calculer le boost Daevanion
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBoost = async () => {
+      const boost = await getDaevanionBoostForSkill(passive.id, "passive");
+      if (!cancelled) {
+        setDaevanionBoost(boost);
+      }
+    };
+    fetchBoost();
+    return () => {
+      cancelled = true;
+    };
+  }, [passive.id, getDaevanionBoostForSkill]);
+
+  const currentLevel = baseLevel + daevanionBoost;
   const isInBuild = buildPassive !== undefined;
   const isStarter = isStarterBuild(build);
   const isOwner = build ? isBuildOwner(build, currentUserId) : false;
 
   // Check if skill is locked/not in build/level 0 (eligible for double-click to add)
-  const isLockedOrNotInBuild = !isInBuild || currentLevel === 0;
+  // Utiliser le niveau de base pour déterminer si le skill est verrouillé
+  const isLockedOrNotInBuild = !isInBuild || baseLevel === 0;
 
   // Build image path with fallback
   const classNameForPath = passive.class?.name || "default";

@@ -3,7 +3,7 @@
 import { MAX_POINTS_BY_TYPE } from "@/constants/daevanion.constant";
 import { useDaevanionPoints, useDaevanionStats } from "@/hooks/useDaevanionData";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { DaevanionPath } from "@/types/daevanion.type";
+import { DaevanionPath, DaevanionStats } from "@/types/daevanion.type";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DaevanionButtons } from "../_client/daevanion-buttons";
 import { DaevanionPoints } from "../_client/daevanion-points";
@@ -52,8 +52,8 @@ export function DaevanionPlanner() {
     return daevanionBuild[activePath] || [];
   }, [daevanionBuild, activePath]);
 
-  // Utiliser TanStack Query pour les stats et points avec cache
-  const { data: totalStats = {
+  // Objet par défaut pour les stats
+  const defaultStats: DaevanionStats = {
     attack: 0,
     criticalHit: 0,
     criticalHitResist: 0,
@@ -72,10 +72,34 @@ export function DaevanionPlanner() {
     pveDamageBoost: 0,
     pvpDamageBoost: 0,
     pvpDamageTolerance: 0,
+    // Stats spéciales Ariel (Legend)
+    bossDamageTolerance: 0,
+    bossDamageBoost: 0,
+    // Stats spéciales Ariel (Rare)
+    pveAccuracy: 0,
+    pveEvasion: 0,
+    bossAttack: 0,
+    bossDefense: 0,
+    pveAttack: 0,
+    pveDefense: 0,
+    // Stats spéciales Azphel (Legend)
+    statusEffectChance: 0,
+    statusEffectResist: 0,
+    // Stats spéciales Azphel (Rare)
+    pvpCriticalHit: 0,
+    pvpCriticalHitResist: 0,
+    pvpAccuracy: 0,
+    pvpEvasion: 0,
+    pvpAttack: 0,
+    pvpDefense: 0,
+    // Augmentations de niveau
     passiveLevelBoost: 0,
     activeSkillLevelBoost: 0,
     skillLevelUps: [],
-  } } = useDaevanionStats(activePath, activeRunes);
+  };
+
+  // Utiliser TanStack Query pour les stats et points avec cache
+  const { data: totalStats = defaultStats } = useDaevanionStats(activePath, activeRunes);
 
   const { data: pointsUsed = 0 } = useDaevanionPoints(activePath, activeRunes);
 
@@ -105,51 +129,55 @@ export function DaevanionPlanner() {
   }, [activePath, activateAllRunes]);
 
   return (
-    <div className="w-full h-full max-h-screen flex flex-col overflow-hidden">
-      {/* Onglets en pleine largeur, centrés */}
-      <DaevanionTab
-        activePath={activePath}
-        onPathChange={handlePathChange}
-      />
-
-      {/* Zone principale avec manager à gauche, planner centré et stats à droite */}
-      <div className="flex-1 flex flex-row gap-4 min-h-0">
-        {/* Daevanion Manager à gauche */}
-        <div className="w-80 border-r-2 border-background/30 pr-4 flex flex-col">
-          <div className="flex-1">
-            <DaevanionButtons
-              activePath={activePath}
-              onResetPath={handleResetPath}
-              onResetAll={handleResetAll}
-              onActivateAll={handleActivateAll}
-            />
-          </div>
-          
-          {/* Section des points en bas */}
-          <div className="mt-auto">
-            <DaevanionPoints
-              pointsUsed={pointsUsed}
-              pointsType={pointsType}
-              maxPoints={maxPoints}
-            />
-          </div>
+    <div className="w-full h-full max-h-screen flex flex-row overflow-hidden">
+      {/* Colonne gauche - Boutons et Points */}
+      <div className="w-1/5 shrink-0  flex flex-col gap-4 h-full">
+        {/* Section des points en bas */}
+        <div className="shrink-0">
+          <DaevanionPoints
+            pointsUsed={pointsUsed}
+            pointsType={pointsType}
+            maxPoints={maxPoints}
+          />
         </div>
-
-        {/* Planner centré */}
-        <div className="flex-1 flex justify-center items-center overflow-auto py-8">
-          <div className="w-full h-full flex justify-center items-center">
-            <RuneGrid
-              path={activePath}
-              activeRunes={activeRunes}
-              onToggleRune={handleToggleRune}
-            />
-          </div>
+        {/* Boutons en haut */}
+        <div className="shrink-0">
+          <DaevanionButtons
+            activePath={activePath}
+            onResetPath={handleResetPath}
+            onResetAll={handleResetAll}
+            onActivateAll={handleActivateAll}
+          />
         </div>
+        
+        {/* Espace flexible qui pousse les points vers le bas */}
+        <div className="flex-1"></div>
+        
+      </div>
 
-        {/* Barre latérale des stats à droite */}
-        <div className="w-80 border-l-2 border-background/30 pl-4">
-          <StatsSidebar stats={totalStats} />
+      {/* Colonne du milieu - Tabs et Rune Grid */}
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden gap-6">
+        {/* Onglets */}
+        <div className="shrink-0">
+          <DaevanionTab
+            activePath={activePath}
+            onPathChange={handlePathChange}
+          />
         </div>
+        
+        {/* Rune Grid */}
+        <div className="flex-1 flex justify-center items-center overflow-hidden min-h-0 min-w-0">
+          <RuneGrid
+            path={activePath}
+            activeRunes={activeRunes}
+            onToggleRune={handleToggleRune}
+          />
+        </div>
+      </div>
+
+      {/* Colonne droite - Stats */}
+      <div className="w-1/5 shrink-0 h-full overflow-hidden">
+        <StatsSidebar stats={totalStats} />
       </div>
     </div>
   );

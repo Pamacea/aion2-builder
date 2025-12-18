@@ -9,36 +9,19 @@ export function DaevanionPoints({
   pointsType,
   maxPoints,
 }: DaevanionPointsProps) {
-  const pointsRemaining = maxPoints - pointsUsed;
   const isOverLimit = pointsUsed > maxPoints;
 
   const pointsTypeLabel = useMemo(() => getPointsTypeLabel(pointsType), [pointsType]);
 
   return (
-    <div className="border-t border-border pt-4 pb-2">
-      <div className="space-y-2">
+      <div className="border-b-2 border-background/30 py-3 px-6 hover:border-foreground transition-all">
         <div className="flex justify-between items-center">
-          <span className="text-sm font-medium">{pointsTypeLabel}:</span>
-          <span className={`text-sm font-bold ${isOverLimit ? "text-destructive" : "text-primary"}`}>
+          <span className="text-sm font-medium uppercase">{pointsTypeLabel}</span>
+          <span className={`text-sm font-bold ${isOverLimit ? "text-destructive" : "text-foreground/80"}`}>
             {pointsUsed} / {maxPoints}
           </span>
         </div>
-        {isOverLimit && (
-          <div className="text-xs text-destructive">
-            ⚠️ Limite dépassée de {Math.abs(pointsRemaining)} points
-          </div>
-        )}
-        {!isOverLimit && pointsRemaining > 0 && (
-          <div className="text-xs text-muted-foreground">
-            {pointsRemaining} points restants
-          </div>
-        )}
-        {!isOverLimit && pointsRemaining === 0 && (
-          <div className="text-xs text-muted-foreground">
-            Tous les points utilisés
-          </div>
-        )}
+
       </div>
-    </div>
   );
 }

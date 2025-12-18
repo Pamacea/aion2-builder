@@ -5,10 +5,12 @@ import { formatStats, getRarityColor, getRarityLabel, getRequiredLevel, getRuneC
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionRune, RuneGridProps } from "@/types/daevanion.type";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   const [hoveredRune, setHoveredRune] = useState<DaevanionRune | null>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
   const { build } = useBuildStore();
   
   // Utiliser TanStack Query pour charger les runes avec cache
@@ -110,6 +112,20 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
     await onToggleRune(rune.slotId);
   }, [canActivate, activeRunes, onToggleRune, isStartNode]);
 
+  // Calculer la taille des runes selon la taille de la grille
+  const runeSize = useMemo(() => {
+    if (path === "ariel" || path === "azphel") {
+      // Grille 15x15 : réduire à ~52px pour mieux tenir dans l'écran
+      return { size: "w-[52px] h-[52px]", gap: "gap-1", imageSize: 52 };
+    } else if (path === "triniel") {
+      // Grille 13x13 : réduire à ~56px
+      return { size: "w-[56px] h-[56px]", gap: "gap-2", imageSize: 56 };
+    } else {
+      // Grille 11x11 : taille normale 64px (w-16 h-16)
+      return { size: "w-16 h-16", gap: "gap-2", imageSize: 64 };
+    }
+  }, [path]);
+
   // Organiser les runes en grille basée sur leurs positions
   const gridRunes = useMemo(() => {
     const grid: (DaevanionRune | null)[][] = [];
@@ -198,13 +214,13 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   }, [runes, activeRunes, canActivate, getSkillLevelUpInfo, isStartNode]);
 
   return (
-    <div className="w-full h-full p-4 overflow-auto flex justify-center items-start">
-      <div className="inline-block">
+    <div className="w-full h-full flex justify-center items-start p-2">
+      <div className="inline-block border-2 border-foreground/50 rounded-md p-4 bg-background/80 ">
         {gridRunes.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex gap-2">
+          <div key={rowIndex} className={`flex ${runeSize.gap}`}>
             {row.map((rune, colIndex) => {
               if (!rune) {
-                return <div key={`${rowIndex}-${colIndex}`} className="w-16 h-16" />;
+                return <div key={`${rowIndex}-${colIndex}`} className={runeSize.size} />;
               }
 
               const isActive = activeRunes.includes(rune.slotId);
@@ -229,7 +245,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                     onClick={() => handleRuneClick(rune)}
                     disabled={!canActivateRune && !isActive}
                     className={`
-                      relative w-16 h-16 transition-all
+                      relative ${runeSize.size} transition-all
                       ${runeStyles.opacityClass}
                       ${canActivateRune || isActive ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
                       ${runeStyles.borderClass}
@@ -238,8 +254,8 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                     <Image
                       src={runeData.imageSrc}
                       alt={rune.name}
-                      width={64}
-                      height={64}
+                      width={runeSize.imageSize}
+                      height={runeSize.imageSize}
                       className="w-full h-full"
                       unoptimized
                     />

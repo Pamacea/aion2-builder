@@ -1,5 +1,6 @@
 "use client";
 
+import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
@@ -25,20 +26,40 @@ export const ActiveSkill = ({
   className = "",
 }: ActiveSkillProps) => {
   const { build, currentUserId, addAbility, updateAbilityLevel } = useBuildStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
+  const [daevanionBoost, setDaevanionBoost] = useState(0);
   const { selectedSkill, setSelectedSkill } = useShortcutContext();
   const hasClickedOnceRef = useRef(false);
   const lastClickTimeRef = useRef<number>(0);
   const clickButtonRef = useRef<"left" | "right" | null>(null);
 
-  const currentLevel = buildAbility?.level ?? 0;
+  const baseLevel = buildAbility?.level ?? 0;
+  
+  // Calculer le boost Daevanion
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBoost = async () => {
+      const boost = await getDaevanionBoostForSkill(ability.id, "ability");
+      if (!cancelled) {
+        setDaevanionBoost(boost);
+      }
+    };
+    fetchBoost();
+    return () => {
+      cancelled = true;
+    };
+  }, [ability.id, getDaevanionBoostForSkill]);
+
+  const currentLevel = baseLevel + daevanionBoost;
   const isInBuild = buildAbility !== undefined;
   const isStarter = isStarterBuild(build);
   const isOwner = build ? isBuildOwner(build, currentUserId) : false;
 
   // Check if skill is locked/not in build/level 0 (eligible for double-click to add)
-  const isLockedOrNotInBuild = !isInBuild || currentLevel === 0;
+  // Utiliser le niveau de base pour déterminer si le skill est verrouillé
+  const isLockedOrNotInBuild = !isInBuild || baseLevel === 0;
 
   // Build image path
   const classNameForPath = ability.class?.name || "default";

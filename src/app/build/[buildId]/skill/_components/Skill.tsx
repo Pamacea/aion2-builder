@@ -1,8 +1,9 @@
 "use client";
 
+import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isBuildOwner } from "@/utils/buildUtils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActiveSkill } from "../_client/active-skill";
 import { MinusButton } from "../_client/buttons/minus-button";
 import { PlusButton } from "../_client/buttons/plus-button";
@@ -31,7 +32,9 @@ export const Skill = () => {
     removePassive,
     removeStigma,
   } = useBuildStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
   const { selectedSkill, setSelectedSkill } = useSelectedSkill();
+  const [daevanionBoost, setDaevanionBoost] = useState(0);
 
   // Helper to find build ability/passive/stigma
   const findBuildAbility = (abilityId: number) =>
@@ -145,11 +148,33 @@ export const Skill = () => {
     }
   }
 
-  const currentLevel =
+  // Calculer le boost Daevanion pour le skill sélectionné
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBoost = async () => {
+      if (selectedBuildAbility) {
+        const boost = await getDaevanionBoostForSkill(selectedBuildAbility.abilityId, "ability");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else if (selectedBuildPassive) {
+        const boost = await getDaevanionBoostForSkill(selectedBuildPassive.passiveId, "passive");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else {
+        if (!cancelled) setDaevanionBoost(0);
+      }
+    };
+    fetchBoost();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill]);
+
+  const baseLevel =
     selectedBuildAbility?.level ||
     selectedBuildPassive?.level ||
     selectedBuildStigma?.level ||
     0;
+  
+  const currentLevel = baseLevel + daevanionBoost;
 
   // Get actual maxLevel from the skill
   const actualMaxLevel =
@@ -203,32 +228,44 @@ export const Skill = () => {
   };
 
   // Handle level changes
+  // Note: On modifie seulement le niveau de base, le boost Daevanion est ajouté automatiquement
   const handleIncrement = () => {
     // Don't allow level changes for chain skills
     if (isChainSkill) return;
 
+    // Le niveau effectif maximum inclut le boost Daevanion pour abilities/passives
+    const effectiveMaxLevel = (skillType === "ability" || skillType === "passive") 
+      ? maxLevel + daevanionBoost 
+      : maxLevel;
+    
     if (selectedBuildAbility) {
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
-      updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
+      // Vérifier que le niveau effectif ne dépasse pas le max
+      if (currentLevel >= effectiveMaxLevel) return;
+      const newBaseLevel = Math.min(baseLevel + 1, maxLevel);
+      updateAbilityLevel(selectedBuildAbility.abilityId, newBaseLevel);
       // The useEffect will handle updating selectedSkill automatically
     } else if (selectedAbility) {
       // Ability is selected but not in build yet
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
-      addAbility(selectedAbility.id, newLevel);
+      if (currentLevel >= effectiveMaxLevel) return;
+      const newBaseLevel = Math.min(baseLevel + 1, maxLevel);
+      addAbility(selectedAbility.id, newBaseLevel);
     } else if (selectedBuildPassive) {
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
-      updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
+      if (currentLevel >= effectiveMaxLevel) return;
+      const newBaseLevel = Math.min(baseLevel + 1, maxLevel);
+      updatePassiveLevel(selectedBuildPassive.passiveId, newBaseLevel);
       // The useEffect will handle updating selectedSkill automatically
     } else if (selectedPassive) {
       // Passive is selected but not in build yet
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
-      addPassive(selectedPassive.id, newLevel);
+      if (currentLevel >= effectiveMaxLevel) return;
+      const newBaseLevel = Math.min(baseLevel + 1, maxLevel);
+      addPassive(selectedPassive.id, newBaseLevel);
     } else if (selectedBuildStigma) {
       // Check if we can increment this stigma (limit of 4 stigmas with level >= 1)
       if (!canIncrementStigma()) {
         return; // Cannot increment, limit reached
       }
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      // Les stigmas ne sont pas affectés par Daevanion
+      const newLevel = Math.min(baseLevel + 1, maxLevel);
       updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
       // The useEffect will handle updating selectedSkill automatically
     } else if (selectedStigma) {
@@ -237,7 +274,8 @@ export const Skill = () => {
       if (!canIncrementStigma()) {
         return; // Cannot add, limit reached
       }
-      const newLevel = Math.min(currentLevel + 1, maxLevel);
+      // Les stigmas ne sont pas affectés par Daevanion
+      const newLevel = Math.min(baseLevel + 1, maxLevel);
       addStigma(selectedStigma.id, newLevel);
     }
   };
@@ -247,33 +285,35 @@ export const Skill = () => {
     if (isChainSkill) return;
 
     if (selectedBuildAbility) {
-      if (currentLevel <= 0) {
+      // Vérifier le niveau de base, pas le niveau effectif
+      if (baseLevel <= 0) {
         // Remove skill from build if level would go below 0
         removeAbility(selectedBuildAbility.abilityId);
         setSelectedSkill(null);
       } else {
         // Decrement level (minimum is 0)
-        const newLevel = Math.max(0, currentLevel - 1);
-        updateAbilityLevel(selectedBuildAbility.abilityId, newLevel);
+        const newBaseLevel = Math.max(0, baseLevel - 1);
+        updateAbilityLevel(selectedBuildAbility.abilityId, newBaseLevel);
       }
     } else if (selectedBuildPassive) {
-      if (currentLevel <= 0) {
+      if (baseLevel <= 0) {
         // Remove skill from build if level would go below 0
         removePassive(selectedBuildPassive.passiveId);
         setSelectedSkill(null);
       } else {
         // Decrement level (minimum is 0)
-        const newLevel = Math.max(0, currentLevel - 1);
-        updatePassiveLevel(selectedBuildPassive.passiveId, newLevel);
+        const newBaseLevel = Math.max(0, baseLevel - 1);
+        updatePassiveLevel(selectedBuildPassive.passiveId, newBaseLevel);
       }
     } else if (selectedBuildStigma) {
-      if (currentLevel <= 0) {
+      // Les stigmas ne sont pas affectés par Daevanion
+      if (baseLevel <= 0) {
         // Remove skill from build if level would go below 0
         removeStigma(selectedBuildStigma.stigmaId);
         setSelectedSkill(null);
       } else {
         // Decrement level (minimum is 0)
-        const newLevel = Math.max(0, currentLevel - 1);
+        const newLevel = Math.max(0, baseLevel - 1);
         updateStigmaLevel(selectedBuildStigma.stigmaId, newLevel);
       }
     }
@@ -397,13 +437,13 @@ export const Skill = () => {
               onClick={handleIncrement}
               disabled={
                 !hasSelectedSkill ||
-                currentLevel >= maxLevel ||
+                currentLevel >= (skillType === "ability" || skillType === "passive" ? maxLevel + daevanionBoost : maxLevel) ||
                 (skillType === "stigma" && !canIncrementStigma())
               }
             />
             <MinusButton
               onClick={handleDecrement}
-              disabled={!hasSelectedSkill || currentLevel <= 1}
+              disabled={!hasSelectedSkill || baseLevel <= 0}
             />
           </section>
         )}

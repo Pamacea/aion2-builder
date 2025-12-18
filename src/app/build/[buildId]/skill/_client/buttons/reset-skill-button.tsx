@@ -51,27 +51,20 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
 
     if (selectedSkill.buildAbility) {
       const abilityId = selectedSkill.buildAbility.abilityId;
-      const currentLevel = selectedSkill.buildAbility.level;
-      
-      // Calculer le boost Daevanion pour ce skill (en parallèle si possible)
-      const daevanionBoost = await getDaevanionBoostForSkill(abilityId, "ability");
-      
-      // Le niveau de base = niveau actuel - boost Daevanion
-      const baseLevel = Math.max(0, currentLevel - daevanionBoost);
       
       // First ability (auto-attack) cannot be reset to level 0, reset to level 1 instead
       if (abilityId === firstAbilityId) {
-        // Pour le premier ability, on reset à 1 (niveau de base) + boost Daevanion
-        const newLevel = 1 + daevanionBoost;
-        updateAbilityLevel(abilityId, newLevel);
+        // Reset le niveau de base à 1 (le boost Daevanion sera ajouté automatiquement à l'affichage)
+        updateAbilityLevel(abilityId, 1);
         // Don't remove first ability from shortcuts (it must stay in reserved slot)
       } else {
-        // Reset le niveau de base à 0, mais garder le boost Daevanion
-        // Le niveau final = baseLevel (0) + boost Daevanion
-        const newLevel = baseLevel + daevanionBoost;
-        updateAbilityLevel(abilityId, newLevel);
-        // Remove from shortcuts si le niveau final est 0 (pas de boost Daevanion)
-        if (newLevel === 0) {
+        // Reset le niveau de base à 0 (le boost Daevanion sera ajouté automatiquement à l'affichage)
+        updateAbilityLevel(abilityId, 0);
+        
+        // Calculer le boost Daevanion pour vérifier si le niveau effectif est 0
+        const daevanionBoost = await getDaevanionBoostForSkill(abilityId, "ability");
+        // Remove from shortcuts si le niveau effectif est 0 (pas de boost Daevanion)
+        if (daevanionBoost === 0) {
           removeSkillFromShortcuts("ability", abilityId);
         }
       }
@@ -87,20 +80,14 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
       });
     } else if (selectedSkill.buildPassive) {
       const passiveId = selectedSkill.buildPassive.passiveId;
-      const currentLevel = selectedSkill.buildPassive.level;
       
-      // Calculer le boost Daevanion pour ce skill
+      // Reset le niveau de base à 0 (le boost Daevanion sera ajouté automatiquement à l'affichage)
+      updatePassiveLevel(passiveId, 0);
+      
+      // Calculer le boost Daevanion pour vérifier si le niveau effectif est 0
       const daevanionBoost = await getDaevanionBoostForSkill(passiveId, "passive");
-      
-      // Le niveau de base = niveau actuel - boost Daevanion
-      const baseLevel = Math.max(0, currentLevel - daevanionBoost);
-      
-      // Reset le niveau de base à 0, mais garder le boost Daevanion
-      // Le niveau final = baseLevel (0) + boost Daevanion
-      const newLevel = baseLevel + daevanionBoost;
-      updatePassiveLevel(passiveId, newLevel);
-      // Remove from shortcuts si le niveau final est 0 (pas de boost Daevanion)
-      if (newLevel === 0) {
+      // Remove from shortcuts si le niveau effectif est 0 (pas de boost Daevanion)
+      if (daevanionBoost === 0) {
         removeSkillFromShortcuts("passive", passiveId);
       }
       

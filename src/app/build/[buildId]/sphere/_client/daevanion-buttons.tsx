@@ -12,16 +12,11 @@ export function DaevanionButtons({
   const pathName = activePath.charAt(0).toUpperCase() + activePath.slice(1);
 
   return (
-    <div className="flex flex-col gap-2 pt-4">
-      <h2 className="text-xl font-bold text-center bg-background/50 py-2 border-y-2 border-y-foreground/30 uppercase">
-        Daevanion Manager
-      </h2>
-      
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
         {/* Bouton Reset Planner Actuel */}
         <Button
           onClick={onResetPath}
-          className="h-auto py-3 justify-start items-center flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+          className="uppercase font-bold h-auto py-3 justify-start items-start bg-background/30 text-foreground flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-foreground/30"
         >
           Reset {pathName}
         </Button>
@@ -29,7 +24,7 @@ export function DaevanionButtons({
         {/* Bouton Reset Tous les Planners */}
         <Button
           onClick={onResetAll}
-          className="h-auto py-3 justify-start items-center flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+          className="uppercase font-bold h-auto py-3 justify-start items-center bg-red-600/30 text-red-400 flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-foreground/30"
         >
           Reset All Planners
         </Button>
@@ -37,11 +32,10 @@ export function DaevanionButtons({
         {/* Bouton Activer Toutes les Runes */}
         <Button
           onClick={onActivateAll}
-          className="h-auto py-3 justify-start items-center flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+          className="uppercase font-bold h-auto py-3 justify-start items-center bg-blue-600/30 text-blue-400 flex px-6 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-foreground/30"
         >
           Activate All {pathName} Runes
         </Button>
       </div>
-    </div>
   );
 }
