@@ -3,11 +3,11 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useBuildLike } from "@/hooks/useBuildLike";
 import { useBuildStore } from "@/store/useBuildEditor";
+import { LikeType } from "@/types/build.type";
 import { Heart } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { Button } from "../../ui/button";
-import { LikeType } from "@/types/build.type";
 
 export const LikeButton = () => {
   const params = useParams();
@@ -78,13 +78,13 @@ export const LikeButton = () => {
     <Button
       onClick={handleLike}
       disabled={!isAuthenticated || isLiking}
-      className={`h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25 gap-2 ${
+      className={`h-full justify-start items-center flex px-2 sm:px-4 md:px-8 hover:border-b-2 hover:border-b-primary border-b-2 border-b-secondary gap-1 sm:gap-2 ${
         !isAuthenticated ? "cursor-not-allowed opacity-50" : "cursor-pointer"
       }`}
       title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Connectez-vous pour liker"}
     >
-      <Heart className={`size-5 ${isLiked ? "fill-current text-red-500" : ""}`} />
-      <span className="text-sm font-semibold">{likesCount}</span>
+      <Heart className={`size-4 sm:size-5 ${isLiked ? "fill-current text-red-500" : ""}`} />
+      <span className="text-xs sm:text-sm font-semibold">{likesCount}</span>
     </Button>
   );
 };

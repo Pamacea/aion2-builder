@@ -38,13 +38,14 @@ export const ShareButton = () => {
   return (
     <Button
       onClick={handleShare}
-      className="h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+      className="h-full justify-start items-center flex px-2 sm:px-4 md:px-8 hover:border-b-2 hover:border-b-primary border-b-2 border-b-secondary"
     >
       <Image
         src="/icons/IC_Feature_Share.webp"
         alt="Bahion Logo"
         width={32}
         height={32}
+        className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6"
       />
     </Button>
   );

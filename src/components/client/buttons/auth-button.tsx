@@ -49,7 +49,7 @@ export const AuthButton = ({
           {userName && (
             <Button
               onClick={handleProfileClick}
-              className="h-full text-sm sm:text-md md:text-md text-foreground uppercase font-semibold px-6 sm:px-8 md:px-8 hover:bg-secondary transition-all duration-300"
+              className="h-full text-xs sm:text-sm md:text-md text-foreground uppercase font-semibold px-2 sm:px-4 md:px-8 hover:bg-secondary transition-all duration-300 whitespace-nowrap"
               title="Mon profil"
             >
               <span className="hidden sm:inline">{userName}</span>
@@ -72,7 +72,7 @@ export const AuthButton = ({
       <Button
         onClick={handleSignIn}
         disabled={isLoading}
-        className="h-full justify-start items-center flex px-2 sm:px-4 md:px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-secondary"
+        className="h-full justify-center items-center flex px-2 sm:px-4 md:px-8 hover:border-b-2 hover:border-b-primary border-b-2 border-b-secondary"
         title="Connexion Discord"
       >
         <svg

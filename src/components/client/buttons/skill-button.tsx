@@ -14,8 +14,8 @@ export const SkillButton = () => {
       className={cn(
         "h-full justify-start items-center flex px-2 sm:px-4 md:px-6",
         pathname.endsWith("/skill") 
-          ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
-          : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
+          ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-primary/80"
+          : "border-b-2 border-b-secondary hover:border-b-2 hover:border-b-foreground/50"
       )}
     >
       <Image

@@ -14,16 +14,16 @@ export const GearButton = () => {
       className={cn(
         "h-full justify-start items-center flex px-2 sm:px-4 md:px-6",
         pathname.endsWith("/gear") 
-          ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
-          : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
+          ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-primary/80"
+          : "border-b-2 border-b-secondary hover:border-b-2 hover:border-b-foreground/50"
       )}
-    >
+      >
       <Image
         src="/icons/IC_Builder_Gear.webp"
         alt="Class Logo"
         width={32}
         height={32}
-        className="w-6 h-6 md:w-8 md:h-8"
+        className="w-6 h-6 md:w-6 md:h-6"
       />
     </Link>
   );

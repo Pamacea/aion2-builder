@@ -22,14 +22,14 @@ export const BuildName = memo(() => {
   if (!build) return null;
 
   return (
-    <section className="w-full flex flex-col items-start justify-start gap-4">
-      <h2 className="uppercase font-bold text-xl text-ring">BUILD NAME</h2>
+    <section className="w-full md:w-auto flex flex-col items-center md:items-start justify-center gap-3 sm:gap-4">
+      <h2 className="uppercase font-bold text-base sm:text-lg md:text-xl text-ring">BUILD NAME</h2>
       <Input
         type="text"
         value={build.name}
         onChange={handleNameChange}
         disabled={isDisabled}
-        className="w-full text-3xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="border-b-2 border-secondary w-full md:w-auto min-w-[300px] text-xl sm:text-2xl md:text-3xl text-center md:text-left disabled:opacity-50 disabled:cursor-not-allowed"
       />
       {isStarter && <StarterBuildMessage />}
     </section>

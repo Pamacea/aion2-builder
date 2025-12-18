@@ -34,15 +34,15 @@ export const ClassSelect = memo(() => {
   if (!build) return null;
 
   return (
-    <section className="w-full flex flex-col items-start justify-start gap-4">
-      <h2 className="uppercase font-bold text-xl text-ring">BUILD CLASS</h2>
+    <section className="w-full md:w-1/2 md:max-w-1/2 flex flex-col items-center md:items-start justify-center gap-3 sm:gap-4">
+      <h2 className="uppercase font-bold text-base sm:text-lg md:text-xl text-ring">BUILD CLASS</h2>
       <Select
         value={currentClassName}
         onValueChange={handleClassChange}
         disabled={isDisabled}
       >
-        <SelectTrigger className="uppercase w-full text-3xl disabled:opacity-50 disabled:cursor-not-allowed">
-          <SelectValue placeholder="Select a class" />
+        <SelectTrigger className="border-b-2 border-secondary uppercase w-full text-xl sm:text-2xl md:text-3xl disabled:opacity-50 disabled:cursor-not-allowed [&>span[data-slot='select-value']]:md:text-left [&>span[data-slot='select-value']]:text-center [&>span[data-slot='select-value']]:w-full">
+          <SelectValue placeholder="Select a class" className="text-center md:text-left" />
         </SelectTrigger>
         <SelectContent className="uppercase">
           {classItems}

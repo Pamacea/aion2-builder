@@ -14,7 +14,7 @@ export const ProfilelassBanner = memo(({
   if (!classBanner) return null;
   
   return (
-    <section className="w-1/2 h-72 bg-secondary flex items-center justify-center border-2 border-foreground/30">
+    <section className="w-full sm:w-1/2 h-72 bg-secondary flex items-center justify-center border-2 border-foreground/30">
       <ClassImage
         src={classBanner}
         alt={altText}

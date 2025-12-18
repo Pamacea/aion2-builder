@@ -27,12 +27,12 @@ export default function BuildProfilePage() {
   if (loading || !build) return <p>Loading...</p>;
 
   return (
-    <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-4">
-      <div className="flex justify-between items-center w-1/2">
+    <main className="w-full h-full flex flex-col items-center justify-start gap-6 sm:gap-8 py-4 px-2 sm:px-0">
+      <div className="w-full max-w-5xl flex flex-col md:flex-row md:items-start md:justify-around items-center justify-center gap-4 md:gap-0">
         <ClassSelect />
         <BuildName />
       </div>
-      <div className="w-1/2">
+      <div className="w-full max-w-5xl flex justify-center">
         <TagsList tags={classTags} />
       </div>
       {classBanner && <ProfilelassBanner classBanner={classBanner} />}

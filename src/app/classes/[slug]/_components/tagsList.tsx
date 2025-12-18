@@ -3,7 +3,7 @@ import { TagTypeBase } from "@/types/schema";
 
 export const TagsList = ({ tags }: { tags: TagTypeBase[] }) => {
   return (
-    <section className="flex flex-wrap gap-2">
+    <section className="flex flex-wrap items-center justify-center md:justify-start md:items-start gap-2">
       {tags.map((tag: TagTypeBase) => {
         const tagColor = tagColors[tag.name] || defaultTagColor;
         return (
