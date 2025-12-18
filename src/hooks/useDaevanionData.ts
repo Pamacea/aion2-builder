@@ -15,7 +15,15 @@ const getRunesForPath = async (path: DaevanionPath): Promise<(DaevanionRune | nu
     const { zikelRunes } = await import("@/data/daevanion/zikel");
     return zikelRunes;
   }
-  // Pour les autres chemins, retourner un tableau vide pour l'instant
+  if (path === "vaizel") {
+    const { vaizelRunes } = await import("@/data/daevanion/vaizel");
+    return vaizelRunes;
+  }
+  if (path === "triniel") {
+    const { trinielRunes } = await import("@/data/daevanion/triniel");
+    return trinielRunes;
+  }
+  // Pour les autres chemins (ariel, azphel), retourner un tableau vide pour l'instant
   return [];
 };
 

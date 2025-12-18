@@ -494,37 +494,58 @@ async function main() {
     }
   }
 
-  console.log("🌱 Seeding DAEVANION RUNES (Nezekan)...");
+  console.log("🌱 Seeding DAEVANION RUNES...");
+
+  // Helper function to seed runes for a path
+  const seedDaevanionPath = async (pathName: string, runes: (any | null)[]) => {
+    let count = 0;
+    for (const rune of runes) {
+      if (!rune) continue; // Skip null slots
+      
+      await prisma.daevanionRune.upsert({
+        where: {
+          path_slotId: {
+            path: rune.path,
+            slotId: rune.slotId,
+          },
+        },
+        update: {},
+        create: {
+          slotId: rune.slotId,
+          path: rune.path,
+          rarity: rune.rarity,
+          name: rune.name,
+          description: rune.description,
+          positionX: rune.position?.x ?? 0,
+          positionY: rune.position?.y ?? 0,
+          prerequisites: rune.prerequisites || [],
+          stats: rune.stats ? JSON.parse(JSON.stringify(rune.stats)) : null,
+        },
+      });
+      count++;
+    }
+    return count;
+  };
 
   // --- Seed DAEVANION RUNES for Nezekan ---
   const { nezekanRunes } = await import("../src/data/daevanion/nezekan");
-  
-  for (const rune of nezekanRunes) {
-    if (!rune) continue; // Skip null slots
-    
-    await prisma.daevanionRune.upsert({
-      where: {
-        path_slotId: {
-          path: rune.path,
-          slotId: rune.slotId,
-        },
-      },
-      update: {},
-      create: {
-        slotId: rune.slotId,
-        path: rune.path,
-        rarity: rune.rarity,
-        name: rune.name,
-        description: rune.description,
-        positionX: rune.position?.x ?? 0,
-        positionY: rune.position?.y ?? 0,
-        prerequisites: rune.prerequisites || [],
-        stats: rune.stats ? JSON.parse(JSON.stringify(rune.stats)) : null,
-      },
-    });
-  }
+  const nezekanCount = await seedDaevanionPath("nezekan", nezekanRunes);
+  console.log(`✅ ${nezekanCount} Daevanion runes seeded for Nezekan`);
 
-  console.log(`✅ ${nezekanRunes.filter(r => r !== null).length} Daevanion runes seeded for Nezekan`);
+  // --- Seed DAEVANION RUNES for Zikel ---
+  const { zikelRunes } = await import("../src/data/daevanion/zikel");
+  const zikelCount = await seedDaevanionPath("zikel", zikelRunes);
+  console.log(`✅ ${zikelCount} Daevanion runes seeded for Zikel`);
+
+  // --- Seed DAEVANION RUNES for Vaizel ---
+  const { vaizelRunes } = await import("../src/data/daevanion/vaizel");
+  const vaizelCount = await seedDaevanionPath("vaizel", vaizelRunes);
+  console.log(`✅ ${vaizelCount} Daevanion runes seeded for Vaizel`);
+
+  // --- Seed DAEVANION RUNES for Triniel ---
+  const { trinielRunes } = await import("../src/data/daevanion/triniel");
+  const trinielCount = await seedDaevanionPath("triniel", trinielRunes);
+  console.log(`✅ ${trinielCount} Daevanion runes seeded for Triniel`);
 
   console.log("🌱 Seeding BUILDS...");
 

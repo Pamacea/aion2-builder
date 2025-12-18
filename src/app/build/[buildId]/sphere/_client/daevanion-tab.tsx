@@ -18,7 +18,7 @@ export function DaevanionTab({ activePath, onPathChange }: DaevanionTabProps) {
   }, [daevanionBuild]);
 
   return (
-    <div className="w-full flex justify-center border-b border-background/30">
+    <div className="w-full flex justify-center border-b-2 border-background/30">
       <div className="flex gap-2">
         {DAEVANION_PATHS.map((path) => {
           const pathRuneCount = pathRuneCounts.get(path.id) || 0;

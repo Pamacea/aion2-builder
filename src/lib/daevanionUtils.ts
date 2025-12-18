@@ -1,6 +1,101 @@
 import { DaevanionPath, DaevanionRune } from "@/types/daevanion.type";
 
 // ======================================
+// FONCTIONS DE CRÉATION DE RUNES
+// ======================================
+
+/**
+ * Fonction pour déterminer les prérequis d'une rune
+ * Les runes adjacentes au start peuvent être activées directement
+ * Les autres runes nécessitent qu'au moins une rune adjacente soit activée
+ */
+export const getPrerequisites = (
+  row: number,
+  col: number,
+  gridSize: number = 11,
+  startRow: number = 5,
+  startCol: number = 5
+): number[] | undefined => {
+  // Le nœud central (start) n'a pas de prérequis - c'est le point de départ
+  if (row === startRow && col === startCol) return undefined;
+  
+  // Les runes directement adjacentes au start (haut, bas, gauche, droite) n'ont pas de prérequis
+  // Elles peuvent être activées directement depuis le start
+  if (
+    (row === startRow - 1 && col === startCol) || // Haut du start
+    (row === startRow + 1 && col === startCol) || // Bas du start
+    (row === startRow && col === startCol - 1) || // Gauche du start
+    (row === startRow && col === startCol + 1)    // Droite du start
+  ) {
+    return undefined; // Pas de prérequis, peut être activée directement
+  }
+  
+  // Pour les autres runes, elles nécessitent qu'au moins une rune adjacente soit activée
+  const prereqs: number[] = [];
+  
+  // Les runes adjacentes (haut, bas, gauche, droite) sont des prérequis possibles
+  if (row > 0) prereqs.push((row - 1) * gridSize + col + 1); // Haut
+  if (row < gridSize - 1) prereqs.push((row + 1) * gridSize + col + 1); // Bas
+  if (col > 0) prereqs.push(row * gridSize + (col - 1) + 1); // Gauche
+  if (col < gridSize - 1) prereqs.push(row * gridSize + (col + 1) + 1); // Droite
+  
+  // Si c'est une rune au bord, elle peut avoir moins de prérequis
+  return prereqs.length > 0 ? prereqs : undefined;
+};
+
+/**
+ * Fonction helper pour créer une rune
+ */
+export const createRune = (
+  row: number,
+  col: number,
+  path: DaevanionPath,
+  rarity: "common" | "rare" | "legend" | "unique" | "start",
+  statsOrId?: DaevanionRune["stats"] | number,
+  abilityId?: number,
+  gridSize: number = 11
+): DaevanionRune => {
+  const slotId = row * gridSize + col + 1;
+  
+  // Déterminer si c'est une rare (passiveId) ou legend (abilityId)
+  let stats: DaevanionRune["stats"] = {};
+  let passiveId: number | undefined;
+  let finalAbilityId: number | undefined;
+  
+  if (rarity === "rare" && typeof statsOrId === "number") {
+    // Pour les nodes rare, statsOrId est le passiveId
+    passiveId = statsOrId;
+  } else if (rarity === "legend" && typeof statsOrId === "number") {
+    // Pour les nodes legend, statsOrId est l'abilityId
+    finalAbilityId = statsOrId;
+  } else if (statsOrId && typeof statsOrId === "object") {
+    // Pour les nodes common/unique, statsOrId est l'objet stats
+    stats = statsOrId;
+  } else if (rarity === "legend" && abilityId !== undefined) {
+    // Format alternatif : statsOrId peut être undefined et abilityId est passé séparément
+    finalAbilityId = abilityId;
+  }
+  
+  // Déterminer la position du start node selon le path
+  const startRow = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : 0;
+  const startCol = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : 0;
+  
+  return {
+    id: slotId,
+    slotId,
+    path,
+    rarity: rarity === "start" ? "common" : rarity, // Start est traité comme common pour le type
+    name: `${path.charAt(0).toUpperCase() + path.slice(1)} Rune ${slotId}`,
+    description: `Rune ${slotId} du chemin ${path} (${rarity})`,
+    stats,
+    passiveId,
+    abilityId: finalAbilityId,
+    position: { x: col, y: row },
+    prerequisites: getPrerequisites(row, col, gridSize, startRow, startCol),
+  };
+};
+
+// ======================================
 // FONCTIONS DE CHARGEMENT DES RUNES
 // ======================================
 
@@ -15,6 +110,14 @@ export const getRunesForPath = async (path: DaevanionPath): Promise<(DaevanionRu
   if (path === "zikel") {
     const { zikelRunes } = await import("@/data/daevanion/zikel");
     return zikelRunes;
+  }
+  if (path === "vaizel") {
+    const { vaizelRunes } = await import("@/data/daevanion/vaizel");
+    return vaizelRunes;
+  }
+  if (path === "triniel") {
+    const { trinielRunes } = await import("@/data/daevanion/triniel");
+    return trinielRunes;
   }
   // Pour les autres chemins, retourner un tableau vide pour l'instant
   return [];
@@ -155,8 +258,14 @@ export const getRarityColor = (rarity: string, isStartNode: boolean = false): st
  * Obtenir le chemin de l'image d'une rune selon son état
  */
 export const getRuneImage = (rune: DaevanionRune, isActive: boolean): string => {
-  // Vérifier si c'est le nœud central (Start)
-  const isStartNode = rune.slotId === 61 && rune.path === "nezekan"; // Slot 61 = centre (5,5) en 11x11
+  // Vérifier si c'est le nœud central (Start) pour tous les paths
+  const startNodeSlotIds: Record<string, number> = {
+    nezekan: 61, // row 5, col 5 - grille 11x11
+    zikel: 61,   // row 5, col 5 - grille 11x11
+    vaizel: 61,  // row 5, col 5 - grille 11x11
+    triniel: 85, // row 6, col 6 - grille 13x13
+  };
+  const isStartNode = rune.slotId === startNodeSlotIds[rune.path];
   
   if (isStartNode) {
     return `/runes/RU_Daevanion_Node_Start.webp`;

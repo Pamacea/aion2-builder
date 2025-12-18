@@ -7,9 +7,9 @@ import { create } from "zustand";
 
 const initialBuild: DaevanionBuild = {
   nezekan: [61], // Start node (slotId 61) toujours activé par défaut
-  zikel: [],
-  vaizel: [],
-  triniel: [],
+  zikel: [61],   // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
+  vaizel: [61],  // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
+  triniel: [85], // Start node (slotId 85) toujours activé par défaut - grille 13x13, position (6,6)
   ariel: [],
   azphel: [],
 };
@@ -78,16 +78,34 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       const currentBuild = currentState.daevanionBuild;
       
       if (daevanion) {
-        // S'assurer que le start node (slotId 61) est toujours activé pour Nezekan
+        // S'assurer que les start nodes sont toujours activés pour chaque chemin
         const nezekanRunes = daevanion.nezekan || [];
         if (!nezekanRunes.includes(61)) {
           nezekanRunes.push(61);
+        }
+        
+        const zikelRunes = daevanion.zikel || [];
+        if (!zikelRunes.includes(61)) {
+          zikelRunes.push(61);
+        }
+        
+        const vaizelRunes = daevanion.vaizel || [];
+        if (!vaizelRunes.includes(61)) {
+          vaizelRunes.push(61);
+        }
+        
+        const trinielRunes = daevanion.triniel || [];
+        if (!trinielRunes.includes(85)) {
+          trinielRunes.push(85);
         }
         
         // Comparer les données pour éviter les rechargements inutiles
         const newBuild = {
           ...daevanion,
           nezekan: nezekanRunes,
+          zikel: zikelRunes,
+          vaizel: vaizelRunes,
+          triniel: trinielRunes,
         };
         
         // Vérifier si les données ont vraiment changé

@@ -82,26 +82,37 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
     return canActivateMap.get(rune.slotId) ?? false;
   }, [canActivateMap]);
 
+  // Helper pour déterminer si une rune est un start node
+  const isStartNode = useCallback((rune: DaevanionRune): boolean => {
+    const startNodeSlotIds: Record<string, number> = {
+      nezekan: 61, // row 5, col 5 - grille 11x11
+      zikel: 61,   // row 5, col 5 - grille 11x11
+      vaizel: 61,  // row 5, col 5 - grille 11x11
+      triniel: 85, // row 6, col 6 - grille 13x13
+    };
+    return rune.slotId === startNodeSlotIds[rune.path];
+  }, []);
+
   const handleRuneClick = useCallback(async (rune: DaevanionRune) => {
-    // Le start node (slotId 61) ne peut pas être désactivé
-    const isStartNode = rune.slotId === 61 && rune.path === "nezekan";
-    if (isStartNode) {
+    // Le start node ne peut pas être désactivé
+    if (isStartNode(rune)) {
       return; // Ne peut pas cliquer sur le start node
     }
     if (!canActivate(rune) && !activeRunes.includes(rune.slotId)) {
       return; // Ne peut pas activer
     }
     await onToggleRune(rune.slotId);
-  }, [canActivate, activeRunes, onToggleRune]);
+  }, [canActivate, activeRunes, onToggleRune, isStartNode]);
 
-  // Organiser les runes en grille basée sur leurs positions (11x11 pour Nezekan)
+  // Organiser les runes en grille basée sur leurs positions
   const gridRunes = useMemo(() => {
     const grid: (DaevanionRune | null)[][] = [];
-    // Grille 11x11 pour Nezekan, 8x8 pour les autres chemins (à ajuster plus tard)
-    const gridSize = path === "nezekan" ? 11 : 8;
+    // Grille 11x11 pour Nezekan, Zikel et Vaizel, 13x13 pour Triniel
+    const gridSize = path === "triniel" ? 13 : 11; // Largeur (colonnes)
+    const gridHeight = path === "nezekan" || path === "zikel" || path === "vaizel" ? 11 : path === "triniel" ? 13 : 9; // Hauteur (lignes)
 
     // Initialiser la grille
-    for (let y = 0; y < gridSize; y++) {
+    for (let y = 0; y < gridHeight; y++) {
       grid[y] = [];
       for (let x = 0; x < gridSize; x++) {
         grid[y][x] = null;
@@ -115,7 +126,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
         const x = rune.position.x;
         const y = rune.position.y;
         // Vérifier que la position est dans les limites
-        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+        if (x >= 0 && x < gridSize && y >= 0 && y < gridHeight) {
           grid[y][x] = rune;
         }
       }
@@ -137,13 +148,13 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
 
       const isActive = activeRunes.includes(rune.slotId);
       const canActivateRune = canActivate(rune);
-      const isStartNode = rune.slotId === 61 && rune.path === "nezekan";
+      const isStartNodeRune = isStartNode(rune);
 
       // Calculer les styles
       let opacityClass = "opacity-100";
       let borderClass = "";
       
-      if (isStartNode) {
+      if (isStartNodeRune) {
         opacityClass = "opacity-100";
         borderClass = isActive ? "border-2 border-blue-500" : "";
       } else if (isActive) {
@@ -159,8 +170,8 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
 
       // Calculer les infos
       const statsList = formatStats(rune.stats);
-      const rarityLabel = getRarityLabel(rune.rarity, isStartNode);
-      const rarityColor = getRarityColor(rune.rarity, isStartNode);
+      const rarityLabel = getRarityLabel(rune.rarity, isStartNodeRune);
+      const rarityColor = getRarityColor(rune.rarity, isStartNodeRune);
       const skillLevelUp = getSkillLevelUpInfo(rune);
       const isTopRow = rune.position && rune.position.y < 3;
       const tooltipPositionClass = isTopRow 
@@ -178,7 +189,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
     });
 
     return infoMap;
-  }, [runes, activeRunes, canActivate, getSkillLevelUpInfo]);
+  }, [runes, activeRunes, canActivate, getSkillLevelUpInfo, isStartNode]);
 
   return (
     <div className="w-full h-full p-4 overflow-auto flex justify-center items-start">

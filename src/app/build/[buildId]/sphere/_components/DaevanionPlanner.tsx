@@ -8,8 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DaevanionButtons } from "../_client/daevanion-buttons";
 import { DaevanionPoints } from "../_client/daevanion-points";
 import { DaevanionTab } from "../_client/daevanion-tab";
-import { RuneGrid } from "../_client/RuneGrid";
 import { useDaevanionStore } from "../_store/useDaevanionStore";
+import { RuneGrid } from "./RuneGrid";
 import { StatsSidebar } from "./StatsSidebar";
 
 export function DaevanionPlanner() {
@@ -105,7 +105,7 @@ export function DaevanionPlanner() {
   }, [activePath, activateAllRunes]);
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full max-h-screen flex flex-col overflow-hidden">
       {/* Onglets en pleine largeur, centrés */}
       <DaevanionTab
         activePath={activePath}
@@ -113,9 +113,9 @@ export function DaevanionPlanner() {
       />
 
       {/* Zone principale avec manager à gauche, planner centré et stats à droite */}
-      <div className="flex-1 flex flex-row gap-4">
+      <div className="flex-1 flex flex-row gap-4 min-h-0">
         {/* Daevanion Manager à gauche */}
-        <div className="w-80 border-r border-border pr-4 flex flex-col">
+        <div className="w-80 border-r-2 border-background/30 pr-4 flex flex-col">
           <div className="flex-1">
             <DaevanionButtons
               activePath={activePath}
@@ -147,7 +147,7 @@ export function DaevanionPlanner() {
         </div>
 
         {/* Barre latérale des stats à droite */}
-        <div className="w-80 border-l border-border pl-4">
+        <div className="w-80 border-l-2 border-background/30 pl-4">
           <StatsSidebar stats={totalStats} />
         </div>
       </div>

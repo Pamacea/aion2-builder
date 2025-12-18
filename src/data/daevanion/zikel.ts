@@ -1,65 +1,51 @@
+import { createRune } from "@/lib/daevanionUtils";
 import { DaevanionRune } from "@/types/daevanion.type";
 
-// Schéma Daevanion pour Zikel basé sur l'image
-// Grille 11x11 (index 0-based: lignes 0-10, colonnes 0-10)
-// Le slotId est calculé comme: row * 11 + col + 1 (pour commencer à 1)
-// Certains slots sont vides (null) - pas de rune à ces positions
+/**
+ * ============================================
+ * SCHÉMA DAEVANION - ZIKEL
+ * ============================================
+ * 
+ * Configuration de la grille Daevanion pour le chemin Zikel.
+ * 
+ * INFORMATIONS GÉNÉRALES:
+ * - Grille: 11x11 (11 lignes × 11 colonnes)
+ * - Index: 0-based (lignes 0-10, colonnes 0-10)
+ * - Calcul slotId: row * 11 + col + 1
+ * - Start Node: Position (5,5) - slotId 61
+ * 
+ * TYPES DE RUNES:
+ * - Common (Gris): Stats de base (+50 MP, +100 HP, +10 Critical Hit, +50 Defense, +5 Critical Hit Resist, +5 Attack)
+ * - Rare (Vert): Augmente le niveau d'un passif spécifique (passiveId)
+ * - Legend (Bleu): Augmente le niveau d'un sort actif spécifique (abilityId)
+ * - Unique (Orange): Stats spéciales (Cooldown Reduction, Combat Speed, Damage Boost, Damage Tolerance)
+ * - Start (Blanc): Nœud de départ, aucune stats, toujours activé
+ * 
+ * NOTES:
+ * - Les slots vides sont représentés par `null`
+ * - Les nodes Rare et Legend utilisent passiveId/abilityId au lieu de stats génériques
+ */
 
 export const zikelRunes: (DaevanionRune | null)[] = [];
 
-// Fonction helper pour créer une rune
-const createRune = (
+/**
+ * Helper pour créer une rune Zikel
+ * Wrapper autour de createRune avec le path "zikel" et gridSize 11 par défaut
+ */
+const createZikelRune = (
   row: number,
   col: number,
   rarity: "common" | "rare" | "legend" | "unique" | "start",
-  stats: DaevanionRune["stats"] = {}
+  statsOrId?: DaevanionRune["stats"] | number,
+  abilityId?: number
 ): DaevanionRune => {
-  const slotId = row * 11 + col + 1;
-  return {
-    id: slotId,
-    slotId,
-    path: "zikel",
-    rarity: rarity === "start" ? "common" : rarity, // Start est traité comme common pour le type
-    name: `Zikel Rune ${slotId}`,
-    description: `Rune ${slotId} du chemin Zikel (${rarity})`,
-    stats,
-    position: { x: col, y: row },
-    prerequisites: getPrerequisites(row, col),
-  };
+  return createRune(row, col, "zikel", rarity, statsOrId, abilityId, 11);
 };
 
-// Fonction pour déterminer les prérequis
-// Les runes adjacentes au start peuvent être activées directement
-// Les autres runes nécessitent qu'au moins une rune adjacente soit activée
-const getPrerequisites = (row: number, col: number): number[] | undefined => {
-  // Le nœud central (5,5) n'a pas de prérequis - c'est le point de départ
-  if (row === 5 && col === 5) return undefined;
-  
-  // Les runes directement adjacentes au start (haut, bas, gauche, droite) n'ont pas de prérequis
-  // Elles peuvent être activées directement depuis le start
-  if (
-    (row === 4 && col === 5) || // Haut du start
-    (row === 6 && col === 5) || // Bas du start
-    (row === 5 && col === 4) || // Gauche du start
-    (row === 5 && col === 6)    // Droite du start
-  ) {
-    return undefined; // Pas de prérequis, peut être activée directement
-  }
-  
-  // Pour les autres runes, elles nécessitent qu'au moins une rune adjacente soit activée
-  const prereqs: number[] = [];
-  
-  // Les runes adjacentes (haut, bas, gauche, droite) sont des prérequis possibles
-  if (row > 0) prereqs.push((row - 1) * 11 + col + 1); // Haut
-  if (row < 10) prereqs.push((row + 1) * 11 + col + 1); // Bas
-  if (col > 0) prereqs.push(row * 11 + (col - 1) + 1); // Gauche
-  if (col < 10) prereqs.push(row * 11 + (col + 1) + 1); // Droite
-  
-  // Si c'est une rune au bord, elle peut avoir moins de prérequis
-  return prereqs.length > 0 ? prereqs : undefined;
-};
-
-// Stats par défaut pour chaque type
+/**
+ * Stats par défaut pour les nodes Common
+ * Chaque node Common donne une de ces stats
+ */
 const commonStats: DaevanionRune["stats"] = {
   mp: 50,
   maxHP: 100,
@@ -69,95 +55,99 @@ const commonStats: DaevanionRune["stats"] = {
   attack: 5,
 };
 
-const rareStats: DaevanionRune["stats"] = {
-  passiveLevelBoost: 1,
-};
-
-const legendStats: DaevanionRune["stats"] = {
-  activeSkillLevelBoost: 1,
-};
-
-// Stats uniques (4 uniques selon le schéma)
+/**
+ * Stats pour les nodes Unique
+ * Chaque node Unique donne une stat spéciale unique
+ */
 const uniqueStatsList: DaevanionRune["stats"][] = [
-  { cooldownReduction: 250 },      // (0,0) - Unique
-  { combatSpeed: 250 },             // (0,10) - Unique
-  { damageBoost: 500 },             // (10,0) - Unique
-  { damageTolerance: 500 },         // (10,10) - Unique
+  { cooldownReduction: 250 },      // (0,0) et (0,10)
+  { combatSpeed: 250 },             // (10,0) et (10,10)
+  { damageBoost: 500 },             // Utilisé pour certains uniques
+  { damageTolerance: 500 },          // Utilisé pour certains uniques
 ];
 
-// Grille 11x11 selon le schéma fourni ligne par ligne
-// Ligne 1 (row 0): Unique common common vide rare common legend vide rare common unique
-zikelRunes.push(createRune(0, 0, "unique", uniqueStatsList[0])); // (0,0) - Unique
-zikelRunes.push(createRune(0, 1, "common", { attack: commonStats.attack })); // (0,1) - Common
-zikelRunes.push(createRune(0, 2, "common", { criticalHitResist: commonStats.criticalHitResist })); // (0,2) - Common
-zikelRunes.push(null); // (0,3) - Vide
-zikelRunes.push(createRune(0, 4, "rare", rareStats)); // (0,4) - Rare
-zikelRunes.push(createRune(0, 5, "common", { criticalHitResist: commonStats.criticalHitResist })); // (0,5) - Common
-zikelRunes.push(createRune(0, 6, "legend", legendStats)); // (0,6) - Legend
-zikelRunes.push(null); // (0,7) - Vide
-zikelRunes.push(createRune(0, 8, "rare", rareStats)); // (0,8) - Rare
-zikelRunes.push(createRune(0, 9, "common", { criticalHit: commonStats.criticalHit })); // (0,9) - Common
-zikelRunes.push(createRune(0, 10, "unique", uniqueStatsList[1])); // (0,10) - Unique
+/**
+ * ============================================
+ * PLACEMENT DES RUNES - LIGNE PAR LIGNE
+ * ============================================
+ * 
+ * Chaque ligne représente une rangée de la grille 11x11.
+ * Format: (row, col) - Type - Description
+ * 
+ * Ligne 1 (row 0): unique commun commun commun legend commun rare commun legend commun unique
+ */
+zikelRunes.push(createZikelRune(0, 0, "unique", uniqueStatsList[3])); // (0,0) - Unique
+zikelRunes.push(createZikelRune(0, 1, "common", {criticalHit: commonStats.criticalHit})); // (0,1) - Common
+zikelRunes.push(createZikelRune(0, 2, "common", { mp: commonStats.mp })); // (0,2) - Common
+zikelRunes.push(createZikelRune(0, 3, "common", { criticalHitResist: commonStats.criticalHitResist })); // (0,3) - Common
+zikelRunes.push(createZikelRune(0, 4, "legend", 6)); // (0,4) - Legend - Ability ID 1
+zikelRunes.push(createZikelRune(0, 5, "common", { defense: commonStats.defense })); // (0,5) - Common
+zikelRunes.push(createZikelRune(0, 6, "rare", 6)); // (0,6) - Rare - Passive ID 2
+zikelRunes.push(createZikelRune(0, 7, "common", { attack: commonStats.attack })); // (0,7) - Common
+zikelRunes.push(createZikelRune(0, 8, "legend", 11)); // (0,8) - Legend - Ability ID 3
+zikelRunes.push(createZikelRune(0, 9, "common", { defense: commonStats.defense })); // (0,9) - Common
+zikelRunes.push(createZikelRune(0, 10, "unique", uniqueStatsList[2])); // (0,10) - Unique
 
-// Ligne 2 (row 1): common vide legend common common vide common common vide common
-zikelRunes.push(createRune(1, 0, "common", { criticalHit: commonStats.criticalHit })); // (1,0) - Common
+// Ligne 2 (row 1): commun vide rare vide commun vide vide commun vide vide commun
+zikelRunes.push(createZikelRune(1, 0, "common", { attack: commonStats.attack })); // (1,0) - Common
 zikelRunes.push(null); // (1,1) - Vide
-zikelRunes.push(createRune(1, 2, "legend", legendStats)); // (1,2) - Legend
-zikelRunes.push(createRune(1, 3, "common", { mp: commonStats.mp })); // (1,3) - Common
-zikelRunes.push(createRune(1, 4, "common", { defense: commonStats.defense })); // (1,4) - Common
+zikelRunes.push(createZikelRune(1, 2, "rare", 10)); // (1,2) - Rare - Passive ID 4
+zikelRunes.push(null); // (1,3) - Vide
+zikelRunes.push(createZikelRune(1, 4, "common", {maxHP: commonStats.maxHP })); // (1,4) - Common
 zikelRunes.push(null); // (1,5) - Vide
-zikelRunes.push(createRune(1, 6, "common", { mp: commonStats.mp })); // (1,6) - Common
-zikelRunes.push(createRune(1, 7, "common", { defense: commonStats.defense })); // (1,7) - Common
+zikelRunes.push(null); // (1,6) - Vide
+zikelRunes.push(createZikelRune(1, 7, "common", { maxHP: commonStats.maxHP })); // (1,7) - Common
 zikelRunes.push(null); // (1,8) - Vide
-zikelRunes.push(createRune(1, 9, "common", { criticalHitResist: commonStats.criticalHitResist })); // (1,9) - Common
-zikelRunes.push(createRune(1, 10, "common", { mp: commonStats.mp })); // (1,10) - Common
+zikelRunes.push(null); // (1,9) - Vide
+zikelRunes.push(createZikelRune(1, 10, "common", { criticalHit: commonStats.criticalHit  })); // (1,10) - Common
 
-// Ligne 3 (row 2): rare common common vide common legend common vide legend common rare
-zikelRunes.push(createRune(2, 0, "rare", rareStats)); // (2,0) - Rare
-zikelRunes.push(createRune(2, 1, "common", { defense: commonStats.defense })); // (2,1) - Common
-zikelRunes.push(createRune(2, 2, "common", { maxHP: commonStats.maxHP })); // (2,2) - Common
+// Ligne 3 (row 2): legend commun commun vide commun commun legend commun commun rare commun
+zikelRunes.push(createZikelRune(2, 0, "legend", 1)); // (2,0) - Legend - Ability ID 4
+zikelRunes.push(createZikelRune(2, 1, "common", { maxHP: commonStats.maxHP })); // (2,1) - Common
+zikelRunes.push(createZikelRune(2, 2, "common", { defense: commonStats.defense })); // (2,2) - Common
 zikelRunes.push(null); // (2,3) - Vide
-zikelRunes.push(createRune(2, 4, "common", { criticalHit: commonStats.criticalHit })); // (2,4) - Common
-zikelRunes.push(createRune(2, 5, "legend", legendStats)); // (2,5) - Legend
-zikelRunes.push(createRune(2, 6, "common", { maxHP: commonStats.maxHP })); // (2,6) - Common
-zikelRunes.push(null); // (2,7) - Vide
-zikelRunes.push(createRune(2, 8, "legend", legendStats)); // (2,8) - Legend
-zikelRunes.push(createRune(2, 9, "common", { maxHP: commonStats.maxHP })); // (2,9) - Common
-zikelRunes.push(createRune(2, 10, "rare", rareStats)); // (2,10) - Rare
+zikelRunes.push(createZikelRune(2, 4, "common", { attack: commonStats.attack })); // (2,4) - Common
+zikelRunes.push(createZikelRune(2, 5, "common", { mp: commonStats.mp })); // (2,5) - Common
+zikelRunes.push(createZikelRune(2, 6, "legend", 3)); // (2,6) - Legend - Ability ID 5
+zikelRunes.push(createZikelRune(2, 7, "common", { criticalHitResist: commonStats.criticalHitResist })); // (2,7) - Common
+zikelRunes.push(createZikelRune(2, 8, "common", { mp: commonStats.mp })); // (2,8) - Common
+zikelRunes.push(createZikelRune(2, 9, "rare", 9)); // (2,9) - Rare - Passive ID 6
+zikelRunes.push(createZikelRune(2, 10, "common", { attack: commonStats.attack })); // (2,10) - Common
 
-// Ligne 4 (row 3): vide common vide vide common vide common vide common vide common
-zikelRunes.push(null); // (3,0) - Vide
-zikelRunes.push(createRune(3, 1, "common", { maxHP: commonStats.maxHP })); // (3,1) - Common
-zikelRunes.push(null); // (3,2) - Vide
-zikelRunes.push(null); // (3,3) - Vide
-zikelRunes.push(createRune(3, 4, "common", { criticalHitResist: commonStats.criticalHitResist })); // (3,4) - Common
+// Ligne 4 (row 3): commun vide commun commun rare vide commun vide commun vide commun
+zikelRunes.push(createZikelRune(3, 0, "common", { criticalHit: commonStats.criticalHit })); // (3,0) - Common
+zikelRunes.push(null); // (3,1) - Vide
+zikelRunes.push(createZikelRune(3, 2, "common", { mp: commonStats.mp })); // (3,2) - Common
+zikelRunes.push(createZikelRune(3, 3, "common", { criticalHitResist: commonStats.criticalHitResist })); // (3,3) - Common
+zikelRunes.push(createZikelRune(3, 4, "rare", 8)); // (3,4) - Rare - Passive ID 7
 zikelRunes.push(null); // (3,5) - Vide
-zikelRunes.push(createRune(3, 6, "common", { defense: commonStats.defense })); // (3,6) - Common
+zikelRunes.push(createZikelRune(3, 6, "common", { criticalHit: commonStats.criticalHit })); // (3,6) - Common
 zikelRunes.push(null); // (3,7) - Vide
-zikelRunes.push(createRune(3, 8, "common", { attack: commonStats.attack })); // (3,8) - Common
+zikelRunes.push(createZikelRune(3, 8, "common", { criticalHit: commonStats.criticalHit })); // (3,8) - Common
 zikelRunes.push(null); // (3,9) - Vide
-zikelRunes.push(createRune(3, 10, "common", { defense: commonStats.defense })); // (3,10) - Common
+zikelRunes.push(createZikelRune(3, 10, "common", { criticalHitResist: commonStats.criticalHitResist })); // (3,10) - Common
 
-// Ligne 5 (row 4): common common legend common common common common rare common common common
-zikelRunes.push(createRune(4, 0, "common", { mp: commonStats.mp })); // (4,0) - Common
-zikelRunes.push(createRune(4, 1, "common", { attack: commonStats.attack })); // (4,1) - Common
-zikelRunes.push(createRune(4, 2, "legend", legendStats)); // (4,2) - Legend
-zikelRunes.push(createRune(4, 3, "common", { maxHP: commonStats.maxHP })); // (4,3) - Common
-zikelRunes.push(createRune(4, 4, "common", { mp: commonStats.mp })); // (4,4) - Common
-zikelRunes.push(createRune(4, 5, "common", { attack: commonStats.attack })); // (4,5) - Common (adjacent haut du start)
-zikelRunes.push(createRune(4, 6, "common", { criticalHitResist: commonStats.criticalHitResist })); // (4,6) - Common
-zikelRunes.push(createRune(4, 7, "rare", rareStats)); // (4,7) - Rare
-zikelRunes.push(createRune(4, 8, "common", { mp: commonStats.mp })); // (4,8) - Common
-zikelRunes.push(createRune(4, 9, "common", { criticalHit: commonStats.criticalHit })); // (4,9) - Common
-zikelRunes.push(createRune(4, 10, "common", { criticalHitResist: commonStats.criticalHitResist })); // (4,10) - Common
+// Ligne 5 (row 4): commun commun legend vide commun vide commun rare commun commun legend
+zikelRunes.push(createZikelRune(4, 0, "common", { defense: commonStats.defense })); // (4,0) - Common
+zikelRunes.push(createZikelRune(4, 1, "common", { maxHP: commonStats.maxHP })); // (4,1) - Common
+zikelRunes.push(createZikelRune(4, 2, "legend", 4)); // (4,2) - Legend - Ability ID 6
+zikelRunes.push(null); // (4,3) - Vide
+zikelRunes.push(createZikelRune(4, 4, "common", { criticalHit: commonStats.criticalHit })); // (4,4) - Common
+zikelRunes.push(null); // (4,5) - Vide
+zikelRunes.push(createZikelRune(4, 6, "common", { mp: commonStats.mp })); // (4,6) - Common
+zikelRunes.push(createZikelRune(4, 7, "rare", 7)); // (4,7) - Rare - Passive ID 8
+zikelRunes.push(createZikelRune(4, 8, "common", { maxHP: commonStats.maxHP })); // (4,8) - Common
+zikelRunes.push(createZikelRune(4, 9, "common", { attack: commonStats.attack })); // (4,9) - Common
+zikelRunes.push(createZikelRune(4, 10, "legend", 2)); // (4,10) - Legend - Ability ID 7
 
-// Ligne 6 (row 5) - CENTRE avec nœud Start: legend vide vide common vide start vide common vide vide legend
-zikelRunes.push(createRune(5, 0, "legend", legendStats)); // (5,0) - Legend
-zikelRunes.push(null); // (5,1) - Vide
+// Ligne 6 (row 5): vide commun vide vide commun START commun vide vide commun vide
+zikelRunes.push(null); // (5,0) - Vide
+zikelRunes.push(createZikelRune(5, 1, "common", { attack: commonStats.attack })); // (5,1) - Common
 zikelRunes.push(null); // (5,2) - Vide
-zikelRunes.push(createRune(5, 3, "common", { defense: commonStats.defense })); // (5,3) - Common
-zikelRunes.push(null); // (5,4) - Vide
-// (5,5) - Nœud central START - AUCUNE STATS
+zikelRunes.push(null); // (5,3) - Vide
+zikelRunes.push(createZikelRune(5, 4, "common", { defense: commonStats.defense })); // (5,4) - Common
+// (5,5) - Nœud central START - Position centrale de la grille
+// IMPORTANT: Ce nœud est toujours activé par défaut et ne peut pas être désactivé
 zikelRunes.push({
   id: 61,
   slotId: 61,
@@ -165,77 +155,77 @@ zikelRunes.push({
   rarity: "common",
   name: "Zikel Start Node",
   description: "Nœud de départ du chemin Zikel",
-  stats: {}, // AUCUNE stats pour le start
+  stats: {}, // AUCUNE stats pour le start node
   position: { x: 5, y: 5 },
   prerequisites: undefined, // Pas de prérequis pour le nœud de départ
 });
-zikelRunes.push(createRune(5, 6, "common", { attack: commonStats.attack })); // (5,6) - Common (adjacent droite du start)
+zikelRunes.push(createZikelRune(5, 6, "common", { attack: commonStats.attack })); // (5,6) - Common
 zikelRunes.push(null); // (5,7) - Vide
 zikelRunes.push(null); // (5,8) - Vide
-zikelRunes.push(null); // (5,9) - Vide
-zikelRunes.push(createRune(5, 10, "legend", legendStats)); // (5,10) - Legend
+zikelRunes.push(createZikelRune(5, 9, "common", { attack: commonStats.attack })); // (5,9) - Common
+zikelRunes.push(null); // (5,10) - Vide
 
-// Ligne 7 (row 6): common common common rare common common common common legend common common
-zikelRunes.push(createRune(6, 0, "common", { criticalHit: commonStats.criticalHit })); // (6,0) - Common
-zikelRunes.push(createRune(6, 1, "common", { criticalHitResist: commonStats.criticalHitResist })); // (6,1) - Common
-zikelRunes.push(createRune(6, 2, "common", { maxHP: commonStats.maxHP })); // (6,2) - Common
-zikelRunes.push(createRune(6, 3, "rare", rareStats)); // (6,3) - Rare
-zikelRunes.push(createRune(6, 4, "common", { criticalHit: commonStats.criticalHit })); // (6,4) - Common (adjacent bas du start)
-zikelRunes.push(createRune(6, 5, "common", { defense: commonStats.defense })); // (6,5) - Common
-zikelRunes.push(createRune(6, 6, "common", { maxHP: commonStats.maxHP })); // (6,6) - Common
-zikelRunes.push(createRune(6, 7, "common", { mp: commonStats.mp })); // (6,7) - Common
-zikelRunes.push(createRune(6, 8, "legend", legendStats)); // (6,8) - Legend
-zikelRunes.push(createRune(6, 9, "common", { defense: commonStats.defense })); // (6,9) - Common
-zikelRunes.push(createRune(6, 10, "common", { maxHP: commonStats.maxHP })); // (6,10) - Common
+// Ligne 7 (row 6): legend commun commun rare commun vide commun vide legend commun commun
+zikelRunes.push(createZikelRune(6, 0, "legend", 8)); // (6,0) - Legend - Ability ID 8
+zikelRunes.push(createZikelRune(6, 1, "common", { defense: commonStats.defense })); // (6,1) - Common
+zikelRunes.push(createZikelRune(6, 2, "common", { mp: commonStats.mp })); // (6,2) - Common
+zikelRunes.push(createZikelRune(6, 3, "rare", 9)); // (6,3) - Rare - Passive ID 9
+zikelRunes.push(createZikelRune(6, 4, "common", { maxHP: commonStats.maxHP })); // (6,4) - Common
+zikelRunes.push(null); // (6,5) - Vide
+zikelRunes.push(createZikelRune(6, 6, "common", { criticalHitResist: commonStats.criticalHitResist })); // (6,6) - Common
+zikelRunes.push(null); // (6,7) - Vide
+zikelRunes.push(createZikelRune(6, 8, "legend", 10)); // (6,8) - Legend - Ability ID 9
+zikelRunes.push(createZikelRune(6, 9, "common", { mp: commonStats.mp })); // (6,9) - Common
+zikelRunes.push(createZikelRune(6, 10, "common", { attack: commonStats.attack })); // (6,10) - Common
 
-// Ligne 8 (row 7): common vide common vide common vide common vide vide common vide
-zikelRunes.push(createRune(7, 0, "common", { attack: commonStats.attack })); // (7,0) - Common
+// Ligne 8 (row 7): commun vide commun vide commun vide rare commun commun vide commun
+zikelRunes.push(createZikelRune(7, 0, "common", { criticalHit: commonStats.criticalHit })); // (7,0) - Common
 zikelRunes.push(null); // (7,1) - Vide
-zikelRunes.push(createRune(7, 2, "common", { defense: commonStats.defense })); // (7,2) - Common
+zikelRunes.push(createZikelRune(7, 2, "common", { criticalHitResist: commonStats.criticalHitResist })); // (7,2) - Common
 zikelRunes.push(null); // (7,3) - Vide
-zikelRunes.push(createRune(7, 4, "common", { attack: commonStats.attack })); // (7,4) - Common
+zikelRunes.push(createZikelRune(7, 4, "common", { criticalHitResist: commonStats.criticalHitResist })); // (7,4) - Common
 zikelRunes.push(null); // (7,5) - Vide
-zikelRunes.push(createRune(7, 6, "common", { criticalHit: commonStats.criticalHit })); // (7,6) - Common
-zikelRunes.push(null); // (7,7) - Vide
-zikelRunes.push(null); // (7,8) - Vide
-zikelRunes.push(createRune(7, 9, "common", { mp: commonStats.mp })); // (7,9) - Common
-zikelRunes.push(null); // (7,10) - Vide
+zikelRunes.push(createZikelRune(7, 6, "rare", 10)); // (7,6) - Rare - Passive ID 10
+zikelRunes.push(createZikelRune(7, 7, "common", { criticalHit: commonStats.criticalHit })); // (7,7) - Common
+zikelRunes.push(createZikelRune(7, 8, "common", { maxHP: commonStats.maxHP })); // (7,8) - Common
+zikelRunes.push(null); // (7,9) - Vide
+zikelRunes.push(createZikelRune(7, 10, "common", { criticalHitResist: commonStats.criticalHitResist })); // (7,10) - Common
 
-// Ligne 9 (row 8): rare common legend vide common legend common vide common common rare
-zikelRunes.push(createRune(8, 0, "rare", rareStats)); // (8,0) - Rare
-zikelRunes.push(createRune(8, 1, "common", { mp: commonStats.mp })); // (8,1) - Common
-zikelRunes.push(createRune(8, 2, "legend", legendStats)); // (8,2) - Legend
-zikelRunes.push(null); // (8,3) - Vide
-zikelRunes.push(createRune(8, 4, "common", { mp: commonStats.mp })); // (8,4) - Common
-zikelRunes.push(createRune(8, 5, "legend", legendStats)); // (8,5) - Legend
-zikelRunes.push(createRune(8, 6, "common", { criticalHitResist: commonStats.criticalHitResist })); // (8,6) - Common
+// Ligne 9 (row 8): commun rare commun commun legend commun commun vide commun commun legend
+zikelRunes.push(createZikelRune(8, 0, "common", { defense: commonStats.defense })); // (8,0) - Common
+zikelRunes.push(createZikelRune(8, 1, "rare", 7)); // (8,1) - Rare - Passive ID 11
+zikelRunes.push(createZikelRune(8, 2, "common", { maxHP: commonStats.maxHP })); // (8,2) - Common
+zikelRunes.push(createZikelRune(8, 3, "common", { criticalHit: commonStats.criticalHit })); // (8,3) - Common
+zikelRunes.push(createZikelRune(8, 4, "legend", 9)); // (8,4) - Legend - Ability ID 10
+zikelRunes.push(createZikelRune(8, 5, "common", { maxHP: commonStats.maxHP })); // (8,5) - Common
+zikelRunes.push(createZikelRune(8, 6, "common", { defense: commonStats.defense })); // (8,6) - Common
 zikelRunes.push(null); // (8,7) - Vide
-zikelRunes.push(createRune(8, 8, "common", { mp: commonStats.mp })); // (8,8) - Common
-zikelRunes.push(createRune(8, 9, "common", { attack: commonStats.attack })); // (8,9) - Common
-zikelRunes.push(createRune(8, 10, "rare", rareStats)); // (8,10) - Rare
+zikelRunes.push(createZikelRune(8, 8, "common", { attack: commonStats.attack })); // (8,8) - Common
+zikelRunes.push(createZikelRune(8, 9, "common", { mp: commonStats.mp })); // (8,9) - Common
+zikelRunes.push(createZikelRune(8, 10, "legend", 7)); // (8,10) - Legend - Ability ID 11
 
-// Ligne 10 (row 9): common vide common common common vide common common legend vide common
-zikelRunes.push(createRune(9, 0, "common", { maxHP: commonStats.maxHP })); // (9,0) - Common
+// Ligne 10 (row 9): commun vide vide commun vide vide commun vide rare vide commun
+zikelRunes.push(createZikelRune(9, 0, "common", { criticalHitResist: commonStats.criticalHitResist })); // (9,0) - Common
 zikelRunes.push(null); // (9,1) - Vide
-zikelRunes.push(createRune(9, 2, "common", { criticalHit: commonStats.criticalHit })); // (9,2) - Common
-zikelRunes.push(createRune(9, 3, "common", { attack: commonStats.attack })); // (9,3) - Common
-zikelRunes.push(createRune(9, 4, "common", { maxHP: commonStats.maxHP })); // (9,4) - Common
+zikelRunes.push(null); // (9,2) - Vide
+zikelRunes.push(createZikelRune(9, 3, "common", { mp: commonStats.mp })); // (9,3) - Common
+zikelRunes.push(null); // (9,4) - Vide
 zikelRunes.push(null); // (9,5) - Vide
-zikelRunes.push(createRune(9, 6, "common", { attack: commonStats.attack })); // (9,6) - Common
-zikelRunes.push(createRune(9, 7, "common", { maxHP: commonStats.maxHP })); // (9,7) - Common
-zikelRunes.push(createRune(9, 8, "legend", legendStats)); // (9,8) - Legend
+zikelRunes.push(createZikelRune(9, 6, "common", { mp: commonStats.mp })); // (9,6) - Common
+zikelRunes.push(null); // (9,7) - Vide
+zikelRunes.push(createZikelRune(9, 8, "rare", 8)); // (9,8) - Rare - Passive ID 12
 zikelRunes.push(null); // (9,9) - Vide
-zikelRunes.push(createRune(9, 10, "common", { criticalHitResist: commonStats.criticalHitResist })); // (9,10) - Common
+zikelRunes.push(createZikelRune(9, 10, "common", { defense: commonStats.defense })); // (9,10) - Common
 
-// Ligne 11 (row 10): Unique common rare vide legend common rare vide common common unique
-zikelRunes.push(createRune(10, 0, "unique", uniqueStatsList[2])); // (10,0) - Unique
-zikelRunes.push(createRune(10, 1, "common", { criticalHitResist: commonStats.criticalHitResist })); // (10,1) - Common
-zikelRunes.push(createRune(10, 2, "rare", rareStats)); // (10,2) - Rare
-zikelRunes.push(null); // (10,3) - Vide
-zikelRunes.push(createRune(10, 4, "legend", legendStats)); // (10,4) - Legend
-zikelRunes.push(createRune(10, 5, "common", { criticalHit: commonStats.criticalHit })); // (10,5) - Common
-zikelRunes.push(createRune(10, 6, "rare", rareStats)); // (10,6) - Rare
-zikelRunes.push(null); // (10,7) - Vide
-zikelRunes.push(createRune(10, 8, "common", { criticalHit: commonStats.criticalHit })); // (10,8) - Common
-zikelRunes.push(createRune(10, 9, "common", { defense: commonStats.defense })); // (10,9) - Common
-zikelRunes.push(createRune(10, 10, "unique", uniqueStatsList[3])); // (10,10) - Unique
+// Ligne 11 (row 10): unique commun legend commun rare commun legend commun commun commun unique
+zikelRunes.push(createZikelRune(10, 0, "unique", uniqueStatsList[2])); // (10,0) - Unique
+zikelRunes.push(createZikelRune(10, 1, "common", { attack: commonStats.attack })); // (10,1) - Common
+zikelRunes.push(createZikelRune(10, 2, "legend", 5)); // (10,2) - Legend - Ability ID 12
+zikelRunes.push(createZikelRune(10, 3, "common", { defense: commonStats.defense })); // (10,3) - Common
+zikelRunes.push(createZikelRune(10, 4, "rare", 6)); // (10,4) - Rare - Passive ID 1
+zikelRunes.push(createZikelRune(10, 5, "common", { attack: commonStats.attack })); // (10,5) - Common
+zikelRunes.push(createZikelRune(10, 6, "legend", 12)); // (10,6) - Legend - Ability ID 2
+zikelRunes.push(createZikelRune(10, 7, "common", { criticalHit: commonStats.criticalHit })); // (10,7) - Common
+zikelRunes.push(createZikelRune(10, 8, "common", { maxHP: commonStats.maxHP })); // (10,8) - Common
+zikelRunes.push(createZikelRune(10, 9, "common", { criticalHitResist: commonStats.criticalHitResist })); // (10,9) - Common
+zikelRunes.push(createZikelRune(10, 10, "unique", uniqueStatsList[3])); // (10,10) - Unique

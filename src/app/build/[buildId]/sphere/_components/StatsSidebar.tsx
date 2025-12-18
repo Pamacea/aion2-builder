@@ -26,7 +26,7 @@ export function StatsSidebar({ stats }: StatsSidebarProps) {
   }, [stats]);
 
   return (
-    <div className="h-full flex flex-col gap-4 pt-4">
+    <div className="h-full flex flex-col gap-4 pt-4 overflow-hidden">
       <h2 className="text-xl font-bold text-center bg-background/50 py-2 border-y-2 border-y-foreground/30 uppercase">Bonus</h2>
       
       {/* Barre de recherche */}
@@ -35,11 +35,11 @@ export function StatsSidebar({ stats }: StatsSidebarProps) {
         placeholder="Search for stats.."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-3 py-2 border-b-2 border-b-background/30"
+        className="w-full px-3 py-2 border-b-2 border-b-background/30 flex-shrink-0"
       />
 
       {/* Liste des stats */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {!hasStats && stats.skillLevelUps.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             None Selected

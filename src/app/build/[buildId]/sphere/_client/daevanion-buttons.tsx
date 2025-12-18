@@ -12,7 +12,7 @@ export function DaevanionButtons({
   const pathName = activePath.charAt(0).toUpperCase() + activePath.slice(1);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 pt-4">
       <h2 className="text-xl font-bold text-center bg-background/50 py-2 border-y-2 border-y-foreground/30 uppercase">
         Daevanion Manager
       </h2>
