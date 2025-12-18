@@ -6,7 +6,7 @@ import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
 import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 
 type PassiveSkillProps = {
@@ -25,7 +25,19 @@ export const PassiveSkill = ({
   className = "",
 }: PassiveSkillProps) => {
   const { build, currentUserId, addPassive, updatePassiveLevel } = useBuildStore();
-  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  // Sélecteurs individuels pour chaque chemin pour détecter les changements
+  const nezekan = useDaevanionStore((state) => state.daevanionBuild.nezekan);
+  const zikel = useDaevanionStore((state) => state.daevanionBuild.zikel);
+  const vaizel = useDaevanionStore((state) => state.daevanionBuild.vaizel);
+  const triniel = useDaevanionStore((state) => state.daevanionBuild.triniel);
+  const ariel = useDaevanionStore((state) => state.daevanionBuild.ariel);
+  const azphel = useDaevanionStore((state) => state.daevanionBuild.azphel);
+  // Créer une dépendance stable basée sur le contenu
+  const daevanionBuildKey = useMemo(() => 
+    JSON.stringify({ nezekan, zikel, vaizel, triniel, ariel, azphel }),
+    [nezekan, zikel, vaizel, triniel, ariel, azphel]
+  );
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
   const [daevanionBoost, setDaevanionBoost] = useState(0);
@@ -48,10 +60,13 @@ export const PassiveSkill = ({
     return () => {
       cancelled = true;
     };
-  }, [passive.id, getDaevanionBoostForSkill, daevanionBuild]);
+  }, [passive.id, getDaevanionBoostForSkill, daevanionBuildKey]);
 
   const currentLevel = baseLevel + daevanionBoost;
   const isInBuild = buildPassive !== undefined;
+  // Pour l'affichage visuel, considérer le skill comme "in build" si le niveau effectif > 0
+  // (même si baseLevel = 0 mais boost Daevanion > 0)
+  const isEffectivelyInBuild = isInBuild || currentLevel > 0;
   const isStarter = isStarterBuild(build);
   const isOwner = build ? isBuildOwner(build, currentUserId) : false;
 
@@ -143,7 +158,7 @@ export const PassiveSkill = ({
       ref={dragRef}
       className={`relative cursor-pointer transition-all ${className} inline-block w-14 h-14 ${
         isDragging ? "opacity-50" : ""
-      } ${isInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
+      } ${isEffectivelyInBuild && !isStarter ? "cursor-move" : ""} ${isStarter ? "cursor-not-allowed" : ""}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
@@ -185,7 +200,7 @@ export const PassiveSkill = ({
         </div>
       )}
       {/* Level badge - only show if level > 0 */}
-      {isInBuild && currentLevel > 0 && (
+      {isEffectivelyInBuild && currentLevel > 0 && (
         <div className="absolute bottom-1 right-1 text-foreground text-xs font-bold pointer-events-none leading-none">
           Lv.{currentLevel}
         </div>

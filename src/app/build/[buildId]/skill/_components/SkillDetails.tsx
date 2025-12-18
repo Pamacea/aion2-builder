@@ -11,7 +11,7 @@ import {
   StigmaType,
 } from "@/types/schema";
 import { SkillDetailsProps } from "@/types/skill.type";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AvailableSpeciality } from "../_client/avaible-speciality";
 import { AvailableSpecialityStigma } from "../_client/avaible-speciality-stigma.tsx";
 import { ChainSkill } from "../_client/chain-skill";
@@ -38,7 +38,19 @@ export const SkillDetails = ({
 }: SkillDetailsProps) => {
   const { selectedSkill } = useSelectedSkill();
   const { build } = useBuildStore();
-  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  // Sélecteurs individuels pour chaque chemin pour détecter les changements
+  const nezekan = useDaevanionStore((state) => state.daevanionBuild.nezekan);
+  const zikel = useDaevanionStore((state) => state.daevanionBuild.zikel);
+  const vaizel = useDaevanionStore((state) => state.daevanionBuild.vaizel);
+  const triniel = useDaevanionStore((state) => state.daevanionBuild.triniel);
+  const ariel = useDaevanionStore((state) => state.daevanionBuild.ariel);
+  const azphel = useDaevanionStore((state) => state.daevanionBuild.azphel);
+  // Créer une dépendance stable basée sur le contenu
+  const daevanionBuildKey = useMemo(() => 
+    JSON.stringify({ nezekan, zikel, vaizel, triniel, ariel, azphel }),
+    [nezekan, zikel, vaizel, triniel, ariel, azphel]
+  );
   const [daevanionBoost, setDaevanionBoost] = useState(0);
   
   // Use selected skill from context if available, otherwise use props
@@ -158,7 +170,7 @@ export const SkillDetails = ({
     return () => {
       cancelled = true;
     };
-  }, [buildAbility, buildPassive, getDaevanionBoostForSkill, daevanionBuild]);
+  }, [buildAbility, buildPassive, getDaevanionBoostForSkill, daevanionBuildKey]);
 
   // If no skill is provided, show empty state
   if (!targetAbility && !targetPassive && !targetStigma) {

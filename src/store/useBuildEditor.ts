@@ -179,6 +179,15 @@ export const useBuildStore = create<BuildState>((set, get) => {
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
 
+      // Get the first ability ID (auto-attack) - cannot be set below level 1
+      const firstAbilityId = build.class?.abilities
+        ?.sort((a, b) => a.id - b.id)[0]?.id;
+      
+      // Prevent setting first ability below level 1
+      if (firstAbilityId && abilityId === firstAbilityId && level < 1) {
+        level = 1;
+      }
+
       const classAbility = build.class?.abilities?.find(
         (a) => a.id === abilityId
       );

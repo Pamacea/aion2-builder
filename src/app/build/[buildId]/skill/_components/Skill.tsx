@@ -3,7 +3,7 @@
 import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isBuildOwner } from "@/utils/buildUtils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActiveSkill } from "../_client/active-skill";
 import { MinusButton } from "../_client/buttons/minus-button";
 import { PlusButton } from "../_client/buttons/plus-button";
@@ -32,7 +32,19 @@ export const Skill = () => {
     removePassive,
     removeStigma,
   } = useBuildStore();
-  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
+  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  // Sélecteurs individuels pour chaque chemin pour détecter les changements
+  const nezekan = useDaevanionStore((state) => state.daevanionBuild.nezekan);
+  const zikel = useDaevanionStore((state) => state.daevanionBuild.zikel);
+  const vaizel = useDaevanionStore((state) => state.daevanionBuild.vaizel);
+  const triniel = useDaevanionStore((state) => state.daevanionBuild.triniel);
+  const ariel = useDaevanionStore((state) => state.daevanionBuild.ariel);
+  const azphel = useDaevanionStore((state) => state.daevanionBuild.azphel);
+  // Créer une dépendance stable basée sur le contenu
+  const daevanionBuildKey = useMemo(() => 
+    JSON.stringify({ nezekan, zikel, vaizel, triniel, ariel, azphel }),
+    [nezekan, zikel, vaizel, triniel, ariel, azphel]
+  );
   const { selectedSkill, setSelectedSkill } = useSelectedSkill();
   const [daevanionBoost, setDaevanionBoost] = useState(0);
 
@@ -121,7 +133,7 @@ export const Skill = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuild]);
+  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuildKey]);
 
   if (!build) {
     return <div className="p-4">Loading...</div>;
