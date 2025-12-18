@@ -1,4 +1,4 @@
-import { Loading } from "@/components/Loading/Loading";
+import { Loading } from "@/components/Loading";
 import dynamic from "next/dynamic";
 import { getClassPageData } from "./_utils/getClassPageData";
 

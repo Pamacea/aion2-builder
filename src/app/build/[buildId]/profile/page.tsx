@@ -1,7 +1,7 @@
 "use client";
 
 import { TagsList } from "@/app/classes/[slug]/_components/tagsList";
-import { Loading } from "@/components/Loading/Loading";
+import { Loading } from "@/components/Loading";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useBuildLoader } from "../_utils/useBuildLoader";

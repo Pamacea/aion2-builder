@@ -1,6 +1,6 @@
 "use client";
 
-import { Loading } from "@/components/Loading/Loading";
+import { Loading } from "@/components/Loading";
 import { useBuildLoader } from "../_utils/useBuildLoader";
 import { DaevanionPlanner } from "./_components/DaevanionPlanner";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
-import { Loading } from "@/components/Loading/Loading";
+import { Loading } from "@/components/Loading";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isBuildOwner } from "@/utils/buildUtils";
 import { useEffect, useMemo, useState } from "react";
