@@ -32,14 +32,14 @@ export default function BuildSkillPage() {
     <DndProvider backend={HTML5Backend}>
       <SelectedSkillProvider>
         <ShortcutProvider>
-          <main className="w-full h-[88vh] flex flex-row justify-between">
-            <div className="w-1/4 h-full overflow-y-auto">
+          <main className="w-full h-auto lg:h-[88vh] flex flex-col lg:flex-row justify-between gap-2 sm:gap-4 px-2 sm:px-4 lg:px-0">
+            <div className="w-full lg:w-1/4 h-[40vh] sm:h-[50vh] lg:h-full overflow-y-auto border-b-2 lg:border-b-0 lg:border-r-2 border-secondary pb-2 lg:pb-0 pr-2 lg:pr-4">
               <SkillDetails />
             </div>
-            <div className="w-2/5 h-full overflow-y-auto">
+            <div className="w-full lg:w-2/5 h-[40vh] sm:h-[50vh] lg:h-full overflow-y-auto border-b-2 lg:border-b-0 lg:border-r-2 border-secondary pb-2 lg:pb-0 px-2 lg:px-4 lg:pr-4">
               <Shortcut />
             </div>
-            <div className="w-4/16 h-full overflow-hidden">
+            <div className="w-full lg:w-4/16 h-auto lg:h-full overflow-hidden pl-2 lg:pl-4">
               <Skill />
             </div>
           </main>

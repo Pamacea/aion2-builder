@@ -138,17 +138,29 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
     }
   }, [canActivate, activeRunes, onToggleRune, isStartNode, isOwner, path]);
 
-  // Calculer la taille des runes selon la taille de la grille
+  // Calculer la taille des runes selon la taille de la grille et la taille d'écran
   const runeSize = useMemo(() => {
     if (path === "ariel" || path === "azphel") {
-      // Grille 15x15 : réduire à ~52px pour mieux tenir dans l'écran
-      return { size: "w-[52px] h-[52px]", gap: "gap-1", imageSize: 52 };
+      // Grille 15x15 : réduire pour mobile, taille normale sur desktop
+      return { 
+        size: "w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] md:w-[48px] md:h-[48px] lg:w-[52px] lg:h-[52px]", 
+        gap: "gap-0.5 sm:gap-1", 
+        imageSize: 52 
+      };
     } else if (path === "triniel") {
-      // Grille 13x13 : réduire à ~56px
-      return { size: "w-[56px] h-[56px]", gap: "gap-2", imageSize: 56 };
+      // Grille 13x13 : réduire pour mobile
+      return { 
+        size: "w-[36px] h-[36px] sm:w-[44px] sm:h-[44px] md:w-[50px] md:h-[50px] lg:w-[56px] lg:h-[56px]", 
+        gap: "gap-1 sm:gap-1.5 md:gap-2", 
+        imageSize: 56 
+      };
     } else {
-      // Grille 11x11 : taille normale 64px (w-16 h-16)
-      return { size: "w-16 h-16", gap: "gap-2", imageSize: 64 };
+      // Grille 11x11 : taille normale sur desktop, réduite sur mobile
+      return { 
+        size: "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16", 
+        gap: "gap-1 sm:gap-1.5 md:gap-2", 
+        imageSize: 64 
+      };
     }
   }, [path]);
 
@@ -240,8 +252,8 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
   }, [runes, activeRunes, canActivate, getSkillLevelUpInfo, isStartNode]);
 
   return (
-    <div className="w-full h-full flex justify-center items-start p-2">
-      <div className="inline-block border-2 border-foreground/50 rounded-md p-4 bg-background/80 ">
+    <div className="w-full h-full flex justify-center items-start p-1 sm:p-2 overflow-auto">
+      <div className="inline-block border-2 border-foreground/50 rounded-md p-1 sm:p-2 md:p-4 bg-background/80">
         {gridRunes.map((row, rowIndex) => (
           <div key={rowIndex} className={`flex ${runeSize.gap}`}>
             {row.map((rune, colIndex) => {
@@ -295,7 +307,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
                   {/* Tooltip */}
                   {showTooltip && (
                     <div
-                      className={`absolute z-100 bg-background border-2 border-primary p-3 rounded-md shadow-lg min-w-[200px] pointer-events-none ${runeInfo.tooltipPositionClass}`}
+                      className={`absolute z-100 bg-background border-2 border-primary p-2 sm:p-3 rounded-md shadow-lg min-w-[180px] sm:min-w-[200px] max-w-[90vw] sm:max-w-none pointer-events-none text-xs sm:text-sm ${runeInfo.tooltipPositionClass}`}
                     >
                       <div className="border-b-2 border-primary pb-2 mb-2">
                         <div className={`font-bold ${runeInfo.rarityColor}`}>{runeInfo.rarityLabel}</div>

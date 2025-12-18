@@ -45,27 +45,30 @@ export const SkillLevelModifier = () => {
   const hasStigmas = build.stigmas && build.stigmas.some((s) => s.level > 1);
 
   return (
-    <div className="w-full flex flex-col xl:flex-row items-center justify-between gap-2 py-2">
+    <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 sm:gap-2 py-1 sm:py-2">
       <Button
         onClick={handleSetAllAbilitiesTo10}
         disabled={!hasAbilities}
-        className="w-full xl:w-1/3  text-xs bg-blue-600/10 text-blue-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-2 py-2 hover:bg-blue-600/50 hover:text-blue-400²"
+        className="w-full sm:w-1/3 text-[10px] xs:text-xs sm:text-sm bg-blue-600/10 text-blue-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-1.5 sm:px-2 py-1 sm:py-1.5 md:py-2 hover:bg-blue-600/50 hover:text-blue-400 whitespace-nowrap"
       >
-        RANK ACTIVE TO 10
+        <span className="hidden xs:inline">RANK ACTIVE TO 10</span>
+        <span className="xs:hidden">ACTIVE 10</span>
       </Button>
       <Button
         onClick={handleSetAllPassivesTo10}
         disabled={!hasPassives}
-        className="w-full xl:w-1/3 text-xs bg-green-600/10 text-green-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-2 py-2 hover:bg-green-600/50 hover:text-green-400"
+        className="w-full sm:w-1/3 text-[10px] xs:text-xs sm:text-sm bg-green-600/10 text-green-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-1.5 sm:px-2 py-1 sm:py-1.5 md:py-2 hover:bg-green-600/50 hover:text-green-400 whitespace-nowrap"
       >
-        RANK PASSIVE TO 10
+        <span className="hidden xs:inline">RANK PASSIVE TO 10</span>
+        <span className="xs:hidden">PASSIVE 10</span>
       </Button>
       <Button
         onClick={handleSetAllStigmasTo10}
         disabled={!hasStigmas}
-        className="w-full xl:w-1/3 text-xs bg-purple-600/10 text-purple-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-2 py-2  hover:bg-purple-600/50 hover:text-purple-400"
+        className="w-full sm:w-1/3 text-[10px] xs:text-xs sm:text-sm bg-purple-600/10 text-purple-400 border-y-2 border-secondary text-center hover:border-primary font-bold uppercase px-1.5 sm:px-2 py-1 sm:py-1.5 md:py-2 hover:bg-purple-600/50 hover:text-purple-400 whitespace-nowrap"
       >
-        RANK STIGMA TO 10
+        <span className="hidden xs:inline">RANK STIGMA TO 10</span>
+        <span className="xs:hidden">STIGMA 10</span>
       </Button>
     </div>
   );

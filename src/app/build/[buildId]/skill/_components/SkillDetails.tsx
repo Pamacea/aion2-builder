@@ -195,15 +195,15 @@ export const SkillDetails = ({
   const effectiveLevel = baseLevel + (buildAbility || buildPassive ? daevanionBoost : 0);
 
   return (
-    <div className={`flex flex-col  px-2 gap-8 h-full ${className}`}>
+    <div className={`flex flex-col px-2 sm:px-3 md:px-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-full overflow-y-auto ${className}`}>
       {/* Skill Name with Level */}
-      <div className="flex items-baseline gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
         <SkillName
           ability={targetAbility}
           passive={targetPassive}
           stigma={targetStigma}
         />
-        <div className="text-sm font-semibold text-foreground/50">
+        <div className="text-xs sm:text-sm font-semibold text-foreground/50">
           {(() => {
             const isChainSkill = (parentAbility || parentStigma) !== undefined;
             const isInBuild = isChainSkill

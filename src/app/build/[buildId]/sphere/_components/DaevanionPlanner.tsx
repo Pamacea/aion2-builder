@@ -107,17 +107,18 @@ export function DaevanionPlanner() {
   }, [activePath, activateAllRunes]);
 
   return (
-    <div className="w-full h-full max-h-screen flex flex-row overflow-hidden">
+    <div className="w-full h-auto lg:h-full max-h-screen flex flex-col lg:flex-row overflow-hidden gap-2 sm:gap-4">
       {/* Colonne gauche - Boutons et Points */}
-      <div className="w-1/5 shrink-0  flex flex-col gap-4 h-full">
+      <div className="w-full lg:w-1/5 shrink-0 flex flex-col gap-2 sm:gap-4 h-auto lg:h-full order-3 lg:order-1">
         {/* Section des points en bas */}
-        <div className="shrink-0">
+        <div className="shrink-0 bg-secondary/30 border-b-2 border-secondary">
           <DaevanionPoints
             pointsUsed={pointsUsed}
             pointsType={pointsType}
             maxPoints={maxPoints}
           />
         </div>
+
         {/* Boutons en haut */}
         <div className="shrink-0">
           <DaevanionButtons
@@ -130,12 +131,12 @@ export function DaevanionPlanner() {
         </div>
         
         {/* Espace flexible qui pousse les points vers le bas */}
-        <div className="flex-1"></div>
+        <div className="hidden lg:block flex-1"></div>
         
       </div>
 
       {/* Colonne du milieu - Tabs et Rune Grid */}
-      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden gap-6">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden gap-2 sm:gap-4 lg:gap-6 order-1 lg:order-2">
         {/* Onglets */}
         <div className="shrink-0">
           <DaevanionTab
@@ -145,7 +146,7 @@ export function DaevanionPlanner() {
         </div>
         
         {/* Rune Grid */}
-        <div className="flex-1 flex justify-center items-center overflow-hidden min-h-0 min-w-0">
+        <div className="flex-1 flex justify-center items-start lg:items-center overflow-auto min-h-0 min-w-0">
           <RuneGrid
             path={activePath}
             activeRunes={activeRunes}
@@ -156,7 +157,7 @@ export function DaevanionPlanner() {
       </div>
 
       {/* Colonne droite - Stats */}
-      <div className="w-1/5 shrink-0 h-full overflow-hidden">
+      <div className="w-full lg:w-1/5 shrink-0 h-[40vh] sm:h-[50vh] lg:h-full overflow-hidden order-2 lg:order-3 pt-2 lg:pt-0 lg:pl-2">
         <StatsSidebar stats={totalStats} />
       </div>
     </div>

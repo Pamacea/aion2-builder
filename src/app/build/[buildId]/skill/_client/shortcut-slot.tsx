@@ -218,7 +218,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
     <div
       ref={ref}
       className={`
-        relative w-6 h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 xl:w-14 xl:h-14
+        relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14
         border-2 border-secondary bg-secondary/30
         flex items-center justify-center
         transition-all
@@ -247,7 +247,7 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
           }`}
         />
       ) : (
-        <div className="text-foreground/20 text-[10px] sm:text-xs">+</div>
+        <div className="text-foreground/20 text-xs sm:text-sm">+</div>
       )}
     </div>
   );

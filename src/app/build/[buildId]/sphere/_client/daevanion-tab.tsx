@@ -18,8 +18,8 @@ export function DaevanionTab({ activePath, onPathChange }: DaevanionTabProps) {
   }, [daevanionBuild]);
 
   return (
-    <div className="w-full flex justify-center">
-      <div className="flex">
+    <div className="w-full flex justify-center overflow-x-auto">
+      <div className="flex min-w-max">
         {DAEVANION_PATHS.map((path) => {
           const pathRuneCount = pathRuneCounts.get(path.id) || 0;
           const isActive = activePath === path.id;
@@ -28,7 +28,7 @@ export function DaevanionTab({ activePath, onPathChange }: DaevanionTabProps) {
             <button
               key={path.id}
               onClick={() => onPathChange(path.id)}
-              className={`px-4 py-2 font-semibold transition-colors ${
+              className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 font-semibold text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 isActive
                   ? "border-b-2 border-foreground text-foreground"
                   : "text-foreground/60 hover:text-foreground border-b-2 border-background/20"

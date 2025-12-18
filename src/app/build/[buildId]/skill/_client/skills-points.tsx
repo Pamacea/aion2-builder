@@ -127,26 +127,26 @@ export const SkillsPoints = () => {
   if (!build) return null;
 
   return (
-    <div className="flex lg:flex-row flex-col items-center justify-between gap-4 text-sm">
-      <div className="flex items-center gap-2">
-        <span className="text-green-600 bg-green-600/30 border-y-2 border-secondary text-center font-bold uppercase px-3 py-1 rounded-sm">SP</span>
+    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 sm:gap-4 text-xs sm:text-sm">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <span className="text-green-600 bg-green-600/30 border-y-2 border-secondary text-center font-bold uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs sm:text-sm">SP</span>
         <span
-          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-2 py-1 rounded-sm ${
+          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-sm text-xs sm:text-sm ${
             totalSP > maxSP ? "text-destructive" : "text-foreground"
           }`}
         >
           {totalSP}/{maxSP}
         </span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <span
-          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-2 py-1 rounded-sm ${
+          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-sm text-xs sm:text-sm ${
             totalSTP > maxSTP ? "text-destructive" : "text-foreground"
           }`}
         >
           {totalSTP}/{maxSTP}
         </span>
-        <span className="text-blue-600 bg-blue-600/30 border-y-2 border-secondary text-center font-bold uppercase px-3 py-1 rounded-sm">STP</span>
+        <span className="text-blue-600 bg-blue-600/30 border-y-2 border-secondary text-center font-bold uppercase px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs sm:text-sm">STP</span>
       </div>
     </div>
   );

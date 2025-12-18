@@ -43,18 +43,18 @@ export function StatsSidebar({ stats }: StatsSidebarProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Barre de recherche - Alignée avec les tabs */}
-      <div className="shrink-0 pb-4">
+      <div className="shrink-0 pb-2 sm:pb-3 lg:pb-4">
         <Input
           type="text"
           placeholder="Search for stats.."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 border-b-2 border-b-background/30 hover:border-foreground transition-all"
+          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-b-2 border-b-secondary hover:border-foreground transition-all"
         />
       </div>
 
       {/* Liste des stats */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pr-2">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pr-1 sm:pr-2">
         {!hasStats && stats.skillLevelUps.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             None selected
@@ -70,36 +70,36 @@ export function StatsSidebar({ stats }: StatsSidebarProps) {
               const itemCount = items.length;
 
               return (
-                <div key={group.id} className="rounded-md bg-background/80 overflow-hidden">
+                <div key={group.id} className=" bg-background/80 overflow-hidden">
                   {/* En-tête du groupe */}
                   <button
                     onClick={() => toggleGroup(group.id)}
-                    className="w-full flex justify-between items-center p-2 hover:bg-muted/50 transition-colors"
+                    className="w-full flex justify-between items-center p-1.5 sm:p-2 hover:bg-secondary/30 transition-colors border-b-2 border-b-secondary"
                   >
-                    <span className="text-sm font-semibold uppercase">
+                    <span className="text-xs sm:text-sm font-semibold uppercase">
                       {group.label} ({itemCount})
                     </span>
                     {isExpanded ? (
-                      <ChevronUpIcon className="size-4 text-muted-foreground" />
+                      <ChevronUpIcon className="size-3 sm:size-4 text-muted-foreground" />
                     ) : (
-                      <ChevronDownIcon className="size-4 text-muted-foreground" />
+                      <ChevronDownIcon className="size-3 sm:size-4 text-muted-foreground" />
                     )}
                   </button>
 
                   {/* Contenu du groupe */}
                   {isExpanded && (
-                    <div className="space-y-1 px-2 pb-2">
+                    <div className="space-y-1 px-1.5 sm:px-2 pb-1.5 sm:pb-2">
                       {items.map((item, index) => {
                         if (item.type === "skill" && item.skill) {
                           return (
                             <div
                               key={`${item.skill.type}-${item.skill.id}-${index}`}
-                              className="flex justify-between items-center p-2 rounded-md bg-muted/50"
+                              className="flex justify-between items-center p-1.5 sm:p-2 bg-muted/50"
                             >
-                              <span className="text-sm font-medium">
+                              <span className="text-xs sm:text-sm font-medium truncate pr-2">
                                 Skill Level Up - {item.skill.name}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
                                 {item.skill.type === "ability" ? "Ability" : "Passive"}
                               </span>
                             </div>
@@ -108,12 +108,12 @@ export function StatsSidebar({ stats }: StatsSidebarProps) {
                           return (
                             <div
                               key={item.stat.key}
-                              className="flex justify-between items-center p-2 border-b border-b-foreground/10"
+                              className="flex justify-between items-center p-1.5 sm:p-2 border-b border-b-foreground/10"
                             >
-                              <span className="text-sm font-medium uppercase">
+                              <span className="text-xs sm:text-sm font-medium uppercase truncate pr-2">
                                 {item.stat.label}
                               </span>
-                              <span className="text-sm font-bold text-foreground/80">
+                              <span className="text-xs sm:text-sm font-bold text-foreground/80 shrink-0">
                                 {item.stat.value}
                               </span>
                             </div>

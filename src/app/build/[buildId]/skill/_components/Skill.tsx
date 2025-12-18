@@ -357,15 +357,15 @@ export const Skill = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 px-2">
+    <div className="w-full h-full flex flex-col gap-2 sm:gap-4 px-2 sm:px-4">
       {/* Three Categories in Column */}
-      <div className="flex-1 flex flex-col gap-4 overflow-y-auto min-h-0">
+      <div className="flex-1 flex flex-col gap-2 sm:gap-4 overflow-y-auto min-h-0">
         {/* ACTIVE Category */}
-        <div className="flex flex-col gap-4">
-        <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
+        <div className="flex flex-col gap-2 sm:gap-4">
+          <div className="py-1.5 sm:py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase text-xs sm:text-sm">
             ACTIVE
           </div>
-          <div className="grid grid-cols-5 gap-2 px-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 px-1 sm:px-2">
             {availableAbilities.map((ability) => {
               const buildAbility = findBuildAbility(ability.id);
               const isSelected = selectedBuildAbility?.abilityId === ability.id;
@@ -383,11 +383,11 @@ export const Skill = () => {
         </div>
 
         {/* PASSIVE Category */}
-        <div className="flex flex-col gap-4">
-        <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
+        <div className="flex flex-col gap-2 sm:gap-4">
+          <div className="py-1.5 sm:py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase text-xs sm:text-sm">
             PASSIVE
           </div>
-          <div className="grid grid-cols-5 gap-2 px-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 px-1 sm:px-2">
             {availablePassives.map((passive) => {
               const buildPassive = findBuildPassive(passive.id);
               const isSelected = selectedBuildPassive?.passiveId === passive.id;
@@ -405,11 +405,11 @@ export const Skill = () => {
         </div>
 
         {/* STIGMA Category */}
-        <div className="flex flex-col gap-4">
-          <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
+        <div className="flex flex-col gap-2 sm:gap-4">
+          <div className="py-1.5 sm:py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase text-xs sm:text-sm">
             STIGMA
           </div>
-          <div className="grid grid-cols-5 gap-2 px-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 px-1 sm:px-2">
             {availableStigmas.map((stigma) => {
               const buildStigma = findBuildStigma(stigma.id);
               const isSelected = selectedBuildStigma?.stigmaId === stigma.id;
@@ -428,8 +428,8 @@ export const Skill = () => {
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className="w-full flex flex-col items-center justify-between pt-2 sm:pt-4  border-t-2 border-secondary ">
-        <section className="w-full flex flex-col gap-2">
+      <div className="w-full flex flex-col items-center justify-between pt-2 sm:pt-4 border-t-2 border-secondary">
+        <section className="w-full flex flex-col gap-2 sm:gap-3">
           <div className="flex-1">
             <SkillsPoints />
           </div>
