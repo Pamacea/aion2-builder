@@ -1,6 +1,7 @@
 "use client";
 
 import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
+import { Loading } from "@/components/Loading/Loading";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { isBuildOwner } from "@/utils/buildUtils";
 import { useEffect, useMemo, useState } from "react";
@@ -136,7 +137,7 @@ export const Skill = () => {
   }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuildKey]);
 
   if (!build) {
-    return <div className="p-4">Loading...</div>;
+    return <Loading />;
   }
 
   const availableAbilities = getAvailableAbilities() || [];

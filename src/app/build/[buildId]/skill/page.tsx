@@ -1,5 +1,6 @@
 "use client";
 
+import { Loading } from "@/components/Loading/Loading";
 import dynamic from "next/dynamic";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -10,15 +11,15 @@ import { ShortcutProvider } from "./_context/ShortcutContext";
 
 // Code splitting : charger les gros composants de manière lazy
 const SkillDetails = dynamic(() => import("./_components/SkillDetails").then(mod => ({ default: mod.SkillDetails })), {
-  loading: () => <div className="flex items-center justify-center h-full">Loading...</div>,
+  loading: () => <Loading />,
 });
 
 const Shortcut = dynamic(() => import("./_components/Shortcut").then(mod => ({ default: mod.Shortcut })), {
-  loading: () => <div className="flex items-center justify-center h-full">Loading...</div>,
+  loading: () => <Loading />,
 });
 
 const Skill = dynamic(() => import("./_components/Skill").then(mod => ({ default: mod.Skill })), {
-  loading: () => <div className="flex items-center justify-center h-full">Loading...</div>,
+  loading: () => <Loading />,
 });
 
 export default function BuildSkillPage() {
@@ -26,7 +27,7 @@ export default function BuildSkillPage() {
   // Initialiser le store Daevanion avec les données du build
   useDaevanionInitializer();
 
-  if (loading || !build) return <p>Loading...</p>;
+  if (loading || !build) return <Loading />;
 
   return (
     <DndProvider backend={HTML5Backend}>

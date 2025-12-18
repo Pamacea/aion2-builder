@@ -1,13 +1,14 @@
+import { Loading } from "@/components/Loading/Loading";
 import dynamic from "next/dynamic";
 import { getClassPageData } from "./_utils/getClassPageData";
 
 // Code splitting : charger les composants de manière lazy
 const Class = dynamic(() => import("./_components/Class").then(mod => ({ default: mod.Class })), {
-  loading: () => <div>Loading class...</div>,
+  loading: () => <Loading />,
 });
 
 const ExploreOthersClasses = dynamic(() => import("./_components/exploreOtherClasses").then(mod => ({ default: mod.ExploreOthersClasses })), {
-  loading: () => <div>Loading...</div>,
+  loading: () => <Loading />,
 });
 
 // Utiliser ISR (Incremental Static Regeneration) pour de meilleures performances
