@@ -5,6 +5,7 @@ import { tagsList } from "data/tags";
 import { config } from "dotenv";
 import { PrismaClient } from "generated/prisma/client";
 import { resolve } from "path";
+import { DaevanionRune } from "../src/types/daevanion.type";
 
 // Charger les variables d'environnement depuis .env.local puis .env
 config({ path: resolve(process.cwd(), ".env.local") });
@@ -497,7 +498,7 @@ async function main() {
   console.log("🌱 Seeding DAEVANION RUNES...");
 
   // Helper function to seed runes for a path
-  const seedDaevanionPath = async (pathName: string, runes: (any | null)[]) => {
+  const seedDaevanionPath = async (pathName: string, runes: (DaevanionRune | null)[]) => {
     let count = 0;
     for (const rune of runes) {
       if (!rune) continue; // Skip null slots
@@ -546,6 +547,16 @@ async function main() {
   const { trinielRunes } = await import("../src/data/daevanion/triniel");
   const trinielCount = await seedDaevanionPath("triniel", trinielRunes);
   console.log(`✅ ${trinielCount} Daevanion runes seeded for Triniel`);
+
+  // --- Seed DAEVANION RUNES for Ariel ---
+  const { arielRunes } = await import("../src/data/daevanion/ariel");
+  const arielCount = await seedDaevanionPath("ariel", arielRunes);
+  console.log(`✅ ${arielCount} Daevanion runes seeded for Ariel`);
+
+  // --- Seed DAEVANION RUNES for Azphel ---
+  const { azphelRunes } = await import("../src/data/daevanion/azphel");
+  const azphelCount = await seedDaevanionPath("azphel", azphelRunes);
+  console.log(`✅ ${azphelCount} Daevanion runes seeded for Azphel`);
 
   console.log("🌱 Seeding BUILDS...");
 

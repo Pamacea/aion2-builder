@@ -1,7 +1,7 @@
 "use client";
 
 import { useDaevanionRunes } from "@/hooks/useDaevanionData";
-import { formatStats, getRarityColor, getRarityLabel, getRuneImage } from "@/lib/daevanionUtils";
+import { formatStats, getRarityColor, getRarityLabel, getRequiredLevel, getRuneCost, getRuneImage } from "@/lib/daevanionUtils";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionRune, RuneGridProps } from "@/types/daevanion.type";
 import Image from "next/image";
@@ -30,6 +30,10 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   // Helper pour obtenir le nom du skill/passive boosté par une rune (mémorisé)
   const getSkillLevelUpInfo = useCallback((rune: DaevanionRune): { name: string; type: "ability" | "passive" } | null => {
     if (!build) return null;
+
+    // EXCEPTION: Pour Ariel et Azphel, les rare/legend donnent des stats, pas des IDs
+    const isArielOrAzphel = rune.path === "ariel" || rune.path === "azphel";
+    if (isArielOrAzphel) return null;
 
     // Traiter les nodes rare (passiveId)
     if (rune.rarity === "rare" && rune.passiveId) {
@@ -85,10 +89,12 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   // Helper pour déterminer si une rune est un start node
   const isStartNode = useCallback((rune: DaevanionRune): boolean => {
     const startNodeSlotIds: Record<string, number> = {
-      nezekan: 61, // row 5, col 5 - grille 11x11
-      zikel: 61,   // row 5, col 5 - grille 11x11
-      vaizel: 61,  // row 5, col 5 - grille 11x11
-      triniel: 85, // row 6, col 6 - grille 13x13
+      nezekan: 61,  // row 5, col 5 - grille 11x11
+      zikel: 61,    // row 5, col 5 - grille 11x11
+      vaizel: 61,   // row 5, col 5 - grille 11x11
+      triniel: 85,  // row 6, col 6 - grille 13x13
+      ariel: 113,   // row 7, col 7 - grille 15x15
+      azphel: 113,  // row 7, col 7 - grille 15x15
     };
     return rune.slotId === startNodeSlotIds[rune.path];
   }, []);
@@ -107,9 +113,9 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   // Organiser les runes en grille basée sur leurs positions
   const gridRunes = useMemo(() => {
     const grid: (DaevanionRune | null)[][] = [];
-    // Grille 11x11 pour Nezekan, Zikel et Vaizel, 13x13 pour Triniel
-    const gridSize = path === "triniel" ? 13 : 11; // Largeur (colonnes)
-    const gridHeight = path === "nezekan" || path === "zikel" || path === "vaizel" ? 11 : path === "triniel" ? 13 : 9; // Hauteur (lignes)
+    // Grille 11x11 pour Nezekan, Zikel et Vaizel, 13x13 pour Triniel, 15x15 pour Ariel et Azphel
+    const gridSize = path === "triniel" ? 13 : path === "ariel" || path === "azphel" ? 15 : 11; // Largeur (colonnes)
+    const gridHeight = path === "nezekan" || path === "zikel" || path === "vaizel" ? 11 : path === "triniel" ? 13 : path === "ariel" || path === "azphel" ? 15 : 9; // Hauteur (lignes)
 
     // Initialiser la grille
     for (let y = 0; y < gridHeight; y++) {
@@ -246,6 +252,19 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                     >
                       <div className="border-b-2 border-primary pb-2 mb-2">
                         <div className={`font-bold ${runeInfo.rarityColor}`}>{runeInfo.rarityLabel}</div>
+                      </div>
+                      
+                      {/* Informations de coût et niveau requis */}
+                      <div className="mb-2 pb-2 border-b border-primary/30 space-y-1">
+                        <div className="text-sm text-foreground">
+                          <span className="font-semibold">Price:</span> {isStartNode(rune) ? 0 : getRuneCost(rune.rarity)}
+                        </div>
+                        <div className="text-sm text-foreground">
+                          <span className="font-semibold">Reset cost:</span> 500
+                        </div>
+                        <div className="text-sm text-foreground">
+                          <span className="font-semibold">Required Level:</span> {getRequiredLevel(rune.path)}
+                        </div>
                       </div>
                       
                       {/* Afficher le skill level up pour les nodes rare et legend */}

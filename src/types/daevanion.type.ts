@@ -30,10 +30,36 @@ export interface DaevanionRune {
     criticalDamageBoost?: number;
     multiHitResist?: number;
     multiHitChance?: number;
+
+    // Stats spéciales Ariel/Asphel (Unique)
     pveDamageTolerance?: number;
     pveDamageBoost?: number;
     pvpDamageBoost?: number;
     pvpDamageTolerance?: number;
+    
+    // Stats spéciales Ariel (Legend - bleu)
+    bossDamageTolerance?: number;
+    bossDamageBoost?: number;
+    
+    // Stats spéciales Ariel (Rare - vert)
+    pveAccuracy?: number;
+    pveEvasion?: number;
+    bossAttack?: number;
+    bossDefense?: number;
+    pveAttack?: number;
+    pveDefense?: number;
+    
+    // Stats spéciales Azphel (Legend - bleu)
+    statusEffectChance?: number;
+    statusEffectResist?: number;
+    
+    // Stats spéciales Azphel (Rare - vert)
+    pvpCriticalHit?: number;
+    pvpCriticalHitResist?: number;
+    pvpAccuracy?: number;
+    pvpEvasion?: number;
+    pvpAttack?: number;
+    pvpDefense?: number;
     
     // Augmentations de niveau (Rare - vert, Legend - bleu)
     passiveLevelBoost?: number; // Rare - boost générique (déprécié, utiliser passiveId)
@@ -88,6 +114,30 @@ export interface DaevanionStats {
   pveDamageBoost: number;
   pvpDamageBoost: number;
   pvpDamageTolerance: number;
+  
+  // Stats spéciales Ariel (Legend)
+  bossDamageTolerance: number;
+  bossDamageBoost: number;
+  
+  // Stats spéciales Ariel (Rare)
+  pveAccuracy: number;
+  pveEvasion: number;
+  bossAttack: number;
+  bossDefense: number;
+  pveAttack: number;
+  pveDefense: number;
+  
+  // Stats spéciales Azphel (Legend)
+  statusEffectChance: number;
+  statusEffectResist: number;
+  
+  // Stats spéciales Azphel (Rare)
+  pvpCriticalHit: number;
+  pvpCriticalHitResist: number;
+  pvpAccuracy: number;
+  pvpEvasion: number;
+  pvpAttack: number;
+  pvpDefense: number;
   
   // Augmentations de niveau
   passiveLevelBoost: number;

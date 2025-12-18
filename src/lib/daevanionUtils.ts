@@ -58,27 +58,30 @@ export const createRune = (
   const slotId = row * gridSize + col + 1;
   
   // Déterminer si c'est une rare (passiveId) ou legend (abilityId)
+  // EXCEPTION: Pour Ariel et Azphel, rare/legend donnent des stats au lieu d'IDs
   let stats: DaevanionRune["stats"] = {};
   let passiveId: number | undefined;
   let finalAbilityId: number | undefined;
   
-  if (rarity === "rare" && typeof statsOrId === "number") {
-    // Pour les nodes rare, statsOrId est le passiveId
+  const isArielOrAzphel = path === "ariel" || path === "azphel";
+  
+  if (rarity === "rare" && typeof statsOrId === "number" && !isArielOrAzphel) {
+    // Pour les nodes rare (sauf Ariel/Azphel), statsOrId est le passiveId
     passiveId = statsOrId;
-  } else if (rarity === "legend" && typeof statsOrId === "number") {
-    // Pour les nodes legend, statsOrId est l'abilityId
+  } else if (rarity === "legend" && typeof statsOrId === "number" && !isArielOrAzphel) {
+    // Pour les nodes legend (sauf Ariel/Azphel), statsOrId est l'abilityId
     finalAbilityId = statsOrId;
   } else if (statsOrId && typeof statsOrId === "object") {
-    // Pour les nodes common/unique, statsOrId est l'objet stats
+    // Pour les nodes common/unique, ou rare/legend d'Ariel/Azphel, statsOrId est l'objet stats
     stats = statsOrId;
-  } else if (rarity === "legend" && abilityId !== undefined) {
+  } else if (rarity === "legend" && abilityId !== undefined && !isArielOrAzphel) {
     // Format alternatif : statsOrId peut être undefined et abilityId est passé séparément
     finalAbilityId = abilityId;
   }
   
   // Déterminer la position du start node selon le path
-  const startRow = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : 0;
-  const startCol = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : 0;
+  const startRow = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : path === "ariel" ? 7 : path === "azphel" ? 7 : 0;
+  const startCol = path === "nezekan" ? 5 : path === "zikel" ? 5 : path === "vaizel" ? 5 : path === "triniel" ? 6 : path === "ariel" ? 7 : path === "azphel" ? 7 : 0;
   
   return {
     id: slotId,
@@ -119,6 +122,14 @@ export const getRunesForPath = async (path: DaevanionPath): Promise<(DaevanionRu
     const { trinielRunes } = await import("@/data/daevanion/triniel");
     return trinielRunes;
   }
+  if (path === "ariel") {
+    const { arielRunes } = await import("@/data/daevanion/ariel");
+    return arielRunes;
+  }
+  if (path === "azphel") {
+    const { azphelRunes } = await import("@/data/daevanion/azphel");
+    return azphelRunes;
+  }
   // Pour les autres chemins, retourner un tableau vide pour l'instant
   return [];
 };
@@ -150,6 +161,27 @@ export const getRuneCost = (rarity: string): number => {
       return 3;
     case "unique":
       return 4;
+    default:
+      return 0;
+  }
+};
+
+/**
+ * Obtenir le niveau requis selon le chemin Daevanion
+ */
+export const getRequiredLevel = (path: DaevanionPath): number => {
+  switch (path) {
+    case "nezekan":
+      return 12;
+    case "zikel":
+      return 20;
+    case "vaizel":
+      return 30;
+    case "triniel":
+      return 40;
+    case "ariel":
+    case "azphel":
+      return 45;
     default:
       return 0;
   }
@@ -213,6 +245,26 @@ export const formatStats = (stats: DaevanionRune["stats"]): string[] => {
     pveDamageBoost: "PvE Damage Boost",
     pvpDamageBoost: "PvP Damage Boost",
     pvpDamageTolerance: "PvP Damage Tolerance",
+    // Stats spéciales Ariel (Legend)
+    bossDamageTolerance: "Boss Damage Tolerance",
+    bossDamageBoost: "Boss Damage Boost",
+    // Stats spéciales Ariel (Rare)
+    pveAccuracy: "PvE Accuracy",
+    pveEvasion: "PvE Evasion",
+    bossAttack: "Boss Attack",
+    bossDefense: "Boss Defense",
+    pveAttack: "PvE Attack",
+    pveDefense: "PvE Defense",
+    // Stats spéciales Azphel (Legend)
+    statusEffectChance: "Status Effect Chance",
+    statusEffectResist: "Status Effect Resist",
+    // Stats spéciales Azphel (Rare)
+    pvpCriticalHit: "PvP Critical Hit",
+    pvpCriticalHitResist: "PvP Critical Hit Resist",
+    pvpAccuracy: "PvP Accuracy",
+    pvpEvasion: "PvP Evasion",
+    pvpAttack: "PvP Attack",
+    pvpDefense: "PvP Defense",
     passiveLevelBoost: "Passive Level Boost",
     activeSkillLevelBoost: "Active Skill Level Boost",
   };
@@ -260,10 +312,12 @@ export const getRarityColor = (rarity: string, isStartNode: boolean = false): st
 export const getRuneImage = (rune: DaevanionRune, isActive: boolean): string => {
   // Vérifier si c'est le nœud central (Start) pour tous les paths
   const startNodeSlotIds: Record<string, number> = {
-    nezekan: 61, // row 5, col 5 - grille 11x11
-    zikel: 61,   // row 5, col 5 - grille 11x11
-    vaizel: 61,  // row 5, col 5 - grille 11x11
-    triniel: 85, // row 6, col 6 - grille 13x13
+    nezekan: 61,  // row 5, col 5 - grille 11x11
+    zikel: 61,    // row 5, col 5 - grille 11x11
+    vaizel: 61,   // row 5, col 5 - grille 11x11
+    triniel: 85,  // row 6, col 6 - grille 13x13
+    ariel: 113,   // row 7, col 7 - grille 15x15
+    azphel: 113,  // row 7, col 7 - grille 15x15
   };
   const isStartNode = rune.slotId === startNodeSlotIds[rune.path];
   
@@ -362,11 +416,22 @@ export const updateSkillLevelsFromRunes = async (
     const rune = allRunes.find((r) => r?.slotId === slotId);
     if (!rune) return;
 
-    // Ignorer le start node
-    if (rune.slotId === 61 && rune.path === "nezekan") return;
+    // Ignorer les start nodes (ils n'ont pas de stats ni d'IDs)
+    const startNodeSlotIds: Record<string, number> = {
+      nezekan: 61,
+      zikel: 61,
+      vaizel: 61,
+      triniel: 85,
+      ariel: 113,
+      azphel: 113,
+    };
+    if (rune.slotId === startNodeSlotIds[rune.path]) return;
 
-    // Traiter les nodes rare (passiveId)
-    if (rune.rarity === "rare" && rune.passiveId) {
+    // EXCEPTION: Pour Ariel et Azphel, les rare/legend donnent des stats, pas des IDs
+    const isArielOrAzphel = rune.path === "ariel" || rune.path === "azphel";
+    
+    // Traiter les nodes rare (passiveId) - seulement si ce n'est pas Ariel/Azphel
+    if (rune.rarity === "rare" && rune.passiveId && !isArielOrAzphel) {
       const passiveIndex = rune.passiveId - 1;
       if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
         const passive = sortedPassives[passiveIndex];
@@ -374,8 +439,8 @@ export const updateSkillLevelsFromRunes = async (
       }
     }
 
-    // Traiter les nodes legend (abilityId)
-    if (rune.rarity === "legend" && rune.abilityId) {
+    // Traiter les nodes legend (abilityId) - seulement si ce n'est pas Ariel/Azphel
+    if (rune.rarity === "legend" && rune.abilityId && !isArielOrAzphel) {
       const abilityIndex = rune.abilityId - 1;
       if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
         const ability = sortedAbilities[abilityIndex];
@@ -392,11 +457,22 @@ export const updateSkillLevelsFromRunes = async (
     const rune = allRunes.find((r) => r?.slotId === slotId);
     if (!rune) return;
 
-    // Ignorer le start node
-    if (rune.slotId === 61 && rune.path === "nezekan") return;
+    // Ignorer les start nodes (ils n'ont pas de stats ni d'IDs)
+    const startNodeSlotIds: Record<string, number> = {
+      nezekan: 61,
+      zikel: 61,
+      vaizel: 61,
+      triniel: 85,
+      ariel: 113,
+      azphel: 113,
+    };
+    if (rune.slotId === startNodeSlotIds[rune.path]) return;
 
-    // Traiter les nodes rare (passiveId)
-    if (rune.rarity === "rare" && rune.passiveId) {
+    // EXCEPTION: Pour Ariel et Azphel, les rare/legend donnent des stats, pas des IDs
+    const isArielOrAzphel = rune.path === "ariel" || rune.path === "azphel";
+    
+    // Traiter les nodes rare (passiveId) - seulement si ce n'est pas Ariel/Azphel
+    if (rune.rarity === "rare" && rune.passiveId && !isArielOrAzphel) {
       const passiveIndex = rune.passiveId - 1;
       if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
         const passive = sortedPassives[passiveIndex];
@@ -404,8 +480,8 @@ export const updateSkillLevelsFromRunes = async (
       }
     }
 
-    // Traiter les nodes legend (abilityId)
-    if (rune.rarity === "legend" && rune.abilityId) {
+    // Traiter les nodes legend (abilityId) - seulement si ce n'est pas Ariel/Azphel
+    if (rune.rarity === "legend" && rune.abilityId && !isArielOrAzphel) {
       const abilityIndex = rune.abilityId - 1;
       if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
         const ability = sortedAbilities[abilityIndex];

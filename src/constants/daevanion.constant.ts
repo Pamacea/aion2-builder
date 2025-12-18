@@ -41,6 +41,30 @@ export const STAT_DISPLAY_ORDER: Array<{ key: keyof DaevanionStats; label: strin
   { key: "pvpDamageBoost", label: "PvP Damage Boost" },
   { key: "pvpDamageTolerance", label: "PvP Damage Tolerance" },
   
+  // Stats spéciales Ariel (Legend)
+  { key: "bossDamageTolerance", label: "Boss Damage Tolerance" },
+  { key: "bossDamageBoost", label: "Boss Damage Boost" },
+  
+  // Stats spéciales Ariel (Rare)
+  { key: "pveAccuracy", label: "PvE Accuracy" },
+  { key: "pveEvasion", label: "PvE Evasion" },
+  { key: "bossAttack", label: "Boss Attack" },
+  { key: "bossDefense", label: "Boss Defense" },
+  { key: "pveAttack", label: "PvE Attack" },
+  { key: "pveDefense", label: "PvE Defense" },
+  
+  // Stats spéciales Azphel (Legend)
+  { key: "statusEffectChance", label: "Status Effect Chance" },
+  { key: "statusEffectResist", label: "Status Effect Resist" },
+  
+  // Stats spéciales Azphel (Rare)
+  { key: "pvpCriticalHit", label: "PvP Critical Hit" },
+  { key: "pvpCriticalHitResist", label: "PvP Critical Hit Resist" },
+  { key: "pvpAccuracy", label: "PvP Accuracy" },
+  { key: "pvpEvasion", label: "PvP Evasion" },
+  { key: "pvpAttack", label: "PvP Attack" },
+  { key: "pvpDefense", label: "PvP Defense" },
+  
   // Augmentations de niveau
   { key: "passiveLevelBoost", label: "Passive Level Boost" },
   { key: "activeSkillLevelBoost", label: "Active Skill Level Boost" },

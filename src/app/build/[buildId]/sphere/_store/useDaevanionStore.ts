@@ -6,12 +6,12 @@ import { DaevanionBuild, DaevanionPath, DaevanionRune, DaevanionStats, Daevanion
 import { create } from "zustand";
 
 const initialBuild: DaevanionBuild = {
-  nezekan: [61], // Start node (slotId 61) toujours activé par défaut
-  zikel: [61],   // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
-  vaizel: [61],  // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
-  triniel: [85], // Start node (slotId 85) toujours activé par défaut - grille 13x13, position (6,6)
-  ariel: [],
-  azphel: [],
+  nezekan: [61],  // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
+  zikel: [61],    // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
+  vaizel: [61],   // Start node (slotId 61) toujours activé par défaut - grille 11x11, position (5,5)
+  triniel: [85],  // Start node (slotId 85) toujours activé par défaut - grille 13x13, position (6,6)
+  ariel: [113],   // Start node (slotId 113) toujours activé par défaut - grille 15x15, position (7,7)
+  azphel: [113],  // Start node (slotId 113) toujours activé par défaut - grille 15x15, position (7,7)
 };
 
 export const useDaevanionStore = create<DaevanionStore>((set, get) => {
@@ -99,6 +99,16 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
           trinielRunes.push(85);
         }
         
+        const arielRunes = daevanion.ariel || [];
+        if (!arielRunes.includes(113)) {
+          arielRunes.push(113);
+        }
+        
+        const azphelRunes = daevanion.azphel || [];
+        if (!azphelRunes.includes(113)) {
+          azphelRunes.push(113);
+        }
+        
         // Comparer les données pour éviter les rechargements inutiles
         const newBuild = {
           ...daevanion,
@@ -106,6 +116,8 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
           zikel: zikelRunes,
           vaizel: vaizelRunes,
           triniel: trinielRunes,
+          ariel: arielRunes,
+          azphel: azphelRunes,
         };
         
         // Vérifier si les données ont vraiment changé
@@ -345,6 +357,30 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       pvpDamageBoost: 0,
       pvpDamageTolerance: 0,
       
+      // Stats spéciales Ariel (Legend)
+      bossDamageTolerance: 0,
+      bossDamageBoost: 0,
+      
+      // Stats spéciales Ariel (Rare)
+      pveAccuracy: 0,
+      pveEvasion: 0,
+      bossAttack: 0,
+      bossDefense: 0,
+      pveAttack: 0,
+      pveDefense: 0,
+      
+      // Stats spéciales Azphel (Legend)
+      statusEffectChance: 0,
+      statusEffectResist: 0,
+      
+      // Stats spéciales Azphel (Rare)
+      pvpCriticalHit: 0,
+      pvpCriticalHitResist: 0,
+      pvpAccuracy: 0,
+      pvpEvasion: 0,
+      pvpAttack: 0,
+      pvpDefense: 0,
+      
       // Augmentations de niveau
       passiveLevelBoost: 0,
       activeSkillLevelBoost: 0,
@@ -365,15 +401,28 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       ? [...build.class.passives].sort((a, b) => a.id - b.id)
       : [];
 
+    // Définir les start nodes pour tous les chemins
+    const startNodeSlotIds: Record<string, number> = {
+      nezekan: 61,
+      zikel: 61,
+      vaizel: 61,
+      triniel: 85,
+      ariel: 113,
+      azphel: 113,
+    };
+
     runes.forEach((rune) => {
       if (!rune) return;
       
-      // Ignorer le start node (slotId 61 pour Nezekan) - il ne donne aucune stats
-      if (rune.slotId === 61 && rune.path === "nezekan") {
+      // Ignorer les start nodes - ils ne donnent aucune stats
+      if (rune.slotId === startNodeSlotIds[rune.path]) {
         return; // Skip le start node
       }
       
-      // Traiter les stats de base
+      // EXCEPTION: Pour Ariel et Azphel, les rare/legend donnent des stats, pas des IDs
+      const isArielOrAzphel = rune.path === "ariel" || rune.path === "azphel";
+      
+      // Traiter les stats de base (et les stats des rare/legend d'Ariel/Azphel)
       if (rune.stats && Object.keys(rune.stats).length > 0) {
         Object.entries(rune.stats).forEach(([key, value]) => {
           if (value !== undefined && value !== 0 && key in stats && key !== "skillLevelUps") {
@@ -385,8 +434,8 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         });
       }
       
-      // Traiter les nodes rare (passiveId)
-      if (rune.rarity === "rare" && rune.passiveId) {
+      // Traiter les nodes rare (passiveId) - seulement si ce n'est pas Ariel/Azphel
+      if (rune.rarity === "rare" && rune.passiveId && !isArielOrAzphel) {
         // L'ID est 1-based, donc on utilise index = passiveId - 1
         const passiveIndex = rune.passiveId - 1;
         if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
@@ -399,8 +448,8 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         }
       }
       
-      // Traiter les nodes legend (abilityId)
-      if (rune.rarity === "legend" && rune.abilityId) {
+      // Traiter les nodes legend (abilityId) - seulement si ce n'est pas Ariel/Azphel
+      if (rune.rarity === "legend" && rune.abilityId && !isArielOrAzphel) {
         // L'ID est 1-based, donc on utilise index = abilityId - 1
         const abilityIndex = rune.abilityId - 1;
         if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
@@ -431,10 +480,20 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         const runePromises = activeRunes.map((slotId) => getRuneData(commonPath, slotId));
         const runes = await Promise.all(runePromises);
         
+        // Définir les start nodes pour tous les chemins
+        const startNodeSlotIds: Record<string, number> = {
+          nezekan: 61,
+          zikel: 61,
+          vaizel: 61,
+          triniel: 85,
+          ariel: 113,
+          azphel: 113,
+        };
+        
         runes.forEach((rune) => {
           if (rune) {
-            // Ignorer le start node (slotId 61 pour Nezekan) - il ne coûte pas de points
-            if (rune.slotId === 61 && rune.path === "nezekan") {
+            // Ignorer les start nodes - ils ne coûtent pas de points
+            if (rune.slotId === startNodeSlotIds[rune.path]) {
               return; // Skip le start node
             }
             totalPoints += getRuneCost(rune.rarity);
@@ -532,14 +591,27 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       const activeRunes = state.daevanionBuild[path] || [];
       const allRunes = runesByPath.get(path) || [];
 
+      // Définir les start nodes pour tous les chemins
+      const startNodeSlotIds: Record<string, number> = {
+        nezekan: 61,
+        zikel: 61,
+        vaizel: 61,
+        triniel: 85,
+        ariel: 113,
+        azphel: 113,
+      };
+
       for (const slotId of activeRunes) {
         const rune = allRunes.find((r) => r?.slotId === slotId);
         if (!rune) continue;
 
-        // Ignorer le start node
-        if (rune.slotId === 61 && rune.path === "nezekan") continue;
+        // Ignorer les start nodes
+        if (rune.slotId === startNodeSlotIds[rune.path]) continue;
+        
+        // EXCEPTION: Pour Ariel et Azphel, les rare/legend donnent des stats, pas des IDs
+        const isArielOrAzphel = rune.path === "ariel" || rune.path === "azphel";
 
-        if (type === "ability" && rune.rarity === "legend" && rune.abilityId) {
+        if (type === "ability" && rune.rarity === "legend" && rune.abilityId && !isArielOrAzphel) {
           // L'ID est 1-based, donc on utilise index = abilityId - 1
           const abilityIndex = rune.abilityId - 1;
           if (abilityIndex >= 0 && abilityIndex < sortedAbilities.length) {
@@ -548,7 +620,7 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
               totalBoost += 1;
             }
           }
-        } else if (type === "passive" && rune.rarity === "rare" && rune.passiveId) {
+        } else if (type === "passive" && rune.rarity === "rare" && rune.passiveId && !isArielOrAzphel) {
           // L'ID est 1-based, donc on utilise index = passiveId - 1
           const passiveIndex = rune.passiveId - 1;
           if (passiveIndex >= 0 && passiveIndex < sortedPassives.length) {
