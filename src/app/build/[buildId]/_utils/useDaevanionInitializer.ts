@@ -13,18 +13,30 @@ export const useDaevanionInitializer = () => {
   const { loadFromBuild } = useDaevanionStore();
   const hasLoadedRef = useRef(false);
   const lastBuildIdRef = useRef<number | null>(null);
+  const lastDaevanionRef = useRef<{ nezekan: number[]; zikel: number[]; vaizel: number[]; triniel: number[]; ariel: number[]; azphel: number[]; } | null>(null);
 
   // Charger les données daevanion depuis le build au chargement
-  // Ne charger qu'une seule fois au montage ou si le buildId change
+  // Recharger aussi quand le build.daevanion change pour réagir aux modifications
   useEffect(() => {
     if (!build) return;
     
     const currentBuildId = build.id;
+    const currentDaevanion = build.daevanion;
     
-    // Ne charger que si c'est la première fois ou si le buildId a changé
-    if (!hasLoadedRef.current || lastBuildIdRef.current !== currentBuildId) {
+    // Sérialiser les données daevanion pour la comparaison
+    const currentDaevanionStr = JSON.stringify(currentDaevanion);
+    const lastDaevanionStr = lastDaevanionRef.current ? JSON.stringify(lastDaevanionRef.current) : null;
+    
+    // Charger si c'est la première fois, si le buildId a changé, ou si les données daevanion ont changé
+    const daevanionChanged = 
+      !hasLoadedRef.current || 
+      lastBuildIdRef.current !== currentBuildId ||
+      currentDaevanionStr !== lastDaevanionStr;
+    
+    if (daevanionChanged) {
       hasLoadedRef.current = true;
       lastBuildIdRef.current = currentBuildId;
+      lastDaevanionRef.current = currentDaevanion || null;
       
       if (build.daevanion) {
         loadFromBuild({
@@ -40,5 +52,5 @@ export const useDaevanionInitializer = () => {
         loadFromBuild(null);
       }
     }
-  }, [build, loadFromBuild]);
+  }, [build, build?.daevanion, loadFromBuild]);
 };

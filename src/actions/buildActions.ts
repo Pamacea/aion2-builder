@@ -291,6 +291,13 @@ export async function updateBuild(
     include: fullBuildInclude,
   });
 
+  // Invalider le cache si le nom a été modifié
+  if ("name" in data && data.name !== undefined) {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}`, 'page');
+    revalidatePath(`/build/${buildId}/profile`, 'page');
+  }
+
   // Invalider le cache si les shortcuts ont été modifiés
   if ("shortcuts" in data && data.shortcuts !== undefined) {
     revalidateTag('builds', 'max');
@@ -304,6 +311,7 @@ export async function updateBuild(
     revalidateTag('builds', 'max');
     revalidatePath(`/build/${buildId}`, 'page');
     revalidatePath(`/build/${buildId}/sphere`, 'page');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
   }
 
   return BuildSchema.parse(updated);

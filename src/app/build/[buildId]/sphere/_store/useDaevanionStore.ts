@@ -41,7 +41,7 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       // Use dynamic import to avoid bundling server actions in client
       const { saveBuildAction } = await import("actions/buildActions");
       
-      await saveBuildAction(build.id, {
+      const savedBuild = await saveBuildAction(build.id, {
         ...build,
         daevanion: {
           id: build.daevanion?.id || 0,
@@ -55,9 +55,18 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
         },
       });
       
-      // Ne pas mettre à jour le build dans le store après la sauvegarde
-      // car les données locales sont déjà à jour et cela éviterait un rechargement inutile
-      // qui causerait un flash visuel. Le build sera mis à jour au prochain chargement de page.
+      // Mettre à jour le build dans le store avec la réponse du serveur pour synchroniser les données
+      // Cela garantit que les autres pages (comme /skill) ont les données à jour
+      if (savedBuild) {
+        const buildStore = useBuildStore.getState();
+        buildStore.setBuild(savedBuild);
+      }
+      
+      // Invalider toutes les queries TanStack Query pour forcer le rechargement des données
+      // On invalide tous les chemins car la sauvegarde affecte potentiellement tous les chemins
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("daevanion-invalidate-all"));
+      }
     } catch (error) {
       console.error("Error saving daevanion:", error);
     }

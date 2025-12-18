@@ -34,7 +34,11 @@ export const useBuildStore = create<BuildState>((set, get) => {
     try {
       // Use dynamic import to avoid bundling server actions in client
       const { saveBuildAction } = await import("actions/buildActions");
-      await saveBuildAction(build.id, build);
+      const savedBuild = await saveBuildAction(build.id, build);
+      // Mettre à jour le build avec la réponse du serveur pour s'assurer que les données sont synchronisées
+      if (savedBuild) {
+        set({ build: savedBuild });
+      }
     } catch (error) {
       console.error("Error saving build:", error);
     } finally {
