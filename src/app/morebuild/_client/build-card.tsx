@@ -1,10 +1,12 @@
 "use client";
 
 import { CreateButton } from "@/components/client/buttons/create-button";
+import { DeleteButton } from "@/components/client/buttons/delete-button";
 import { BANNER_PATH } from "@/constants/paths";
 import { useAuth } from "@/hooks/useAuth";
 import { useBuildLike } from "@/hooks/useBuildLike";
 import { BuildCardProps, BuildType, LikeType } from "@/types/schema";
+import { isBuildOwner } from "@/utils/buildUtils";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,6 +38,9 @@ export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
     : false;
 
   const likesCount = build.likes?.length || 0;
+
+  // Vérifier si l'utilisateur est propriétaire du build
+  const isOwner = isBuildOwner(build, userId);
 
   // Handler de like avec optimistic update immédiat
   const handleLike = useCallback(async (e: React.MouseEvent) => {
@@ -100,6 +105,13 @@ export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
         <Heart className={`size-3 sm:size-4 ${isLiked ? "fill-current" : ""}`} />
         <span className="text-xs font-semibold">{likesCount}</span>
       </button>
+
+      {/* Delete Button - Top Left (only for owners) */}
+      {isOwner && (
+        <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 z-10" onClick={(e) => e.stopPropagation()}>
+          <DeleteButton buildId={build.id} />
+        </div>
+      )}
 
       {/* Banner Background */}
       <div className="relative h-40 sm:h-48 w-full">

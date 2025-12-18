@@ -318,6 +318,64 @@ export async function updateBuild(
 }
 
 // ======================================
+// DELETE BUILD
+// ======================================
+export async function deleteBuildAction(buildId: number): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Vous devez être connecté pour supprimer un build");
+  }
+
+  // Récupérer le build actuel pour vérifier le propriétaire
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build
+  if (currentBuild.userId && currentBuild.userId !== session.user.id) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à supprimer ce build. Seul le propriétaire peut le supprimer."
+    );
+  }
+
+  // Utiliser une transaction pour supprimer toutes les relations et le build de manière atomique
+  // Cela garantit la cohérence et réduit la latence en groupant toutes les opérations
+  await prisma.$transaction(async (tx) => {
+    // Supprimer toutes les relations en parallèle
+    await Promise.all([
+      tx.buildAbility.deleteMany({
+        where: { buildId },
+      }),
+      tx.buildPassive.deleteMany({
+        where: { buildId },
+      }),
+      tx.buildStigma.deleteMany({
+        where: { buildId },
+      }),
+    ]);
+
+    // Supprimer le build (BuildDaevanion et Like seront supprimés en cascade)
+    await tx.build.delete({
+      where: { id: buildId },
+    });
+  });
+
+  // Invalider le cache de manière synchrone pour garantir la cohérence
+  revalidateTag('builds', 'max');
+  revalidatePath('/morebuild', 'page');
+  revalidatePath('/myprofile', 'page');
+  revalidatePath(`/build/${buildId}`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
 // UPDATE DAEVANION ONLY (optimized)
 // ======================================
 export async function updateDaevanionOnly(
