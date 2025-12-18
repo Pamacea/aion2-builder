@@ -99,7 +99,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
     return rune.slotId === startNodeSlotIds[rune.path];
   }, []);
 
-  const handleRuneClick = useCallback(async (rune: DaevanionRune) => {
+  const handleRuneClick = useCallback(async (rune: DaevanionRune, event?: React.MouseEvent) => {
     // Si l'utilisateur n'est pas propriétaire, ne pas permettre les interactions
     if (!isOwner) {
       return;
@@ -108,11 +108,35 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
     if (isStartNode(rune)) {
       return; // Ne peut pas cliquer sur le start node
     }
-    if (!canActivate(rune) && !activeRunes.includes(rune.slotId)) {
-      return; // Ne peut pas activer
+
+    // Si la rune est déjà active, comportement normal (toggle/désactivation)
+    if (activeRunes.includes(rune.slotId)) {
+      await onToggleRune(rune.slotId);
+      return;
     }
-    await onToggleRune(rune.slotId);
-  }, [canActivate, activeRunes, onToggleRune, isStartNode, isOwner]);
+
+    // Pour une rune inactive, toujours créer le chemin automatique (clic gauche ou droit)
+    event?.preventDefault();
+    
+    // Utiliser le store pour trouver le chemin le plus court
+    const { useDaevanionStore } = await import("../_store/useDaevanionStore");
+    const store = useDaevanionStore.getState();
+    const shortestPath = await store.findShortestPath(path, rune.slotId);
+    
+    console.log(`[Daevanion] Clic sur rune ${rune.slotId}, chemin trouvé:`, shortestPath);
+    
+    if (shortestPath.length > 0) {
+      // Activer toutes les runes du chemin (incluant la rune cible)
+      console.log(`[Daevanion] Activation du chemin avec ${shortestPath.length} runes`);
+      await store.activatePath(path, shortestPath);
+    } else {
+      console.warn(`[Daevanion] Aucun chemin trouvé pour la rune ${rune.slotId}, tentative d'activation directe`);
+      // Si aucun chemin trouvé, essayer d'activer directement si possible
+      if (canActivate(rune)) {
+        await onToggleRune(rune.slotId);
+      }
+    }
+  }, [canActivate, activeRunes, onToggleRune, isStartNode, isOwner, path]);
 
   // Calculer la taille des runes selon la taille de la grille
   const runeSize = useMemo(() => {
@@ -226,7 +250,6 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
               }
 
               const isActive = activeRunes.includes(rune.slotId);
-              const canActivateRune = canActivate(rune);
               const showTooltip = hoveredRune?.slotId === rune.slotId;
               const runeData = runesInfo.get(rune.slotId);
               
@@ -244,15 +267,20 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
                   onMouseLeave={handleMouseLeave}
                 >
                   <button
-                    onClick={() => handleRuneClick(rune)}
-                    disabled={!isOwner || (!canActivateRune && !isActive)}
+                    onClick={(e) => handleRuneClick(rune, e)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      handleRuneClick(rune, e);
+                    }}
+                    disabled={!isOwner}
                     className={`
                       relative ${runeSize.size} transition-all
                       ${runeStyles.opacityClass}
-                      ${isOwner && (canActivateRune || isActive) ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
+                      ${isOwner ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
                       ${!isOwner ? "opacity-60" : ""}
                       ${runeStyles.borderClass}
                     `}
+                    title={isOwner ? (isActive ? "Cliquer pour désactiver" : "Cliquer pour activer le chemin automatique") : ""}
                   >
                     <Image
                       src={runeData.imageSrc}

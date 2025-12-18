@@ -556,9 +556,10 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
     });
   },
 
-  resetAll: () => {
+  resetAll: async () => {
     set({ daevanionBuild: initialBuild });
     scheduleSave();
+    return Promise.resolve();
   },
 
   activateAllRunes: async (path) => {
@@ -657,5 +658,139 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
 
     return totalBoost;
   },
+
+    findShortestPath: async (path, targetSlotId) => {
+      const state = get();
+      const activeRunes = state.daevanionBuild[path] || [];
+      
+      // Si la rune cible est déjà active, retourner un chemin vide
+      if (activeRunes.includes(targetSlotId)) {
+        return [];
+      }
+
+      // Obtenir toutes les runes du path
+      const allRunes = await getRunesForPath(path);
+      const targetRune = allRunes.find(r => r?.slotId === targetSlotId);
+      
+      if (!targetRune) {
+        return []; // Rune cible introuvable
+      }
+
+      // Déterminer le start node pour ce path
+      const startNodeSlotIds: Record<string, number> = {
+        nezekan: 61,
+        zikel: 61,
+        vaizel: 61,
+        triniel: 85,
+        ariel: 113,
+        azphel: 113,
+      };
+      const startNodeId = startNodeSlotIds[path];
+
+      // Construire un graphe inverse : pour chaque rune, quelles runes peuvent être activées après elle
+      // (c'est-à-dire les runes qui ont cette rune dans leurs prerequisites)
+      const graph = new Map<number, number[]>();
+      allRunes.forEach(rune => {
+        if (!rune) return;
+        
+        // Si la rune n'a pas de prerequisites, elle est accessible depuis le start node
+        if (!rune.prerequisites || rune.prerequisites.length === 0) {
+          if (!graph.has(startNodeId)) {
+            graph.set(startNodeId, []);
+          }
+          graph.get(startNodeId)!.push(rune.slotId);
+        } else {
+          // Sinon, elle est accessible depuis ses prerequisites
+          rune.prerequisites.forEach(prereqId => {
+            if (!graph.has(prereqId)) {
+              graph.set(prereqId, []);
+            }
+            graph.get(prereqId)!.push(rune.slotId);
+          });
+        }
+      });
+
+      // BFS pour trouver le chemin le plus court depuis les runes actives jusqu'à la cible
+      const queue: { slotId: number; path: number[] }[] = [];
+      const visited = new Set<number>();
+      
+      // Initialiser la queue avec toutes les runes actives
+      activeRunes.forEach(slotId => {
+        queue.push({ slotId, path: [slotId] });
+        visited.add(slotId);
+      });
+
+      while (queue.length > 0) {
+        const { slotId, path: currentPath } = queue.shift()!;
+        
+        // Si on a atteint la cible, retourner le chemin complet (incluant la cible)
+        if (slotId === targetSlotId) {
+          // Retourner le chemin sans les runes déjà actives (garder seulement celles à activer)
+          const pathToActivate = currentPath.filter(id => !activeRunes.includes(id));
+          console.log(`[Daevanion] Chemin trouvé vers ${targetSlotId}:`, pathToActivate);
+          return pathToActivate;
+        }
+
+        // Explorer les runes accessibles depuis cette rune
+        const nextRunes = graph.get(slotId) || [];
+        for (const nextSlotId of nextRunes) {
+          if (!visited.has(nextSlotId)) {
+            visited.add(nextSlotId);
+            queue.push({ 
+              slotId: nextSlotId, 
+              path: [...currentPath, nextSlotId] 
+            });
+          }
+        }
+      }
+
+      console.warn(`[Daevanion] Aucun chemin trouvé vers ${targetSlotId} depuis les runes actives:`, activeRunes);
+
+      // Aucun chemin trouvé
+      return [];
+    },
+
+    activatePath: async (path, slotIds) => {
+      // Vérifier que l'utilisateur est propriétaire du build
+      const buildStore = useBuildStore.getState();
+      const build = buildStore.build;
+      if (!build) return;
+      
+      const { isBuildOwner } = await import("@/utils/buildUtils");
+      if (!isBuildOwner(build, buildStore.currentUserId)) {
+        console.warn("Cannot modify Daevanion planner: user is not the owner");
+        return;
+      }
+
+      const state = get();
+      const currentPathRunes = state.daevanionBuild[path] || [];
+      
+      // Activer toutes les runes du chemin qui ne sont pas déjà actives
+      const runesToActivate = slotIds.filter(slotId => !currentPathRunes.includes(slotId));
+      
+      if (runesToActivate.length === 0) {
+        return; // Toutes les runes sont déjà actives
+      }
+
+      // Activer les runes une par une dans l'ordre du chemin
+      const newPathRunes = [...currentPathRunes, ...runesToActivate];
+
+      // Toujours lire l'état le plus récent avant de mettre à jour
+      const currentState = get();
+      set({
+        daevanionBuild: {
+          ...currentState.daevanionBuild,
+          [path]: newPathRunes,
+        },
+      });
+
+      // Invalider les queries avant de mettre à jour les niveaux pour que l'UI se mette à jour
+      invalidateDaevanionQueries(path);
+
+      // Mettre à jour les niveaux de skills/passifs après l'activation
+      await updateSkillLevelsFromRunes(path, newPathRunes, currentPathRunes, () => useBuildStore.getState());
+
+      scheduleSave();
+    },
   }
 });

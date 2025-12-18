@@ -189,4 +189,6 @@ export interface DaevanionStore {
   resetAll: () => Promise<void>;
   activateAllRunes: (path: DaevanionPath) => Promise<void>;
   loadFromBuild: (daevanion: DaevanionBuild | null | undefined) => void;
+  findShortestPath: (path: DaevanionPath, targetSlotId: number) => Promise<number[]>;
+  activatePath: (path: DaevanionPath, slotIds: number[]) => Promise<void>;
 }
