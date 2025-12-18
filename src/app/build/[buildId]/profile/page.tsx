@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useBuildLoader } from "../_utils/useBuildLoader";
 import { ProfilelassBanner } from "./_client/class-banner";
+import { ProfileButtons } from "./_client/profile-buttons";
 import { useClassTags } from "./_utils/useClassTags";
 
 // Code splitting : charger les composants de manière lazy
@@ -35,6 +36,7 @@ export default function BuildProfilePage() {
         <TagsList tags={classTags} />
       </div>
       {classBanner && <ProfilelassBanner classBanner={classBanner} />}
+      <ProfileButtons />
     </main>
   );
 }

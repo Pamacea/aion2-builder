@@ -76,6 +76,7 @@ export type BuildState = {
   
   // Shortcuts management
   updateShortcuts: (shortcuts: BuildType["shortcuts"]) => void;
+  updateShortcutLabels: (labels: BuildType["shortcutLabels"]) => void;
   
   // Chain Skills management
   updateChainSkill: (skillId: number, chainSkillIds: number[], type: "ability" | "stigma") => void;
@@ -102,6 +103,7 @@ export const BuildSchemaBase = z.object({
     buildAbilityId: z.number().optional(),
     buildStigmaId: z.number().optional(),
   })).nullish(),
+  shortcutLabels: z.record(z.string(), z.string()).nullish(), // Record<columnId, label>
 });
 export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 
@@ -202,5 +204,6 @@ export type BuildType = BuildTypeBase & {
     buildAbilityId?: number;
     buildStigmaId?: number;
   }> | null;
+  shortcutLabels?: Record<string, string> | null; // Record<columnId, label>
 };
 

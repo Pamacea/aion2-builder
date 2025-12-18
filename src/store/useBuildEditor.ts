@@ -615,6 +615,13 @@ export const useBuildStore = create<BuildState>((set, get) => {
       get().updateBuild({ shortcuts });
     },
 
+    updateShortcutLabels: (labels) => {
+      const build = get().build;
+      const currentUserId = get().currentUserId;
+      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
+      get().updateBuild({ shortcutLabels: labels });
+    },
+
     // ==========================================================
     // CHAIN SKILLS MANAGEMENT
     // ==========================================================

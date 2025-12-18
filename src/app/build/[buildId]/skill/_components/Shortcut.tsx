@@ -5,7 +5,7 @@ import { useBuildStore } from "@/store/useBuildEditor";
 import { ShortcutSkill } from "@/types/shortcut.type";
 import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
 import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResetShortcutButton } from "../_client/buttons/reset-shortcut-button";
 import { ShortcutSlot } from "../_client/shortcut-slot";
 import {
@@ -15,6 +15,18 @@ import {
   RESERVED_SLOT_ID,
   RIGHT_SLOTS_COUNT,
 } from "../_utils/constants";
+
+// Labels par défaut par colonne
+const DEFAULT_LABELS: Record<string, string> = {
+  "left-0": "1",
+  "left-1": "2",
+  "left-2": "3",
+  "left-3": "4",
+  "middle-0": "A",
+  "middle-1": "E",
+  "right-0": "RC",
+  "bottom": "STIGMA",
+};
 
 export const Shortcut = () => {
   const { build, updateShortcuts, addStigma } = useBuildStore();
@@ -27,6 +39,11 @@ export const Shortcut = () => {
   const isStarter = isStarterBuild(build);
   const isOwner = isBuildOwner(build, userId);
   const canEdit = !isStarter && isOwner;
+
+  // Récupérer les labels depuis le build ou utiliser les valeurs par défaut
+  const getLabel = useCallback((columnId: string): string => {
+    return build?.shortcutLabels?.[columnId] ?? DEFAULT_LABELS[columnId] ?? "";
+  }, [build?.shortcutLabels]);
 
   // Convert saved shortcuts (with IDs) to local format (with full objects)
   const loadedShortcuts = useMemo(() => {
@@ -375,6 +392,7 @@ export const Shortcut = () => {
     queueSaveShortcuts();
   };
 
+
   return (
     <div className="w-full h-full flex flex-col justify-end gap-2 sm:gap-4">
       {/* Header with Refresh Button - at the bottom */}
@@ -389,8 +407,16 @@ export const Shortcut = () => {
         <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-0">
           {/* Left: Cast Slots (4x3) */}
           <div className="flex flex-col gap-1 sm:gap-2">
-            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
-              1
+            {/* Labels pour chaque colonne (indicatif uniquement) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2.5">
+              {Array.from({ length: 4 }).map((_, colIndex) => (
+                <div
+                  key={`left-${colIndex}`}
+                  className="text-center text-sm font-medium text-gray-400"
+                >
+                  {getLabel(`left-${colIndex}`)}
+                </div>
+              ))}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 grid-rows-3 gap-1.5 sm:gap-2.5">
               {Array.from({ length: LEFT_SLOTS_COUNT }).map((_, index) => {
@@ -413,8 +439,16 @@ export const Shortcut = () => {
 
           {/* Middle: Additional Slots (2x3) */}
           <div className="flex flex-col gap-1 sm:gap-2">
-            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
-              A
+            {/* Labels pour chaque colonne (indicatif uniquement) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2.5">
+              {Array.from({ length: 2 }).map((_, colIndex) => (
+                <div
+                  key={`middle-${colIndex}`}
+                  className="text-center text-sm font-medium text-gray-400"
+                >
+                  {getLabel(`middle-${colIndex}`)}
+                </div>
+              ))}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 grid-rows-3 gap-1.5 sm:gap-2.5">
               {Array.from({ length: MIDDLE_SLOTS_COUNT }).map((_, index) => {
@@ -435,8 +469,9 @@ export const Shortcut = () => {
 
           {/* Right: Additional Slots (1x3) */}
           <div className="flex flex-col gap-1 sm:gap-2">
-            <div className="text-xs sm:text-sm font-semibold text-foreground/80 px-1 sm:px-2">
-              RC
+            {/* Label pour la colonne (indicatif uniquement) */}
+            <div className="text-center text-sm font-medium text-gray-400">
+              {getLabel("right-0")}
             </div>
             <div className="grid grid-cols-1 grid-rows-3 gap-1.5 sm:gap-2.5">
               {Array.from({ length: RIGHT_SLOTS_COUNT }).map((_, index) => {
