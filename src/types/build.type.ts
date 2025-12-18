@@ -104,7 +104,7 @@ export const BuildSchemaBase = z.object({
     buildStigmaId: z.number().optional(),
   })).nullish(),
   shortcutLabels: z.record(z.string(), z.string()).nullish(), // Record<columnId, label>
-  private: z.boolean().default(false),
+  private: z.boolean().default(true),
 });
 export type BuildTypeBase = z.infer<typeof BuildSchemaBase>;
 

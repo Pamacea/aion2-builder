@@ -2,20 +2,19 @@
 
 import { deleteBuildAction } from "@/actions/buildActions";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 type DeleteButtonProps = {
   buildId: number;
@@ -41,7 +40,6 @@ export const DeleteButton = ({ buildId, className = "" }: DeleteButtonProps) => 
 
     try {
       await deleteBuildAction(buildId);
-      toast.success("Build supprimé avec succès");
       setOpen(false);
       
       // Si on est sur la page d'un build spécifique, rediriger
@@ -54,9 +52,6 @@ export const DeleteButton = ({ buildId, className = "" }: DeleteButtonProps) => 
       }
     } catch (error) {
       console.error("Error deleting build:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Erreur lors de la suppression du build"
-      );
     } finally {
       setIsDeleting(false);
     }

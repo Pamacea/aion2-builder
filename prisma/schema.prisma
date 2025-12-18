@@ -397,7 +397,7 @@ model Build {
   extraSTP  Int            @default(0)
   shortcuts Json?
   userId    String?
-  private   Boolean        @default(false)
+  private   Boolean        @default(true)
   class     Class          @relation(fields: [classId], references: [id])
   user      User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   abilities BuildAbility[]
