@@ -4,7 +4,8 @@ import { MAX_POINTS_BY_TYPE } from "@/constants/daevanion.constant";
 import { useDaevanionPoints, useDaevanionStats } from "@/hooks/useDaevanionData";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath, DaevanionStats } from "@/types/daevanion.type";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useDaevanionInitializer } from "../../_utils/useDaevanionInitializer";
 import { DaevanionButtons } from "../_client/daevanion-buttons";
 import { DaevanionPoints } from "../_client/daevanion-points";
 import { DaevanionTab } from "../_client/daevanion-tab";
@@ -15,37 +16,10 @@ import { StatsSidebar } from "./StatsSidebar";
 export function DaevanionPlanner() {
   const [activePath, setActivePath] = useState<DaevanionPath>("nezekan");
   const { build } = useBuildStore();
-  const { daevanionBuild, toggleRune, getPointsType, loadFromBuild, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
-  const hasLoadedRef = useRef(false);
-  const lastBuildIdRef = useRef<number | null>(null);
-
-  // Charger les données daevanion depuis le build au chargement
-  // Ne charger qu'une seule fois au montage ou si le buildId change
-  useEffect(() => {
-    if (!build) return;
-    
-    const currentBuildId = build.id;
-    
-    // Ne charger que si c'est la première fois ou si le buildId a changé
-    if (!hasLoadedRef.current || lastBuildIdRef.current !== currentBuildId) {
-      hasLoadedRef.current = true;
-      lastBuildIdRef.current = currentBuildId;
-      
-      if (build.daevanion) {
-        loadFromBuild({
-          nezekan: build.daevanion.nezekan || [],
-          zikel: build.daevanion.zikel || [],
-          vaizel: build.daevanion.vaizel || [],
-          triniel: build.daevanion.triniel || [],
-          ariel: build.daevanion.ariel || [],
-          azphel: build.daevanion.azphel || [],
-        });
-      } else {
-        // Si le build n'a pas de daevanion, initialiser avec le start node
-        loadFromBuild(null);
-      }
-    }
-  }, [build, loadFromBuild]);
+  const { daevanionBuild, toggleRune, getPointsType, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
+  
+  // Initialiser le store Daevanion avec les données du build
+  useDaevanionInitializer();
 
   // Mémoriser les runes actives pour éviter les recalculs
   const activeRunes = useMemo(() => {

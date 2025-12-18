@@ -32,7 +32,7 @@ export const Skill = () => {
     removePassive,
     removeStigma,
   } = useBuildStore();
-  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
   const { selectedSkill, setSelectedSkill } = useSelectedSkill();
   const [daevanionBoost, setDaevanionBoost] = useState(0);
 
@@ -166,7 +166,7 @@ export const Skill = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill]);
+  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuild]);
 
   const baseLevel =
     selectedBuildAbility?.level ||

@@ -26,7 +26,7 @@ export const ActiveSkill = ({
   className = "",
 }: ActiveSkillProps) => {
   const { build, currentUserId, addAbility, updateAbilityLevel } = useBuildStore();
-  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
   const [daevanionBoost, setDaevanionBoost] = useState(0);
@@ -38,6 +38,7 @@ export const ActiveSkill = ({
   const baseLevel = buildAbility?.level ?? 0;
   
   // Calculer le boost Daevanion
+  // Recalculer quand daevanionBuild change pour mettre à jour les niveaux après l'initialisation
   useEffect(() => {
     let cancelled = false;
     const fetchBoost = async () => {
@@ -50,7 +51,7 @@ export const ActiveSkill = ({
     return () => {
       cancelled = true;
     };
-  }, [ability.id, getDaevanionBoostForSkill]);
+  }, [ability.id, getDaevanionBoostForSkill, daevanionBuild]);
 
   const currentLevel = baseLevel + daevanionBoost;
   const isInBuild = buildAbility !== undefined;

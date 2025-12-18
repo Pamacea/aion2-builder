@@ -38,7 +38,7 @@ export const SkillDetails = ({
 }: SkillDetailsProps) => {
   const { selectedSkill } = useSelectedSkill();
   const { build } = useBuildStore();
-  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
   const [daevanionBoost, setDaevanionBoost] = useState(0);
   
   // Use selected skill from context if available, otherwise use props
@@ -140,6 +140,7 @@ export const SkillDetails = ({
   }
 
   // Calculer le boost Daevanion pour le skill affiché
+  // Recalculer quand daevanionBuild change pour mettre à jour les niveaux après l'initialisation
   useEffect(() => {
     let cancelled = false;
     const fetchBoost = async () => {
@@ -157,7 +158,7 @@ export const SkillDetails = ({
     return () => {
       cancelled = true;
     };
-  }, [buildAbility, buildPassive, getDaevanionBoostForSkill]);
+  }, [buildAbility, buildPassive, getDaevanionBoostForSkill, daevanionBuild]);
 
   // If no skill is provided, show empty state
   if (!targetAbility && !targetPassive && !targetStigma) {

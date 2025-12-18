@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useBuildLoader } from "../_utils/useBuildLoader";
+import { useDaevanionInitializer } from "../_utils/useDaevanionInitializer";
 import { SelectedSkillProvider } from "./_context/SelectedSkillContext";
 import { ShortcutProvider } from "./_context/ShortcutContext";
 
@@ -22,6 +23,8 @@ const Skill = dynamic(() => import("./_components/Skill").then(mod => ({ default
 
 export default function BuildSkillPage() {
   const { build, loading } = useBuildLoader();
+  // Initialiser le store Daevanion avec les données du build
+  useDaevanionInitializer();
 
   if (loading || !build) return <p>Loading...</p>;
 

@@ -5,12 +5,10 @@ import { formatStats, getRarityColor, getRarityLabel, getRequiredLevel, getRuneC
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionRune, RuneGridProps } from "@/types/daevanion.type";
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   const [hoveredRune, setHoveredRune] = useState<DaevanionRune | null>(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
   const { build } = useBuildStore();
   
   // Utiliser TanStack Query pour charger les runes avec cache

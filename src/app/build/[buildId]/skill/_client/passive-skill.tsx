@@ -25,7 +25,7 @@ export const PassiveSkill = ({
   className = "",
 }: PassiveSkillProps) => {
   const { build, currentUserId, addPassive, updatePassiveLevel } = useBuildStore();
-  const { getDaevanionBoostForSkill } = useDaevanionStore();
+  const { getDaevanionBoostForSkill, daevanionBuild } = useDaevanionStore();
   const [localSelected, setLocalSelected] = useState(isSelected);
   const [imageError, setImageError] = useState(false);
   const [daevanionBoost, setDaevanionBoost] = useState(0);
@@ -35,6 +35,7 @@ export const PassiveSkill = ({
   const baseLevel = buildPassive?.level ?? 0;
   
   // Calculer le boost Daevanion
+  // Recalculer quand daevanionBuild change pour mettre à jour les niveaux après l'initialisation
   useEffect(() => {
     let cancelled = false;
     const fetchBoost = async () => {
@@ -47,7 +48,7 @@ export const PassiveSkill = ({
     return () => {
       cancelled = true;
     };
-  }, [passive.id, getDaevanionBoostForSkill]);
+  }, [passive.id, getDaevanionBoostForSkill, daevanionBuild]);
 
   const currentLevel = baseLevel + daevanionBoost;
   const isInBuild = buildPassive !== undefined;
