@@ -4,6 +4,7 @@ import { MAX_POINTS_BY_TYPE } from "@/constants/daevanion.constant";
 import { useDaevanionPoints, useDaevanionStats } from "@/hooks/useDaevanionData";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath, DaevanionStats } from "@/types/daevanion.type";
+import { isBuildOwner } from "@/utils/buildUtils";
 import { useCallback, useMemo, useState } from "react";
 import { useDaevanionInitializer } from "../../_utils/useDaevanionInitializer";
 import { DaevanionButtons } from "../_client/daevanion-buttons";
@@ -15,11 +16,14 @@ import { StatsSidebar } from "./StatsSidebar";
 
 export function DaevanionPlanner() {
   const [activePath, setActivePath] = useState<DaevanionPath>("nezekan");
-  const { build } = useBuildStore();
+  const { build, currentUserId } = useBuildStore();
   const { daevanionBuild, toggleRune, getPointsType, resetPath, resetAll, activateAllRunes } = useDaevanionStore();
   
   // Initialiser le store Daevanion avec les données du build
   useDaevanionInitializer();
+  
+  // Vérifier si l'utilisateur est propriétaire du build
+  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
 
   // Mémoriser les runes actives pour éviter les recalculs
   const activeRunes = useMemo(() => {
@@ -90,16 +94,16 @@ export function DaevanionPlanner() {
     toggleRune(activePath, slotId);
   }, [activePath, toggleRune]);
 
-  const handleResetPath = useCallback(() => {
-    resetPath(activePath);
+  const handleResetPath = useCallback(async () => {
+    await resetPath(activePath);
   }, [activePath, resetPath]);
 
-  const handleResetAll = useCallback(() => {
-    resetAll();
+  const handleResetAll = useCallback(async () => {
+    await resetAll();
   }, [resetAll]);
 
-  const handleActivateAll = useCallback(() => {
-    activateAllRunes(activePath);
+  const handleActivateAll = useCallback(async () => {
+    await activateAllRunes(activePath);
   }, [activePath, activateAllRunes]);
 
   return (
@@ -121,6 +125,7 @@ export function DaevanionPlanner() {
             onResetPath={handleResetPath}
             onResetAll={handleResetAll}
             onActivateAll={handleActivateAll}
+            isOwner={isOwner}
           />
         </div>
         
@@ -145,6 +150,7 @@ export function DaevanionPlanner() {
             path={activePath}
             activeRunes={activeRunes}
             onToggleRune={handleToggleRune}
+            isOwner={isOwner}
           />
         </div>
       </div>

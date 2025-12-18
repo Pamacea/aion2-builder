@@ -8,8 +8,14 @@ export function DaevanionButtons({
   onResetPath,
   onResetAll,
   onActivateAll,
+  isOwner,
 }: DaevanionButtonsProps) {
   const pathName = activePath.charAt(0).toUpperCase() + activePath.slice(1);
+
+  // Si l'utilisateur n'est pas propriétaire, ne pas afficher les boutons
+  if (!isOwner) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-2">

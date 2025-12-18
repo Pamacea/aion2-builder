@@ -94,15 +94,7 @@ export const Skill = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [build?.abilities, build?.passives, build?.stigmas]);
 
-  if (!build) {
-    return <div className="p-4">Loading...</div>;
-  }
-
-  const availableAbilities = getAvailableAbilities() || [];
-  const availablePassives = getAvailablePassives() || [];
-  const availableStigmas = getAvailableStigmas() || [];
-
-  // Get selected skill info for dynamic buttons
+  // Get selected skill info for dynamic buttons (before early return)
   const selectedBuildAbility = selectedSkill?.buildAbility;
   const selectedBuildPassive = selectedSkill?.buildPassive;
   const selectedBuildStigma = selectedSkill?.buildStigma;
@@ -110,6 +102,34 @@ export const Skill = () => {
   const selectedAbility = selectedSkill?.ability;
   const selectedPassive = selectedSkill?.passive;
   const selectedStigma = selectedSkill?.stigma;
+
+  // Calculer le boost Daevanion pour le skill sélectionné (before early return)
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBoost = async () => {
+      if (selectedBuildAbility) {
+        const boost = await getDaevanionBoostForSkill(selectedBuildAbility.abilityId, "ability");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else if (selectedBuildPassive) {
+        const boost = await getDaevanionBoostForSkill(selectedBuildPassive.passiveId, "passive");
+        if (!cancelled) setDaevanionBoost(boost);
+      } else {
+        if (!cancelled) setDaevanionBoost(0);
+      }
+    };
+    fetchBoost();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuild]);
+
+  if (!build) {
+    return <div className="p-4">Loading...</div>;
+  }
+
+  const availableAbilities = getAvailableAbilities() || [];
+  const availablePassives = getAvailablePassives() || [];
+  const availableStigmas = getAvailableStigmas() || [];
 
   // Check if the selected skill is a chain skill
   // A skill is a chain skill if it appears as chainAbility/chainStigma in parentAbilities/parentStigmas of other skills
@@ -147,26 +167,6 @@ export const Skill = () => {
       }
     }
   }
-
-  // Calculer le boost Daevanion pour le skill sélectionné
-  useEffect(() => {
-    let cancelled = false;
-    const fetchBoost = async () => {
-      if (selectedBuildAbility) {
-        const boost = await getDaevanionBoostForSkill(selectedBuildAbility.abilityId, "ability");
-        if (!cancelled) setDaevanionBoost(boost);
-      } else if (selectedBuildPassive) {
-        const boost = await getDaevanionBoostForSkill(selectedBuildPassive.passiveId, "passive");
-        if (!cancelled) setDaevanionBoost(boost);
-      } else {
-        if (!cancelled) setDaevanionBoost(0);
-      }
-    };
-    fetchBoost();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedBuildAbility, selectedBuildPassive, getDaevanionBoostForSkill, daevanionBuild]);
 
   const baseLevel =
     selectedBuildAbility?.level ||

@@ -7,7 +7,7 @@ import { DaevanionRune, RuneGridProps } from "@/types/daevanion.type";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 
-export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
+export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridProps) {
   const [hoveredRune, setHoveredRune] = useState<DaevanionRune | null>(null);
   const { build } = useBuildStore();
   
@@ -100,6 +100,10 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
   }, []);
 
   const handleRuneClick = useCallback(async (rune: DaevanionRune) => {
+    // Si l'utilisateur n'est pas propriétaire, ne pas permettre les interactions
+    if (!isOwner) {
+      return;
+    }
     // Le start node ne peut pas être désactivé
     if (isStartNode(rune)) {
       return; // Ne peut pas cliquer sur le start node
@@ -108,7 +112,7 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
       return; // Ne peut pas activer
     }
     await onToggleRune(rune.slotId);
-  }, [canActivate, activeRunes, onToggleRune, isStartNode]);
+  }, [canActivate, activeRunes, onToggleRune, isStartNode, isOwner]);
 
   // Calculer la taille des runes selon la taille de la grille
   const runeSize = useMemo(() => {
@@ -241,11 +245,12 @@ export function RuneGrid({ path, activeRunes, onToggleRune }: RuneGridProps) {
                 >
                   <button
                     onClick={() => handleRuneClick(rune)}
-                    disabled={!canActivateRune && !isActive}
+                    disabled={!isOwner || (!canActivateRune && !isActive)}
                     className={`
                       relative ${runeSize.size} transition-all
                       ${runeStyles.opacityClass}
-                      ${canActivateRune || isActive ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
+                      ${isOwner && (canActivateRune || isActive) ? "cursor-pointer hover:scale-110" : "cursor-not-allowed"}
+                      ${!isOwner ? "opacity-60" : ""}
                       ${runeStyles.borderClass}
                     `}
                   >

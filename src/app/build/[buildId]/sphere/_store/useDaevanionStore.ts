@@ -149,6 +149,17 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
     },
 
     toggleRune: async (path, slotId) => {
+      // Vérifier que l'utilisateur est propriétaire du build
+      const buildStore = useBuildStore.getState();
+      const build = buildStore.build;
+      if (!build) return;
+      
+      const { isBuildOwner } = await import("@/utils/buildUtils");
+      if (!isBuildOwner(build, buildStore.currentUserId)) {
+        console.warn("Cannot modify Daevanion planner: user is not the owner");
+        return;
+      }
+      
       // Le start node (slotId 61) ne peut pas être désactivé
       if (path === "nezekan" && slotId === 61) {
         return; // Ne peut pas désactiver le start node
@@ -523,7 +534,18 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
     return getPointsType(path);
   },
 
-  resetPath: (path) => {
+  resetPath: async (path) => {
+    // Vérifier que l'utilisateur est propriétaire du build
+    const buildStore = useBuildStore.getState();
+    const build = buildStore.build;
+    if (!build) return;
+    
+    const { isBuildOwner } = await import("@/utils/buildUtils");
+    if (!isBuildOwner(build, buildStore.currentUserId)) {
+      console.warn("Cannot reset Daevanion path: user is not the owner");
+      return;
+    }
+    
     set((state) => {
       const newDaevanionBuild = {
         ...state.daevanionBuild,

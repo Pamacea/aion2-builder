@@ -158,6 +158,7 @@ export interface DaevanionButtonsProps {
   onResetPath: () => void;
   onResetAll: () => void;
   onActivateAll: () => void;
+  isOwner: boolean;
 }
 
 export interface DaevanionPointsProps {
@@ -174,6 +175,7 @@ export interface RuneGridProps {
   path: DaevanionPath;
   activeRunes: number[];
   onToggleRune: (slotId: number) => void;
+  isOwner: boolean;
 }
 
 export interface DaevanionStore {
@@ -183,8 +185,8 @@ export interface DaevanionStore {
   getPointsUsed: (path: DaevanionPath) => Promise<number>;
   getPointsType: (path: DaevanionPath) => string;
   getDaevanionBoostForSkill: (skillId: number, type: "ability" | "passive") => Promise<number>;
-  resetPath: (path: DaevanionPath) => void;
-  resetAll: () => void;
+  resetPath: (path: DaevanionPath) => Promise<void>;
+  resetAll: () => Promise<void>;
   activateAllRunes: (path: DaevanionPath) => Promise<void>;
   loadFromBuild: (daevanion: DaevanionBuild | null | undefined) => void;
 }
