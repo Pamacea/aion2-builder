@@ -18,6 +18,10 @@ const ClassSelect = dynamic(() => import("./_client/class-select").then(mod => (
   loading: () => <Loading />,
 });
 
+const BuildVisibility = dynamic(() => import("./_client/build-visibility").then(mod => ({ default: mod.BuildVisibility })), {
+  loading: () => <Loading />,
+});
+
 export default function BuildProfilePage() {
   const { build, loading } = useBuildLoader();
   const classTags = useClassTags();
@@ -32,6 +36,7 @@ export default function BuildProfilePage() {
       <div className="w-full max-w-5xl flex flex-col md:flex-row md:items-start md:justify-around items-center justify-center gap-4 md:gap-0">
         <ClassSelect />
         <BuildName />
+        <BuildVisibility />
       </div>
       <div className="w-full max-w-5xl flex justify-center">
         <TagsList tags={classTags} />

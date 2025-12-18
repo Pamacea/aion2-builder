@@ -756,6 +756,9 @@ export async function getRandomStarterBuildId(): Promise<number | null> {
 const getAllBuildsCached = unstable_cache(
   async (): Promise<BuildType[]> => {
     const builds = await prisma.build.findMany({
+      where: {
+        private: false, // Afficher uniquement les builds publics
+      },
       include: fullBuildInclude,
       orderBy: {
         id: "desc",
@@ -902,4 +905,46 @@ export async function checkAdminStatus(): Promise<{
         ? `Vous n'êtes pas admin.`
         : "Aucun ADMIN_USER_ID configuré dans .env.local"
   };
+}
+
+// ======================================
+// UPDATE BUILD PRIVATE STATUS
+// ======================================
+export async function updateBuildPrivateStatus(
+  buildId: number,
+  isPrivate: boolean
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement le statut private
+  await prisma.build.update({
+    where: { id: buildId },
+    data: { private: isPrivate },
+  });
+
+  // Invalider le cache
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/profile`, 'page');
+  revalidatePath('/morebuild', 'page');
+
+  return { success: true };
 }
