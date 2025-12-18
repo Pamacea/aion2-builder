@@ -180,13 +180,13 @@ export function RuneGrid({ path, activeRunes, onToggleRune, isOwner }: RuneGridP
       
       if (isStartNodeRune) {
         opacityClass = "opacity-100";
-        borderClass = isActive ? "border-2 border-blue-500" : "";
+        borderClass = isActive ? "border-2 border-blue-500/50" : "";
       } else if (isActive) {
         opacityClass = "opacity-100";
-        borderClass = "border-2 border-blue-500";
+        borderClass = "border-2 border-blue-500/50";
       } else if (canActivateRune) {
         opacityClass = "opacity-100";
-        borderClass = "border-2 border-gray-400";
+        borderClass = "border-2 border-gray-400/50";
       } else {
         opacityClass = "opacity-40";
         borderClass = "";

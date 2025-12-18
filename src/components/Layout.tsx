@@ -12,7 +12,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Header />
-      <main className=" py-12 px-4 flex flex-col gap-4">{children}</main>
+      <main className=" pt-8 px-4 flex flex-col gap-4">{children}</main>
       {!isBuildPage && !isMyProfilePage && <Footer />}
     </>
   );
