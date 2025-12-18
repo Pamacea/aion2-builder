@@ -35,7 +35,6 @@ export function isAdmin(userId: string | null | undefined): boolean {
   const isAdminResult = userId === adminUserId;
   // Debug: log in development to help troubleshoot
   if (typeof process !== "undefined" && process.env.NODE_ENV === "development" && isAdminResult) {
-    console.log("[isAdmin] Admin check passed for userId:", userId);
   }
   return isAdminResult;
 }

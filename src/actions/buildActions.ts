@@ -482,7 +482,10 @@ export async function updateShortcutsOnly(
     data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
   });
 
-  // Invalider le cache de manière synchrone pour garantir la cohérence
+  // Invalider le cache pour garantir la cohérence
+  // Note: Les revalidations sont asynchrones, mais elles déclenchent la mise à jour du cache
+  // Le composant client préserve les shortcuts locaux pendant cette période pour éviter
+  // qu'un rechargement prématuré n'écrase les modifications récentes
   revalidateTag('builds', 'max');
   revalidatePath(`/build/${buildId}`, 'page');
   revalidatePath(`/build/${buildId}/profile`, 'page');

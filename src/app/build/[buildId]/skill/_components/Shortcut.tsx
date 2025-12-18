@@ -165,14 +165,20 @@ export const Shortcut = () => {
     // Si on vient de modifier les shortcuts localement, ne pas les réinitialiser
     // Les skills manquants buildAbility/buildStigma seront gérés par scheduleSaveShortcuts
     if (preventResetRef.current) {
-      // Réinitialiser le flag après un court délai pour permettre la prochaine sync
+      // Réinitialiser le flag après un délai plus long pour permettre la sauvegarde complète
+      // et éviter que le cache non mis à jour réinitialise les shortcuts
       const timeoutId = setTimeout(() => {
         preventResetRef.current = false;
-      }, 500);
+      }, 1500);
       return () => clearTimeout(timeoutId);
     }
 
-    isInitialLoad.current = true;
+    // Ne marquer comme chargement initial que la première fois
+    const wasInitialLoad = isInitialLoad.current;
+    if (wasInitialLoad) {
+      isInitialLoad.current = true;
+    }
+    
     // Use setTimeout to avoid synchronous setState in effect
     const timeoutId = setTimeout(() => {
       const updatedShortcuts = { ...loadedShortcuts };
@@ -231,10 +237,12 @@ export const Shortcut = () => {
 
       setShortcuts(updatedShortcuts);
       lastShortcutsUpdateRef.current = updatedShortcuts;
-      // Reset flag after state is set
-      setTimeout(() => {
-        isInitialLoad.current = false;
-      }, 0);
+      // Reset flag after state is set - seulement si c'était le chargement initial
+      if (wasInitialLoad) {
+        setTimeout(() => {
+          isInitialLoad.current = false;
+        }, 100);
+      }
     }, 0);
 
     return () => clearTimeout(timeoutId);
@@ -243,7 +251,10 @@ export const Shortcut = () => {
   // Save shortcuts to build when they change (but not during initial load)
   // Utilise un debounce pour éviter trop de requêtes
   const scheduleSaveShortcuts = useCallback(() => {
-    if (isInitialLoad.current) return;
+    if (isInitialLoad.current) {
+      console.log("[Shortcut] Skipping save - still in initial load");
+      return;
+    }
 
     // Annuler la sauvegarde précédente si elle existe
     if (saveTimeoutRef.current) {
@@ -312,12 +323,24 @@ export const Shortcut = () => {
         // Si tous les skills ont leur buildAbility/buildStigma, sauvegarder
         // Sinon, attendre un peu plus pour que le build soit mis à jour
         if (!hasSkillsWithoutBuild) {
-          updateShortcuts(
+          console.log("[Shortcut] Saving shortcuts:", shortcutsToSaveFormatted);
+          // Appeler updateShortcuts et gérer la Promise
+          // updateShortcuts est async, donc il retourne toujours une Promise
+          const saveResult = updateShortcuts(
             Object.keys(shortcutsToSaveFormatted).length > 0
               ? shortcutsToSaveFormatted
               : null
           );
+          // Wrapper dans Promise.resolve pour gérer les cas où updateShortcuts retourne void
+          Promise.resolve(saveResult as Promise<void> | void).then(() => {
+            console.log("[Shortcut] Shortcuts saved successfully");
+          }).catch((error: unknown) => {
+            console.error("Error saving shortcuts:", error);
+            // En cas d'erreur, réessayer après un délai
+            performSave(500);
+          });
         } else {
+          console.log("[Shortcut] Some skills don't have buildAbility/buildStigma, retrying...");
           // Réessayer après 300ms supplémentaires pour laisser le temps au build de se mettre à jour
           performSave(300);
         }
@@ -434,13 +457,22 @@ export const Shortcut = () => {
       return newShortcuts;
     });
     
-    // Empêcher la réinitialisation des shortcuts depuis le build
+    // Empêcher la réinitialisation des shortcuts depuis le build pendant la sauvegarde
     preventResetRef.current = true;
+    console.log("[Shortcut] handleDrop - preventResetRef set to true");
     
     // Programmer la sauvegarde après la mise à jour de l'état
+    // Utiliser un délai légèrement plus long pour s'assurer que l'état est bien mis à jour
     setTimeout(() => {
+      console.log("[Shortcut] handleDrop - calling scheduleSaveShortcuts, isInitialLoad:", isInitialLoad.current);
       scheduleSaveShortcuts();
-    }, 0);
+      // Garder le flag actif pendant un délai plus long après la sauvegarde
+      // pour éviter que le cache non mis à jour réinitialise les shortcuts
+      setTimeout(() => {
+        preventResetRef.current = false;
+        console.log("[Shortcut] handleDrop - preventResetRef set to false");
+      }, 2000);
+    }, 50);
   };
 
   const handleClear = (slotId: number) => {
@@ -454,13 +486,17 @@ export const Shortcut = () => {
       return newShortcuts;
     });
     
-    // Empêcher la réinitialisation des shortcuts depuis le build
+    // Empêcher la réinitialisation des shortcuts depuis le build pendant la sauvegarde
     preventResetRef.current = true;
     
     // Programmer la sauvegarde après la mise à jour de l'état
     setTimeout(() => {
       scheduleSaveShortcuts();
-    }, 0);
+      // Garder le flag actif pendant un délai plus long après la sauvegarde
+      setTimeout(() => {
+        preventResetRef.current = false;
+      }, 2000);
+    }, 50);
   };
 
   const handleRefresh = () => {
