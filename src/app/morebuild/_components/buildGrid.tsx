@@ -17,7 +17,7 @@ export const BuildGrid = ({ builds }: BuildGridProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
       {builds.map((build) => (
         <BuildCard key={build.id} build={build} />
       ))}

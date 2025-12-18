@@ -50,7 +50,7 @@ export const MoreBuild = ({ builds, classes }: MoreBuildProps) => {
   );
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-4 sm:gap-6">
       <MoreBuildHead />
       <FiltersSection
         classes={classes}

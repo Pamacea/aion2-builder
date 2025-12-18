@@ -30,22 +30,24 @@ export const FiltersSection = memo(({
     onSortChange(value as "likes" | "newest" | "oldest");
   }, [onSortChange]);
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 pb-4 border-b-2 border-background/20">
-      <FilterByClass
-        classes={classes}
-        selectedClassId={selectedClassId}
-        onClassChange={onClassChange}
-      />
-      <div className="flex-1 w-full sm:w-auto">
-        <FilterByName searchQuery={searchQuery} onSearchChange={onSearchChange} />
+    <div className="flex flex-col gap-3 sm:gap-4 pb-3 sm:pb-4 border-b-2 border-background/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-4">
+        <FilterByClass
+          classes={classes}
+          selectedClassId={selectedClassId}
+          onClassChange={onClassChange}
+        />
+        <div className="flex-1 w-full sm:w-auto">
+          <FilterByName searchQuery={searchQuery} onSearchChange={onSearchChange} />
+        </div>
       </div>
-      <div className="flex items-end gap-2">
-        <span className="text-sm font-bold text-foreground/70 uppercase whitespace-nowrap">sort</span>
+      <div className="flex items-end gap-2 w-full sm:w-auto">
+        <span className="text-xs sm:text-sm font-bold text-foreground/70 uppercase whitespace-nowrap">sort</span>
         <Select
           value={sortBy}
           onValueChange={(value) => onSortChange(value as "likes" | "newest" | "oldest")}
         >
-          <SelectTrigger className="uppercase w-full text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed pl-4">
+          <SelectTrigger className="uppercase w-full sm:w-auto text-xs sm:text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed pl-3 sm:pl-4">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent className="uppercase px-2 z-50">

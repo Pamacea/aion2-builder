@@ -90,19 +90,19 @@ export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
       <button
         onClick={handleLike}
         disabled={!isAuthenticated || isLiking}
-        className={`absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-1 rounded-md bg-background/80 backdrop-blur-sm transition-colors ${
+        className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 z-10 flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-background/80 backdrop-blur-sm transition-colors ${
           isLiked
             ? "text-red-500 hover:text-red-600"
             : "text-foreground/50 hover:text-foreground/70"
         } ${!isAuthenticated ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
         title={isAuthenticated ? (isLiked ? "Unlike" : "Like") : "Connectez-vous pour liker"}
       >
-        <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
+        <Heart className={`size-3 sm:size-4 ${isLiked ? "fill-current" : ""}`} />
         <span className="text-xs font-semibold">{likesCount}</span>
       </button>
 
       {/* Banner Background */}
-      <div className="relative h-48 w-full">
+      <div className="relative h-40 sm:h-48 w-full">
         <Image
           src={displayBannerPath}
           alt={`${build.class?.name} banner`}
@@ -116,20 +116,20 @@ export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4  backdrop-blur-sm">
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 backdrop-blur-sm">
         <Link href={`/build/${build.id}/profile`} prefetch={true}>
-          <h3 className="text-lg font-bold text-foreground mb-2 truncate hover:text-primary transition-colors cursor-pointer">
+          <h3 className="text-base sm:text-lg font-bold text-foreground mb-1.5 sm:mb-2 truncate hover:text-primary transition-colors cursor-pointer">
             {build.name}
           </h3>
         </Link>
-        <div className="flex flex-row justify-between items-center mb-3">
-          <p className="text-sm text-foreground/70">{build.class?.name ? build.class.name.charAt(0).toUpperCase() + build.class.name.slice(1) : ''}</p>
+        <div className="flex flex-row justify-between items-center mb-2 sm:mb-3">
+          <p className="text-xs sm:text-sm text-foreground/70">{build.class?.name ? build.class.name.charAt(0).toUpperCase() + build.class.name.slice(1) : ''}</p>
           {build.user?.name && (
-            <p className="text-xs text-foreground/70">by {build.user.name}</p>
+            <p className="text-xs text-foreground/70 truncate ml-2">by {build.user.name}</p>
           )}
           {!build.user?.name && <div />}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <div className={isCreateButtonHidden ? "w-full" : "flex-1"} onClick={(e) => e.stopPropagation()}>
             <ShowBuildButton buildId={build.id} />
           </div>
@@ -139,7 +139,7 @@ export const BuildCard = ({ build: initialBuild }: BuildCardProps) => {
                 buildId={build.id}
                 text="Fork Build"
                 hideWhenUnauthenticated
-                className="w-full bg-background/60 text-foreground border-y-2 border-foreground/50 hover:bg-background/80 hover:border-foreground/70 font-bold uppercase text-xs py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-background/60 text-foreground border-y-2 border-foreground/50 hover:bg-background/80 hover:border-foreground/70 font-bold uppercase text-xs py-1.5 sm:py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           )}

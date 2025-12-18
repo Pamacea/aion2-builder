@@ -20,11 +20,11 @@ export const FilterByClass = ({
   };
 
   return (
-    <div className="flex flex-wrap items-end gap-2">
-      <span className="text-sm font-bold uppercase text-foreground/70"> FILTER BY CLASS</span>
+    <div className="flex flex-wrap items-end gap-1.5 sm:gap-2 w-full sm:w-auto">
+      <span className="text-xs sm:text-sm font-bold uppercase text-foreground/70 whitespace-nowrap">FILTER BY CLASS</span>
       <Button
         onClick={() => onClassChange(null)}
-        className={`text-xs bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-2 hover:bg-background/80 hover:text-foreground ${
+        className={`text-xs bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-background/80 hover:text-foreground ${
           selectedClassId === null ? "border-y-2 border-foreground" : ""
         }`}
       >
@@ -37,7 +37,7 @@ export const FilterByClass = ({
           <Button
             key={cls.id}
             onClick={() => onClassChange(cls.id)}
-            className={`text-xs ${colors.bg} ${colors.text} border-y-2 ${colors.border} text-center font-bold uppercase px-2 py-2 ${colors.hoverBg} ${colors.hoverText} transition-colors ${
+            className={`text-xs ${colors.bg} ${colors.text} border-y-2 ${colors.border} text-center font-bold uppercase px-2 sm:px-3 py-1.5 sm:py-2 ${colors.hoverBg} ${colors.hoverText} transition-colors ${
               isSelected ? "border-y-2 border-foreground" : ""
             }`}
           >
