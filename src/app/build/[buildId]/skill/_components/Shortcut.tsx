@@ -37,6 +37,8 @@ export const Shortcut = () => {
   const isInitialLoad = useRef(true);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shortcutsRef = useRef(shortcuts);
+  const lastShortcutsUpdateRef = useRef<Record<number, ShortcutSkill | undefined>>({});
+  const preventResetRef = useRef(false);
   
   // Synchroniser la ref avec l'état
   useEffect(() => {
@@ -82,12 +84,14 @@ export const Shortcut = () => {
           console.warn(
             `Ability with id ${shortcut.abilityId} not found in class abilities`
           );
+          return; // Skip this shortcut if ability not found
         }
         if (!buildAbility) {
           console.warn(
             `BuildAbility with abilityId ${shortcut.abilityId} not found. Available abilityIds:`,
             build.abilities?.map((ba) => ba.abilityId)
           );
+          return; // Skip this shortcut if buildAbility not found (not yet added to build)
         }
 
         if (ability && buildAbility) {
@@ -110,12 +114,14 @@ export const Shortcut = () => {
           console.warn(
             `Stigma with id ${shortcut.stigmaId} not found in class stigmas`
           );
+          return; // Skip this shortcut if stigma not found
         }
         if (!buildStigma) {
           console.warn(
             `BuildStigma with stigmaId ${shortcut.stigmaId} not found. Available stigmaIds:`,
             build.stigmas?.map((bs) => bs.stigmaId)
           );
+          return; // Skip this shortcut if buildStigma not found (not yet added to build)
         }
 
         if (stigma && buildStigma) {
@@ -158,6 +164,16 @@ export const Shortcut = () => {
   // Sync loaded shortcuts to local state and ensure first ability is in slot 11
   // Also update shortcuts that have skills without buildAbility/buildStigma
   useEffect(() => {
+    // Si on vient de modifier les shortcuts localement, ne pas les réinitialiser
+    // Les skills manquants buildAbility/buildStigma seront gérés par scheduleSaveShortcuts
+    if (preventResetRef.current) {
+      // Réinitialiser le flag après un court délai pour permettre la prochaine sync
+      const timeoutId = setTimeout(() => {
+        preventResetRef.current = false;
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+
     isInitialLoad.current = true;
     // Use setTimeout to avoid synchronous setState in effect
     const timeoutId = setTimeout(() => {
@@ -216,6 +232,7 @@ export const Shortcut = () => {
       }
 
       setShortcuts(updatedShortcuts);
+      lastShortcutsUpdateRef.current = updatedShortcuts;
       // Reset flag after state is set
       setTimeout(() => {
         isInitialLoad.current = false;
@@ -235,45 +252,82 @@ export const Shortcut = () => {
       clearTimeout(saveTimeoutRef.current);
     }
 
-    // Programmer une nouvelle sauvegarde après 500ms
-    saveTimeoutRef.current = setTimeout(() => {
-      // Utiliser la ref pour obtenir la dernière valeur de shortcuts
-      const currentShortcuts = shortcutsRef.current;
-      const shortcutsToSaveFormatted: Record<
-        string,
-        {
-          type: "ability" | "stigma";
-          abilityId?: number;
-          stigmaId?: number;
+    // Fonction interne pour effectuer la sauvegarde
+    const performSave = (retryDelay = 500) => {
+      saveTimeoutRef.current = setTimeout(() => {
+        // Utiliser la ref pour obtenir la dernière valeur de shortcuts
+        const currentShortcuts = shortcutsRef.current;
+        const shortcutsToSaveFormatted: Record<
+          string,
+          {
+            type: "ability" | "stigma";
+            abilityId?: number;
+            stigmaId?: number;
+          }
+        > = {};
+
+        let hasSkillsWithoutBuild = false;
+
+        Object.entries(currentShortcuts).forEach(([slotIdStr, skill]) => {
+          if (!skill) return;
+
+          // Only save skills that are in the build (have buildAbility or buildStigma)
+          if (skill.type === "ability" && skill.ability && skill.buildAbility) {
+            shortcutsToSaveFormatted[slotIdStr] = {
+              type: "ability",
+              abilityId: skill.ability.id,
+            };
+          } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
+            shortcutsToSaveFormatted[slotIdStr] = {
+              type: "stigma",
+              stigmaId: skill.stigma.id,
+            };
+          } else if (skill.type === "stigma" && skill.stigma && !skill.buildStigma) {
+            // Si un stigma n'a pas encore de buildStigma, vérifier dans le build actuel
+            const buildStigma = build?.stigmas?.find(
+              (bs) => bs.stigmaId === skill.stigma?.id
+            );
+            if (buildStigma) {
+              shortcutsToSaveFormatted[slotIdStr] = {
+                type: "stigma",
+                stigmaId: skill.stigma.id,
+              };
+            } else {
+              hasSkillsWithoutBuild = true;
+            }
+          } else if (skill.type === "ability" && skill.ability && !skill.buildAbility) {
+            // Si une ability n'a pas encore de buildAbility, vérifier dans le build actuel
+            const buildAbility = build?.abilities?.find(
+              (ba) => ba.abilityId === skill.ability?.id
+            );
+            if (buildAbility) {
+              shortcutsToSaveFormatted[slotIdStr] = {
+                type: "ability",
+                abilityId: skill.ability.id,
+              };
+            } else {
+              hasSkillsWithoutBuild = true;
+            }
+          }
+        });
+
+        // Si tous les skills ont leur buildAbility/buildStigma, sauvegarder
+        // Sinon, attendre un peu plus pour que le build soit mis à jour
+        if (!hasSkillsWithoutBuild) {
+          updateShortcuts(
+            Object.keys(shortcutsToSaveFormatted).length > 0
+              ? shortcutsToSaveFormatted
+              : null
+          );
+        } else {
+          // Réessayer après 300ms supplémentaires pour laisser le temps au build de se mettre à jour
+          performSave(300);
         }
-      > = {};
+      }, retryDelay);
+    };
 
-      Object.entries(currentShortcuts).forEach(([slotIdStr, skill]) => {
-        if (!skill) return;
-
-        // Only save skills that are in the build (have buildAbility or buildStigma)
-        if (skill.type === "ability" && skill.ability && skill.buildAbility) {
-          shortcutsToSaveFormatted[slotIdStr] = {
-            type: "ability",
-            abilityId: skill.ability.id,
-          };
-        } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
-          shortcutsToSaveFormatted[slotIdStr] = {
-            type: "stigma",
-            stigmaId: skill.stigma.id,
-          };
-        }
-        // If skill doesn't have buildAbility/buildStigma, it won't be saved
-        // It will be added to the build and then saved on next update
-      });
-
-      updateShortcuts(
-        Object.keys(shortcutsToSaveFormatted).length > 0
-          ? shortcutsToSaveFormatted
-          : null
-      );
-    }, 500);
-  }, [updateShortcuts]);
+    performSave();
+  }, [updateShortcuts, build]);
 
   // Nettoyer le timeout au démontage
   useEffect(() => {
@@ -381,6 +435,10 @@ export const Shortcut = () => {
 
       return newShortcuts;
     });
+    
+    // Empêcher la réinitialisation des shortcuts depuis le build
+    preventResetRef.current = true;
+    
     // Programmer la sauvegarde après la mise à jour de l'état
     setTimeout(() => {
       scheduleSaveShortcuts();
@@ -397,6 +455,10 @@ export const Shortcut = () => {
       delete newShortcuts[slotId];
       return newShortcuts;
     });
+    
+    // Empêcher la réinitialisation des shortcuts depuis le build
+    preventResetRef.current = true;
+    
     // Programmer la sauvegarde après la mise à jour de l'état
     setTimeout(() => {
       scheduleSaveShortcuts();

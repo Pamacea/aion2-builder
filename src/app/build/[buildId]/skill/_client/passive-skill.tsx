@@ -165,7 +165,7 @@ export const PassiveSkill = ({
       {/* Icon with gold border */}
       <div
         className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
-          imageError ? "bg-background/80" : ""
+          imageError ? "bg-secondary/30" : ""
         } ${
           currentLevel === 0 ? "grayscale opacity-50" : ""
         } ${

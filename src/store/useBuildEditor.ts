@@ -654,6 +654,9 @@ export const useBuildStore = create<BuildState>((set, get) => {
       const currentUserId = get().currentUserId;
       if (!build || isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
       
+      // Sauvegarder l'état précédent pour rollback en cas d'erreur
+      const previousShortcuts = build.shortcuts;
+
       // Mettre à jour localement immédiatement pour une réactivité instantanée
       set((state) => ({
         build: state.build ? { ...state.build, shortcuts } : null,
@@ -661,7 +664,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
 
       // Sauvegarder de manière optimisée (seulement shortcuts)
       try {
-        const { updateShortcutsOnly } = await import("@/actions/buildActions");
+        const { updateShortcutsOnly, getBuildById } = await import("@/actions/buildActions");
         // Filtrer les propriétés inutiles et convertir undefined en null
         const shortcutsToSave = shortcuts
           ? Object.fromEntries(
@@ -675,12 +678,38 @@ export const useBuildStore = create<BuildState>((set, get) => {
               ])
             )
           : null;
-        // build est déjà vérifié au début de la fonction, mais TypeScript nécessite une vérification explicite ici
+        
         if (!build) return;
         await updateShortcutsOnly(build.id, shortcutsToSave);
+        
+        // Le cache est invalidé de manière synchrone dans updateShortcutsOnly
+        // On peut recharger le build pour garantir la synchronisation
+        // Mais on préserve les shortcuts locaux pour éviter une réinitialisation dans le composant
+        // Les shortcuts sont déjà à jour localement et sauvegardés sur le serveur
+        // Le rechargement permettra de récupérer les autres données mises à jour (abilities, stigmas, etc.)
+        try {
+          const updatedBuild = await getBuildById(build.id);
+          if (updatedBuild) {
+            // Mettre à jour le build avec les données du serveur, en préservant les shortcuts locaux
+            // car ils viennent d'être sauvegardés et sont déjà dans le bon format
+            set((state) => ({
+              build: state.build ? {
+                ...updatedBuild,
+                // Utiliser les shortcuts du build rechargé s'ils sont présents, sinon garder les locaux
+                shortcuts: updatedBuild.shortcuts || state.build.shortcuts,
+              } : updatedBuild,
+            }));
+          }
+        } catch (reloadError) {
+          // Si le rechargement échoue, ce n'est pas critique, les shortcuts sont déjà sauvegardés
+          console.warn("Could not reload build after shortcuts update:", reloadError);
+        }
       } catch (error) {
         console.error("Error saving shortcuts:", error);
-        // En cas d'erreur, on pourrait restaurer l'ancien état
+        // En cas d'erreur, restaurer l'ancien état des shortcuts
+        set((state) => ({
+          build: state.build ? { ...state.build, shortcuts: previousShortcuts } : null,
+        }));
       }
     },
 

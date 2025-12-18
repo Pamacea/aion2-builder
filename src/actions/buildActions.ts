@@ -410,19 +410,20 @@ export async function updateShortcutsOnly(
   }
 
   // Mettre à jour uniquement shortcuts sans charger toutes les relations
+  const updateData: { shortcuts: BuildType["shortcuts"] } = { 
+    shortcuts: shortcuts as BuildType["shortcuts"]
+  };
+  
   await prisma.build.update({
     where: { id: buildId },
-    data: { shortcuts: shortcuts as any },
+    data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
   });
 
-  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
-  // On les fait après la réponse pour ne pas bloquer
-  Promise.resolve().then(() => {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}`, 'page');
-    revalidatePath(`/build/${buildId}/profile`, 'page');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-  });
+  // Invalider le cache de manière synchrone pour garantir la cohérence
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/profile`, 'page');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
 
   return { success: true };
 }

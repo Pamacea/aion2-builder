@@ -15,10 +15,10 @@ export const ProfileButtons = () => {
       <Link
         href={`/build/${buildId}/skill`}
         className={cn(
-          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-background/50 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
+          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-secondary/30 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
           pathname.endsWith("/skill")
-           ? "border-y-2 border-y-foreground hover:border-b-foreground/50"
-            : "border-y-2 border-y-foreground/25 hover:border-y-foreground"
+            ? "border-y-2 border-y-foreground hover:border-b-primary"
+            : "border-y-2 border-y-secondary hover:border-y-foreground"
         )}
       >
         <Image
@@ -35,10 +35,10 @@ export const ProfileButtons = () => {
       <Link
         href={`/build/${buildId}/gear`}
         className={cn(
-          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-background/50 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
+          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-secondary/30 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
           pathname.endsWith("/gear")
-             ? "border-y-2 border-y-foreground hover:border-b-foreground/50"
-            : "border-y-2 border-y-foreground/25 hover:border-y-foreground"
+            ? "border-y-2 border-y-foreground hover:border-b-primary"
+            : "border-y-2 border-y-secondary hover:border-y-foreground"
         )}
       >
         <Image
@@ -55,10 +55,10 @@ export const ProfileButtons = () => {
       <Link
         href={`/build/${buildId}/sphere`}
         className={cn(
-          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-background/50 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
+          "w-full sm:w-auto justify-center items-center gap-1 sm:gap-2 md:gap-4 flex px-4 sm:px-4 md:px-6 py-2 transition-colors bg-secondary/30 font-bold text-xs sm:text-sm md:text-base whitespace-nowrap",
           pathname.endsWith("/sphere")
-            ? "border-y-2 border-y-foreground hover:border-b-foreground/50"
-            : "border-y-2 border-y-foreground/25 hover:border-y-foreground"
+            ? "border-y-2 border-y-foreground hover:border-b-primary"
+            : "border-y-2 border-y-secondary hover:border-y-foreground"
         )}
       >
         <Image

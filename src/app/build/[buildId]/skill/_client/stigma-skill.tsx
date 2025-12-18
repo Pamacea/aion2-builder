@@ -250,7 +250,7 @@ export const StigmaSkill = ({
       {classNameForPath ? (
         <div
           className={`w-full h-full rounded-md border-2 flex items-center justify-center ${
-            imageError ? "bg-background/80" : ""
+            imageError ? "bg-secondary/30" : ""
           } ${
             currentLevel === 0 || isLockedByLimit ? "grayscale opacity-50" : ""
           } ${
@@ -309,7 +309,7 @@ export const StigmaSkill = ({
       {/* Selection indicator for shortcut */}
       {isSelectedForShortcut && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-full h-full bg-background/50 flex items-center justify-center border-2 border-foreground/50">
+          <div className="w-full h-full bg-secondary/30 flex items-center justify-center border-2 border-secondary">
             <Image
               src="/icons/IC_Feature_SelectnDrop.webp"
               alt="Selected Icon"
