@@ -11,8 +11,8 @@ export const LikedBuilds = ({ builds }: LikedBuildsProps) => {
   if (builds.length === 0) {
     return (
       <div className="text-center py-12 text-foreground/50">
-        <p className="text-lg">Vous n&apos;avez pas encore liké de build.</p>
-        <p className="text-sm mt-2">Explorez les builds de la communauté et likez ceux qui vous intéressent !</p>
+        <p className="text-lg">You have not liked any builds yet.</p>
+        <p className="text-sm mt-2">Explore the build catalog and like the ones you like!</p>
       </div>
     );
   }
