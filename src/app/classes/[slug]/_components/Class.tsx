@@ -21,8 +21,8 @@ export const Class = memo(({ classData, starterbuildId }: { classData: ClassType
   }
 
   return (
-    <section className="w-1/2 h-full flex flex-col justify-between md:flex-row gap-8 md:gap-16">
-      <div className="w-1/2 flex flex-col gap-4">
+    <section className="w-full md:w-1/2 h-full flex flex-col justify-between md:flex-row gap-4 md:gap-8 lg:gap-16">
+      <div className="w-full md:w-1/2 flex flex-col gap-4">
         <ClassHead className={classData.name} />
         <TagsList tags={tags} />
         <ClassBanner classBanner={bannerUrl} />
@@ -31,11 +31,11 @@ export const Class = memo(({ classData, starterbuildId }: { classData: ClassType
           starterBuildId={starterbuildId}
           text="create your build"
           showDiscordWhenUnauthenticated
-          className="w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 flex justify-center items-center text-md uppercase bg-secondary/25 text-foreground font-bold hover:bg-primary/10 transition border-y-2 border-secondary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <MoreBuild starterBuildHref={starterBuildHref} />
       </div>
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center w-full md:w-1/2 h-full min-h-[400px] md:min-h-[600px]">
         <ClassCharacter ClassCharacter={characterUrl} />
       </div>
     </section>

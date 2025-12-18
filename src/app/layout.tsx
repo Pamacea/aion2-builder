@@ -109,7 +109,7 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning>
       <body
-        className={`${roboto.className} ${cinzel.variable} dark antialiased bg-[url('/BG_Bahion.webp')] bg-cover`}
+        className={`${roboto.className} ${cinzel.variable} dark antialiased bg-background`}
       >
         <Analytics />
         <Providers>

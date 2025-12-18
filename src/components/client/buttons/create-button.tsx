@@ -5,7 +5,6 @@ import {
   createBuildFromStarter,
   getRandomStarterBuildId,
 } from "@/actions/buildActions";
-import { DiscordIcon } from "@/constants/discord.icon";
 import { useAuth } from "@/hooks/useAuth";
 import { signIn } from "@/lib/auth-client";
 import { useBuildStore } from "@/store/useBuildEditor";
@@ -82,7 +81,7 @@ export const CreateButton = ({
   // Afficher le bouton Discord si non authentifié
   if (isAuthenticated === false && showDiscordWhenUnauthenticated) {
     const buttonClassName =
-      "w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary";
+      "w-full py-3 flex justify-center items-center text-md uppercase bg-secondary/25 text-foreground font-bold hover:bg-primary/10 transition border-x-2 border-secondary hover:border-primary";
 
     return (
       <button
@@ -93,14 +92,14 @@ export const CreateButton = ({
         className={buttonClassName}
         suppressHydrationWarning
       >
-        <DiscordIcon />
+        Connect with discord
       </button>
     );
   }
 
-  // Styles pour la variante text
+  // Styles pour la variante text (basé sur ClassButton)
   const defaultTextClassName =
-    "w-full py-3 flex justify-center items-center text-md uppercase bg-background/60 text-foreground font-bold hover:bg-background/90 transition border-y-2 border-foreground/50 hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full py-3 flex justify-center items-center text-md uppercase bg-secondary/25 text-foreground font-bold hover:bg-primary/10 transition border-x-2 border-secondary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed";
   const textClassName = className || defaultTextClassName;
 
   const isDisabled =

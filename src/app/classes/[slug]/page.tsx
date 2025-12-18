@@ -24,7 +24,7 @@ export default async function ClassPage(props: {
   }
 
   return (
-    <main className="w-full h-full flex flex-col items-center justify-start gap-8 py-8">
+    <main className="w-full h-full flex flex-col items-center justify-start gap-8 md:gap-16 py-6 md:py-12 px-4 md:px-0">
       <Class classData={classData} starterbuildId={starterbuildId} />
       <ExploreOthersClasses />
     </main>

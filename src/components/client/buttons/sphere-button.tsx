@@ -12,7 +12,7 @@ export const SphereButton = () => {
     <Link
       href={`/build/${pathname.split("/")[2]}/sphere`}
       className={cn(
-        "h-full justify-start items-center flex px-6",
+        "h-full justify-start items-center flex px-2 sm:px-4 md:px-6",
         pathname.endsWith("/sphere") 
           ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-foreground/50"
           : "border-b-2 border-b-background/25 hover:border-b-2 hover:border-b-foreground"
@@ -23,6 +23,7 @@ export const SphereButton = () => {
         alt="Class Logo"
         width={40}
         height={32}
+        className="w-6 h-6 md:w-10 md:h-8"
       />
     </Link>
   );

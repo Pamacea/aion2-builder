@@ -43,25 +43,26 @@ export const AuthButton = ({
     if (isAuthenticated) {
       const isMyProfile = pathname === "/myprofile";
       return (
-        <div className={`h-full flex items-center hover:border-b-2 hover:border-b-foreground/90 border-b-2 ${
+        <div className={`h-full flex items-center border-b-secondary hover:border-b-2 hover:border-b-primary border-b-2 ${
           isMyProfile ? "border-b-foreground" : "border-b-background/30"
         }`}>
           {userName && (
             <Button
               onClick={handleProfileClick}
-              className="h-full text-sm text-foreground/80 uppercase font-semibold px-8 hover:bg-background/50 transition-all duration-300"
+              className="h-full text-sm sm:text-md md:text-md text-foreground uppercase font-semibold px-6 sm:px-8 md:px-8 hover:bg-secondary transition-all duration-300"
               title="Mon profil"
             >
-              {userName}
+              <span className="hidden sm:inline">{userName}</span>
+              <span className="sm:hidden">{userName?.charAt(0).toUpperCase()}</span>
             </Button>
           )}
           <Button
             onClick={handleSignOut}
             disabled={isLoading}
-            className="h-full bg-destructive/50 hover:bg-destructive/90 transition-all duration-300 px-6"
+            className="h-full bg-destructive/50 hover:bg-destructive/90 transition-all duration-300 px-2 sm:px-4 md:px-6"
             title="Déconnexion"
           >
-            <LogOut className="size-5" />
+            <LogOut className="size-4 sm:size-5" />
           </Button>
         </div>
       );
@@ -71,11 +72,11 @@ export const AuthButton = ({
       <Button
         onClick={handleSignIn}
         disabled={isLoading}
-        className="h-full justify-start items-center flex px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-background/25"
+        className="h-full justify-start items-center flex px-2 sm:px-4 md:px-8 hover:border-b-2 hover:border-b-foreground border-b-2 border-b-secondary"
         title="Connexion Discord"
       >
         <svg
-          className="size-6"
+          className="size-4 sm:size-5 md:size-6"
           viewBox="0 0 24 24"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"

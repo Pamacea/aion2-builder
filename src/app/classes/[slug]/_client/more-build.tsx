@@ -6,7 +6,7 @@ export const MoreBuild = ({
 }: {
   starterBuildHref: string;
 }) => (
-  <div className="flex items-center justify-between gap-4">
+  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
     <DefaultBuildButton starterBuildHref={starterBuildHref} />
     <ShowMoreBuildButton />
   </div>

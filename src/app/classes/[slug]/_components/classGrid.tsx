@@ -25,7 +25,7 @@ const ClassGridItem = memo(({ classData }: ClassGridItemProps) => {
 
   return (
     <Link href={classUrl} prefetch={true}>
-      <div className="p-6 rounded-xl h-40 w-40 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform cursor-pointer text-foreground/70 hover:text-foreground">
+      <div className=" border-x-2 border-secondary bg-secondary/25 hover:border-primary p-2 hover:bg-primary/10 h-36 w-40 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform cursor-pointer text-foreground/70 hover:text-foreground">
         <Image
           src={iconUrl}
           alt={`${classData.name} icon`}

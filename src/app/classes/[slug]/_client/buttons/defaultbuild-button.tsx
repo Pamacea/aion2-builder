@@ -6,7 +6,7 @@ export const DefaultBuildButton = ({
   starterBuildHref: string;
 }) => {
   return (
-    <ClassButton href={starterBuildHref} className="w-60">
+    <ClassButton href={starterBuildHref} className="w-full sm:w-60">
       Starter Build
     </ClassButton>
   );
