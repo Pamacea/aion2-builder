@@ -17,7 +17,7 @@ export const SkillName = ({ ability, passive, stigma, className = "" }: SkillNam
   }
 
   return (
-    <h3 className={`text-xl font-bold ${className}`}>
+    <h3 className={`text-3xl font-bold ${className}`}>
       {name}
     </h3>
   );

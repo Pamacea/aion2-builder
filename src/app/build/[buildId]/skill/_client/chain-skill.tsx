@@ -227,7 +227,7 @@ export const ChainSkill = ({
   const isChainSkill2Selected = chainSkill2 && chainSkill2.id === selectedSkillId;
 
   return (
-    <div className="flex flex-col gap-2 border-t-2 border-background/40 pt-6">
+    <div className="flex flex-col gap-2 border-t-2 border-secondary pt-6">
       <h3 className="text-sm font-bold text-foreground uppercase">Chain Skill</h3>
       <div className="flex items-center gap-2">
         {/* Slot 0: Base Skill (always present) */}

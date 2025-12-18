@@ -16,7 +16,7 @@ export const ResetShortcutButton = ({
     alt="Reset Icon"
     onClick={onClick}
     disabled={disabled}
-    className={`w-14 h-13 bg-background/80 border-y-2 border-foreground/50 hover:border-foreground ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+    className={`w-14 h-13 bg-secondary/30 border-x-2 border-secondary hover:border-primary ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
     iconSize={24}
     title={disabled ? "Vous devez être le propriétaire pour modifier les shortcuts" : "Reset all shortcuts"}
   />

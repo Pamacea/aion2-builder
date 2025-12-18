@@ -384,6 +384,144 @@ export async function updateDaevanionOnly(
 }
 
 // ======================================
+// UPDATE SHORTCUTS ONLY (optimized)
+// ======================================
+export async function updateShortcutsOnly(
+  buildId: number,
+  shortcuts: Record<string, { type: "ability" | "stigma"; abilityId?: number; stigmaId?: number }> | null
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement shortcuts sans charger toutes les relations
+  await prisma.build.update({
+    where: { id: buildId },
+    data: { shortcuts: shortcuts as any },
+  });
+
+  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
+  // On les fait après la réponse pour ne pas bloquer
+  Promise.resolve().then(() => {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}`, 'page');
+    revalidatePath(`/build/${buildId}/profile`, 'page');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
+  });
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE ABILITY SPECIALTY CHOICES ONLY (optimized)
+// ======================================
+export async function updateAbilitySpecialtyChoicesOnly(
+  buildId: number,
+  abilityId: number,
+  activeSpecialtyChoiceIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement activeSpecialtyChoiceIds de l'ability spécifique
+  await prisma.buildAbility.updateMany({
+    where: {
+      buildId,
+      abilityId,
+    },
+    data: {
+      activeSpecialtyChoiceIds,
+    },
+  });
+
+  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
+  Promise.resolve().then(() => {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
+  });
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE STIGMA SPECIALTY CHOICES ONLY (optimized)
+// ======================================
+export async function updateStigmaSpecialtyChoicesOnly(
+  buildId: number,
+  stigmaId: number,
+  activeSpecialtyChoiceIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement activeSpecialtyChoiceIds du stigma spécifique
+  await prisma.buildStigma.updateMany({
+    where: {
+      buildId,
+      stigmaId,
+    },
+    data: {
+      activeSpecialtyChoiceIds,
+    },
+  });
+
+  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
+  Promise.resolve().then(() => {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
+  });
+
+  return { success: true };
+}
+
+// ======================================
 // CREATE BUILD FROM STARTER BUILD
 // ======================================
 export async function createBuildFromStarter(

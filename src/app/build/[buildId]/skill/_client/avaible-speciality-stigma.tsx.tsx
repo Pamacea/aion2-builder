@@ -102,8 +102,8 @@ export const AvailableSpecialityStigma = ({
   };
 
   return (
-    <div className={`space-y-2 pt-4 border-t-2 border-background/40 ${className}`}>
-      <h4 className="text-sm font-semibold text-foreground pb-2">Speciality Choices</h4>
+    <div className={`space-y-2 pt-4 border-t-2 border-secondary ${className}`}>
+      <h4 className="text-xl font-semibold text-foreground pb-2 uppercase">Speciality Choices</h4>
       {sortedSpecialtyChoices.map((specialtyChoice) => {
         const isActive = activeIds.includes(specialtyChoice.id);
         // If stigma is not in build (no buildStigma), always lock specialty choices
@@ -130,7 +130,7 @@ export const AvailableSpecialityStigma = ({
               onToggleSpecialtyChoice || buildStigma
                 ? isLocked
                   ? shouldReduceOpacity
-                    ? "cursor-not-allowed opacity-50"
+                    ? "cursor-not-allowed opacity-80"
                     : "cursor-not-allowed opacity-100"
                   : "cursor-pointer hover:opacity-80 transition-opacity"
                 : ""

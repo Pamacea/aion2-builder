@@ -25,7 +25,7 @@ export const Buildbar = () => {
   return (
     <nav className="w-full md:w-1/3 h-full flex items-center justify-center gap-2 md:gap-0 relative">
       {/* Desktop: affichage normal */}
-      <div className="hidden md:flex items-center justify-center gap-2 w-full h-full">
+      <div className="hidden md:flex items-center justify-center gap-2 sm:gap-0 w-full h-full">
         <ProfileButton />
         <SkillButton />
         <GearButton />

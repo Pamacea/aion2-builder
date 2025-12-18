@@ -314,7 +314,7 @@ export const SkillDetails = ({
         */}
 
       {/* Casting Duration, Cooldown, Mana Cost, Range, and Target */}
-      <div className="flex flex-col gap-2 pt-4 border-t-2 border-background/40">
+      <div className="flex flex-col gap-2 pt-4 border-t-2 border-secondary">
         <SkillManaCost ability={targetAbility} stigma={targetStigma} />
         <SkillRange
           ability={targetAbility}

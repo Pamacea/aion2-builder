@@ -11,6 +11,7 @@ export const MinusButton = ({ onClick, disabled = false }: MinusButtonProps) => 
     alt="Minus Icon"
     onClick={onClick}
     disabled={disabled}
-    className="h-full bg-destructive/50 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50"
+    className="h-full bg-destructive/50 border-y-2 border-secondary hover:border-primary hover:bg-destructive/80 disabled:opacity-50"
+    iconSize={20}
   />
 );

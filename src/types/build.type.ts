@@ -54,7 +54,7 @@ export type BuildState = {
   updateAbilityLevel: (abilityId: number, level: number) => void;
   addAbility: (abilityId: number, level?: number) => void;
   removeAbility: (abilityId: number) => void;
-  toggleSpecialtyChoice: (abilityId: number, specialtyChoiceId: number) => void;
+  toggleSpecialtyChoice: (abilityId: number, specialtyChoiceId: number) => Promise<void>;
   getAbilitiesBySpellTag: (spellTagName: string) => BuildType["abilities"];
   getAvailableAbilities: () => BuildType["class"]["abilities"];
   
@@ -70,7 +70,7 @@ export type BuildState = {
   updateStigmaLevel: (stigmaId: number, level: number) => void;
   addStigma: (stigmaId: number, level?: number, stigmaCost?: number) => void;
   removeStigma: (stigmaId: number) => void;
-  toggleSpecialtyChoiceStigma: (stigmaId: number, specialtyChoiceId: number) => void;
+  toggleSpecialtyChoiceStigma: (stigmaId: number, specialtyChoiceId: number) => Promise<void>;
   getStigmasBySpellTag: (spellTagName: string) => BuildType["stigmas"];
   getAvailableStigmas: () => BuildType["class"]["stigmas"];
   

@@ -362,7 +362,7 @@ export const Skill = () => {
       <div className="flex-1 flex flex-col gap-4 overflow-y-auto min-h-0">
         {/* ACTIVE Category */}
         <div className="flex flex-col gap-4">
-          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+        <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
             ACTIVE
           </div>
           <div className="grid grid-cols-5 gap-2 px-2">
@@ -384,7 +384,7 @@ export const Skill = () => {
 
         {/* PASSIVE Category */}
         <div className="flex flex-col gap-4">
-          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+        <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
             PASSIVE
           </div>
           <div className="grid grid-cols-5 gap-2 px-2">
@@ -406,7 +406,7 @@ export const Skill = () => {
 
         {/* STIGMA Category */}
         <div className="flex flex-col gap-4">
-          <div className="py-2 bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase">
+          <div className="py-2 bg-secondary/30 border-y-2 border-secondary text-center font-bold uppercase">
             STIGMA
           </div>
           <div className="grid grid-cols-5 gap-2 px-2">
@@ -428,8 +428,8 @@ export const Skill = () => {
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className="w-full flex flex-col items-center justify-between gap-2 sm:gap-3 pt-2 sm:pt-4">
-        <section className="w-full flex flex-col gap-2 sm:gap-4">
+      <div className="w-full flex flex-col items-center justify-between pt-2 sm:pt-4  border-t-2 border-secondary ">
+        <section className="w-full flex flex-col gap-2">
           <div className="flex-1">
             <SkillsPoints />
           </div>

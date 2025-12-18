@@ -56,8 +56,8 @@ export const AvailableSpeciality = ({
   const canActivateMore = activeIds.length < maxActiveSpecialties;
 
   return (
-    <div className={`space-y-2 pt-4 border-t-2 border-background/40 ${className}`}>
-      <h4 className="text-sm font-semibold text-foreground pb-2">Speciality Choices</h4>
+    <div className={`space-y-2 pt-4 border-t-2 border-secondary ${className}`}>
+      <h4 className="text-xl font-semibold text-foreground pb-2 uppercase">Speciality Choices</h4>
       {sortedSpecialtyChoices.map((specialtyChoice) => {
         const isActive = activeIds.includes(specialtyChoice.id);
         // If ability is not in build (no buildAbility), always lock specialty choices

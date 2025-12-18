@@ -219,9 +219,10 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
       ref={ref}
       className={`
         relative w-6 h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 xl:w-14 xl:h-14
-        border-2 border-foreground/30 bg-background/80
+        border-2 border-secondary bg-secondary/30
         flex items-center justify-center
         transition-all
+        rounded-md
         ${disabled ? "cursor-not-allowed" : "cursor-move"}
         ${isDragging && !disabled ? "opacity-50" : ""}
         ${isOver && !disabled ? "border-orange-500 bg-orange-500/20" : ""}

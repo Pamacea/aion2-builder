@@ -241,7 +241,7 @@ export const SkillDesc = ({
 
   return (
     <div className={className}>
-      <p className="text-sm text-foreground/80 pt-4 border-t-2 border-background/40">
+      <p className="text-sm text-foreground/80 pt-4 border-t-2 border-secondary">
         {processedDescription}
       </p>
     </div>

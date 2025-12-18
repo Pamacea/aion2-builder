@@ -312,7 +312,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       get().updateBuild({ abilities });
     },
 
-    toggleSpecialtyChoice: (abilityId, specialtyChoiceId) => {
+    toggleSpecialtyChoice: async (abilityId, specialtyChoiceId) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -358,19 +358,38 @@ export const useBuildStore = create<BuildState>((set, get) => {
         return;
       }
 
-      const abilities = build.abilities?.map((a) => {
-        if (a.abilityId !== abilityId) return a;
+      // Calculer les nouveaux activeSpecialtyChoiceIds
+      const newActiveSpecialtyChoiceIds = isActive
+        ? buildAbility.activeSpecialtyChoiceIds.filter(
+            (id) => id !== specialtyChoiceId
+          )
+        : [...buildAbility.activeSpecialtyChoiceIds, specialtyChoiceId];
 
+      // Mettre à jour localement immédiatement pour une réactivité instantanée
+      set((state) => {
+        if (!state.build) return state;
+        const updatedAbilities = state.build.abilities?.map((a) => {
+          if (a.abilityId !== abilityId) return a;
+          return {
+            ...a,
+            activeSpecialtyChoiceIds: newActiveSpecialtyChoiceIds,
+          };
+        });
         return {
-          ...a,
-          activeSpecialtyChoiceIds: isActive
-            ? a.activeSpecialtyChoiceIds.filter(
-                (id) => id !== specialtyChoiceId
-              )
-            : [...a.activeSpecialtyChoiceIds, specialtyChoiceId],
+          build: {
+            ...state.build,
+            abilities: updatedAbilities,
+          },
         };
       });
-      get().updateBuild({ abilities });
+
+      // Sauvegarder de manière optimisée (seulement activeSpecialtyChoiceIds)
+      try {
+        const { updateAbilitySpecialtyChoicesOnly } = await import("@/actions/buildActions");
+        await updateAbilitySpecialtyChoicesOnly(build.id, abilityId, newActiveSpecialtyChoiceIds);
+      } catch (error) {
+        console.error("Error saving ability specialty choices:", error);
+      }
     },
 
     getAbilitiesBySpellTag: (spellTagName) => {
@@ -546,7 +565,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       get().updateBuild({ stigmas });
     },
 
-    toggleSpecialtyChoiceStigma: (stigmaId, specialtyChoiceId) => {
+    toggleSpecialtyChoiceStigma: async (stigmaId, specialtyChoiceId) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -575,29 +594,38 @@ export const useBuildStore = create<BuildState>((set, get) => {
         return;
       }
 
-      const stigmas = build.stigmas?.map((s) => {
-        if (s.stigmaId !== stigmaId) return s;
+      // Calculer les nouveaux activeSpecialtyChoiceIds
+      const newActiveSpecialtyChoiceIds = isActive
+        ? buildStigma.activeSpecialtyChoiceIds.filter(
+            (id) => id !== specialtyChoiceId
+          )
+        : [...buildStigma.activeSpecialtyChoiceIds, specialtyChoiceId];
 
-        if (isActive) {
-          // Deactivate: remove from active list
+      // Mettre à jour localement immédiatement pour une réactivité instantanée
+      set((state) => {
+        if (!state.build) return state;
+        const updatedStigmas = state.build.stigmas?.map((s) => {
+          if (s.stigmaId !== stigmaId) return s;
           return {
             ...s,
-            activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds.filter(
-              (id) => id !== specialtyChoiceId
-            ),
+            activeSpecialtyChoiceIds: newActiveSpecialtyChoiceIds,
           };
-        } else {
-          // Activate: add to active list (no limit for stigmas)
-          return {
-            ...s,
-            activeSpecialtyChoiceIds: [
-              ...s.activeSpecialtyChoiceIds,
-              specialtyChoiceId,
-            ],
-          };
-        }
+        });
+        return {
+          build: {
+            ...state.build,
+            stigmas: updatedStigmas,
+          },
+        };
       });
-      get().updateBuild({ stigmas });
+
+      // Sauvegarder de manière optimisée (seulement activeSpecialtyChoiceIds)
+      try {
+        const { updateStigmaSpecialtyChoicesOnly } = await import("@/actions/buildActions");
+        await updateStigmaSpecialtyChoicesOnly(build.id, stigmaId, newActiveSpecialtyChoiceIds);
+      } catch (error) {
+        console.error("Error saving stigma specialty choices:", error);
+      }
     },
 
     getStigmasBySpellTag: (spellTagName) => {
@@ -621,11 +649,39 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // SHORTCUTS MANAGEMENT
     // ==========================================================
 
-    updateShortcuts: (shortcuts) => {
+    updateShortcuts: async (shortcuts) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
-      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
-      get().updateBuild({ shortcuts });
+      if (!build || isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
+      
+      // Mettre à jour localement immédiatement pour une réactivité instantanée
+      set((state) => ({
+        build: state.build ? { ...state.build, shortcuts } : null,
+      }));
+
+      // Sauvegarder de manière optimisée (seulement shortcuts)
+      try {
+        const { updateShortcutsOnly } = await import("@/actions/buildActions");
+        // Filtrer les propriétés inutiles et convertir undefined en null
+        const shortcutsToSave = shortcuts
+          ? Object.fromEntries(
+              Object.entries(shortcuts).map(([key, value]) => [
+                key,
+                {
+                  type: value.type,
+                  ...(value.abilityId !== undefined && { abilityId: value.abilityId }),
+                  ...(value.stigmaId !== undefined && { stigmaId: value.stigmaId }),
+                },
+              ])
+            )
+          : null;
+        // build est déjà vérifié au début de la fonction, mais TypeScript nécessite une vérification explicite ici
+        if (!build) return;
+        await updateShortcutsOnly(build.id, shortcutsToSave);
+      } catch (error) {
+        console.error("Error saving shortcuts:", error);
+        // En cas d'erreur, on pourrait restaurer l'ancien état
+      }
     },
 
     updateShortcutLabels: (labels) => {

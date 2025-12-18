@@ -27,12 +27,12 @@ export const SpecialtyChoice = ({
 
   return (
     <div
-      className={`flex gap-2 px-2 py-2 border-b border-foreground/50  ${
+      className={`flex gap-2 px-2 py-2 border-b-2 border-secondary  ${
         isActive
-          ? "border-yellow-600 bg-yellow-600/10"
+          ? "border-none bg-yellow-600/80"
           : isLocked
-            ? "border-muted bg-muted/50"
-            : "bg-muted/50"
+            ? "border-primary bg-secondary/30"
+            : "bg-secondary"
       } ${className}`}
     >
       <div className="flex gap-4 ">

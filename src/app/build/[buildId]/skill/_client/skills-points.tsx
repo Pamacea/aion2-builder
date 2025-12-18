@@ -129,9 +129,9 @@ export const SkillsPoints = () => {
   return (
     <div className="flex lg:flex-row flex-col items-center justify-between gap-4 text-sm">
       <div className="flex items-center gap-2">
-        <span className="text-green-600 bg-green-600/30 border-y-2 border-foreground/50 text-center font-bold uppercase px-3 py-1 rounded-sm">SP</span>
+        <span className="text-green-600 bg-green-600/30 border-y-2 border-secondary text-center font-bold uppercase px-3 py-1 rounded-sm">SP</span>
         <span
-          className={`bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-1 rounded-sm ${
+          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-2 py-1 rounded-sm ${
             totalSP > maxSP ? "text-destructive" : "text-foreground"
           }`}
         >
@@ -140,13 +140,13 @@ export const SkillsPoints = () => {
       </div>
       <div className="flex items-center gap-2">
         <span
-          className={`bg-background/60 border-y-2 border-foreground/50 text-center font-bold uppercase px-2 py-1 rounded-sm ${
+          className={`bg-background/60 border-y-2 border-secondary text-center font-bold uppercase px-2 py-1 rounded-sm ${
             totalSTP > maxSTP ? "text-destructive" : "text-foreground"
           }`}
         >
           {totalSTP}/{maxSTP}
         </span>
-        <span className="text-blue-600 bg-blue-600/30 border-y-2 border-foreground/50 text-center font-bold uppercase px-3 py-1 rounded-sm">STP</span>
+        <span className="text-blue-600 bg-blue-600/30 border-y-2 border-secondary text-center font-bold uppercase px-3 py-1 rounded-sm">STP</span>
       </div>
     </div>
   );

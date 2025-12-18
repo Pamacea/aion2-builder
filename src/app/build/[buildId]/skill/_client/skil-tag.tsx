@@ -35,7 +35,7 @@ export const SkillTag = ({ ability, passive, stigma, className = "" }: SkillTagP
   }
 
   return (
-    <div className={`flex flex-wrap gap-2 pt-4 border-t-2 border-background/40 ${className}`}>
+    <div className={`flex flex-wrap gap-2 pt-4 border-t-2 border-secondary ${className}`}>
       {spellTags.map((tag) => {
         const tagColor = spellTagColors[tag.name] || "border-gray-500 text-gray-500 bg-gray-500/10";
         return (

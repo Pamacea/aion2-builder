@@ -35,7 +35,13 @@ export const Shortcut = () => {
     Record<number, ShortcutSkill | undefined>
   >({});
   const isInitialLoad = useRef(true);
-  const [shouldSave, setShouldSave] = useState(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shortcutsRef = useRef(shortcuts);
+  
+  // Synchroniser la ref avec l'état
+  useEffect(() => {
+    shortcutsRef.current = shortcuts;
+  }, [shortcuts]);
   const isStarter = isStarterBuild(build);
   const isOwner = isBuildOwner(build, userId);
   const canEdit = !isStarter && isOwner;
@@ -220,54 +226,63 @@ export const Shortcut = () => {
   }, [loadedShortcuts, firstAbility, build?.abilities, build?.stigmas]);
 
   // Save shortcuts to build when they change (but not during initial load)
-  useEffect(() => {
-    if (isInitialLoad.current || !shouldSave) return;
+  // Utilise un debounce pour éviter trop de requêtes
+  const scheduleSaveShortcuts = useCallback(() => {
+    if (isInitialLoad.current) return;
 
-    const shortcutsToSaveFormatted: Record<
-      string,
-      {
-        type: "ability" | "stigma";
-        abilityId?: number;
-        stigmaId?: number;
-      }
-    > = {};
-
-    Object.entries(shortcuts).forEach(([slotIdStr, skill]) => {
-      if (!skill) return;
-
-      // Only save skills that are in the build (have buildAbility or buildStigma)
-      if (skill.type === "ability" && skill.ability && skill.buildAbility) {
-        shortcutsToSaveFormatted[slotIdStr] = {
-          type: "ability",
-          abilityId: skill.ability.id,
-        };
-      } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
-        shortcutsToSaveFormatted[slotIdStr] = {
-          type: "stigma",
-          stigmaId: skill.stigma.id,
-        };
-      }
-      // If skill doesn't have buildAbility/buildStigma, it won't be saved
-      // It will be added to the build and then saved on next update
-    });
-
-    updateShortcuts(
-      Object.keys(shortcutsToSaveFormatted).length > 0
-        ? shortcutsToSaveFormatted
-        : null
-    );
-    // Reset flag asynchronously to avoid setState in effect
-    setTimeout(() => {
-      setShouldSave(false);
-    }, 0);
-  }, [shouldSave, shortcuts, updateShortcuts]);
-
-  // Queue shortcuts to be saved (will be saved in useEffect)
-  const queueSaveShortcuts = () => {
-    if (!isInitialLoad.current) {
-      setShouldSave(true);
+    // Annuler la sauvegarde précédente si elle existe
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  };
+
+    // Programmer une nouvelle sauvegarde après 500ms
+    saveTimeoutRef.current = setTimeout(() => {
+      // Utiliser la ref pour obtenir la dernière valeur de shortcuts
+      const currentShortcuts = shortcutsRef.current;
+      const shortcutsToSaveFormatted: Record<
+        string,
+        {
+          type: "ability" | "stigma";
+          abilityId?: number;
+          stigmaId?: number;
+        }
+      > = {};
+
+      Object.entries(currentShortcuts).forEach(([slotIdStr, skill]) => {
+        if (!skill) return;
+
+        // Only save skills that are in the build (have buildAbility or buildStigma)
+        if (skill.type === "ability" && skill.ability && skill.buildAbility) {
+          shortcutsToSaveFormatted[slotIdStr] = {
+            type: "ability",
+            abilityId: skill.ability.id,
+          };
+        } else if (skill.type === "stigma" && skill.stigma && skill.buildStigma) {
+          shortcutsToSaveFormatted[slotIdStr] = {
+            type: "stigma",
+            stigmaId: skill.stigma.id,
+          };
+        }
+        // If skill doesn't have buildAbility/buildStigma, it won't be saved
+        // It will be added to the build and then saved on next update
+      });
+
+      updateShortcuts(
+        Object.keys(shortcutsToSaveFormatted).length > 0
+          ? shortcutsToSaveFormatted
+          : null
+      );
+    }, 500);
+  }, [updateShortcuts]);
+
+  // Nettoyer le timeout au démontage
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleDrop = (
     slotId: number,
@@ -366,8 +381,10 @@ export const Shortcut = () => {
 
       return newShortcuts;
     });
-    // Queue save after state update
-    queueSaveShortcuts();
+    // Programmer la sauvegarde après la mise à jour de l'état
+    setTimeout(() => {
+      scheduleSaveShortcuts();
+    }, 0);
   };
 
   const handleClear = (slotId: number) => {
@@ -380,8 +397,10 @@ export const Shortcut = () => {
       delete newShortcuts[slotId];
       return newShortcuts;
     });
-    // Queue save after state update
-    queueSaveShortcuts();
+    // Programmer la sauvegarde après la mise à jour de l'état
+    setTimeout(() => {
+      scheduleSaveShortcuts();
+    }, 0);
   };
 
   const handleRefresh = () => {
@@ -389,7 +408,9 @@ export const Shortcut = () => {
       return;
     }
     setShortcuts({});
-    queueSaveShortcuts();
+    setTimeout(() => {
+      scheduleSaveShortcuts();
+    }, 0);
   };
 
 

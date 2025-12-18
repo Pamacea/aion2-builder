@@ -208,8 +208,8 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
       alt="Reset Icon"
       onClick={handleReset}
       disabled={!hasSelectedSkill || disabled || isLocked}
-      className="h-full bg-background/80 border-y-2 border-foreground/50 hover:border-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-      iconSize={25}
+      className="h-full bg-secondary/30 border-x-2 border-secondary hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+      iconSize={20}
     />
   );
 };
