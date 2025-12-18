@@ -3,7 +3,7 @@
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
-import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
+import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -45,7 +45,7 @@ export const StigmaSkill = ({
   const currentLevel = buildStigma?.level ?? 0;
   const isInBuild = buildStigma !== undefined;
   const isStarter = isStarterBuild(build);
-  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
+  const canEdit = build ? canEditBuild(build, currentUserId) : false;
 
   // Count stigmas with level >= 1 to check if limit is reached
   const stigmasWithLevelOneOrMore = build?.stigmas?.filter((s) => s.level >= 1) || [];
@@ -149,7 +149,7 @@ export const StigmaSkill = ({
     clickButtonRef.current = "left";
 
     // Handle double-click to add skill to build (locked/not in build/level 0)
-    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner && !isLockedByLimit && canAddOrIncrementStigma()) {
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && canEdit && !isLockedByLimit && canAddOrIncrementStigma()) {
       if (!isInBuild) {
         // Add stigma to build with level 1
         addStigma(stigma.id, 1);
@@ -217,7 +217,7 @@ export const StigmaSkill = ({
     clickButtonRef.current = "right";
 
     // Handle double right-click to add skill to build (locked/not in build/level 0)
-    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && isOwner && !isLockedByLimit && canAddOrIncrementStigma()) {
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && canEdit && !isLockedByLimit && canAddOrIncrementStigma()) {
       if (!isInBuild) {
         // Add stigma to build with level 1
         addStigma(stigma.id, 1);

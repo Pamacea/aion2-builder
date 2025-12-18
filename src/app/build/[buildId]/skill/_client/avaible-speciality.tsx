@@ -2,7 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
-import { isBuildOwner } from "@/utils/buildUtils";
+import { canEditBuild } from "@/utils/buildUtils";
 import { SpecialtyChoice } from "./speciality-choice";
 
 type AvailableSpecialityProps = {
@@ -23,7 +23,7 @@ export const AvailableSpeciality = ({
   onToggleSpecialtyChoice,
 }: AvailableSpecialityProps) => {
   const { toggleSpecialtyChoice, build, currentUserId } = useBuildStore();
-  const isOwner = isBuildOwner(build, currentUserId);
+  const canEdit = canEditBuild(build, currentUserId);
 
   // Determine which ability and data to use
   const targetAbility = buildAbility?.ability || ability;
@@ -72,7 +72,7 @@ export const AvailableSpeciality = ({
         // Specialty choice is locked if not in build, level is 0, level is too low, max reached, or trying to activate 3rd without level 20
         // Also lock if user is not the owner (but keep active specialties visible)
         const isLockedByRules = isLockedByNotInBuild || isLockedByLevel || isLockedByMax || isLockedByThirdSlot;
-        const isLocked = isLockedByRules || !isOwner;
+        const isLocked = isLockedByRules || !canEdit;
         // For active specialties, keep full opacity even if not owner (important information)
         const shouldReduceOpacity = isLocked && !isActive;
         

@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
 import { fullBuildInclude } from "@/utils/actionsUtils";
-import { isStarterBuild } from "@/utils/buildUtils";
+import { isAdmin, isStarterBuild } from "@/utils/buildUtils";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "../lib/prisma";
@@ -59,8 +59,9 @@ export async function saveBuildAction(
     );
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (data.userId && session?.user?.id !== data.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (data.userId && session?.user?.id !== data.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -163,8 +164,9 @@ export async function updateBuild(
     select: { userId: true },
   });
 
-  // Vérifier que l'utilisateur est le propriétaire du build (sauf si le build n'a pas de propriétaire)
-  if (currentBuild?.userId && session?.user?.id !== currentBuild.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild?.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -337,8 +339,9 @@ export async function deleteBuildAction(buildId: number): Promise<{ success: boo
     throw new Error("Build not found");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (currentBuild.userId && currentBuild.userId !== session.user.id) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session.user.id);
+  if (currentBuild.userId && currentBuild.userId !== session.user.id && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à supprimer ce build. Seul le propriétaire peut le supprimer."
     );
@@ -401,8 +404,9 @@ export async function updateDaevanionOnly(
     throw new Error("Build not found");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -460,8 +464,9 @@ export async function updateShortcutsOnly(
     throw new Error("Build not found");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -506,8 +511,9 @@ export async function updateAbilitySpecialtyChoicesOnly(
     throw new Error("Build not found");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -553,8 +559,9 @@ export async function updateStigmaSpecialtyChoicesOnly(
     throw new Error("Build not found");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId) {
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
     throw new Error(
       "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
     );
@@ -863,4 +870,33 @@ export async function createBuildFromBuild(
   });
 
   return BuildSchema.parse(newBuild);
+}
+
+// ======================================
+// DEBUG: Check admin status (development only)
+// ======================================
+export async function checkAdminStatus(): Promise<{ 
+  userId: string | null; 
+  adminUserId: string | null; 
+  isAdmin: boolean;
+  message: string;
+}> {
+  const session = await auth();
+  const userId = session?.user?.id || null;
+  
+  // Get admin ID from environment
+  const adminUserId = process.env.ADMIN_USER_ID || process.env.NEXT_PUBLIC_ADMIN_USER_ID || null;
+  
+  const userIsAdmin = isAdmin(userId);
+  
+  return {
+    userId,
+    adminUserId,
+    isAdmin: userIsAdmin,
+    message: userIsAdmin 
+      ? "Vous êtes admin !" 
+      : adminUserId 
+        ? `Vous n'êtes pas admin.`
+        : "Aucun ADMIN_USER_ID configuré dans .env.local"
+  };
 }

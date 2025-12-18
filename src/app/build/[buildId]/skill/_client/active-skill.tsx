@@ -4,7 +4,7 @@ import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevan
 import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
-import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
+import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -71,7 +71,7 @@ export const ActiveSkill = ({
   // (même si baseLevel = 0 mais boost Daevanion > 0)
   const isEffectivelyInBuild = isInBuild || currentLevel > 0;
   const isStarter = isStarterBuild(build);
-  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
+  const canEdit = build ? canEditBuild(build, currentUserId) : false;
 
   // Check if skill is locked/not in build/level 0 (eligible for double-click to add)
   // Utiliser le niveau de base pour déterminer si le skill est verrouillé
@@ -134,7 +134,7 @@ export const ActiveSkill = ({
     clickButtonRef.current = "left";
 
     // Handle double-click to add skill to build (locked/not in build/level 0)
-    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && !isAbility12 && isOwner) {
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && !isAbility12 && canEdit) {
       if (!isInBuild) {
         // Add ability to build with level 1
         addAbility(ability.id, 1);
@@ -202,7 +202,7 @@ export const ActiveSkill = ({
     clickButtonRef.current = "right";
 
     // Handle double right-click to add skill to build (locked/not in build/level 0)
-    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && !isAbility12 && isOwner) {
+    if (isDoubleClick && isLockedOrNotInBuild && !isStarter && !isAbility12 && canEdit) {
       if (!isInBuild) {
         // Add ability to build with level 1
         addAbility(ability.id, 1);

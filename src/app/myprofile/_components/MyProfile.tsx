@@ -1,7 +1,8 @@
 "use client";
 
+import { checkAdminStatus } from "@/actions/buildActions";
 import { BuildType } from "@/types/schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LikedBuilds } from "../_client/liked-builds";
 import { UserBuilds } from "../_client/user-builds";
 import { UserInfo } from "../_client/user-info";
@@ -21,6 +22,20 @@ type MyProfileProps = {
 
 export const MyProfile = ({ user, builds, likedBuilds }: MyProfileProps) => {
   const [activeTab, setActiveTab] = useState<"info" | "builds" | "liked">("info");
+  
+  // Debug: Check admin status in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      checkAdminStatus().then((result: { userId: string | null; adminUserId: string | null; isAdmin: boolean; message: string }) => {
+        console.log("[Admin Debug]", result);
+        if (!result.isAdmin && result.userId) {
+          console.warn(`[Admin Debug] Pour devenir admin, ajoutez ceci dans .env.local :`);
+          console.warn(`ADMIN_USER_ID=${result.userId}`);
+          console.warn(`NEXT_PUBLIC_ADMIN_USER_ID=${result.userId}`);
+        }
+      });
+    }
+  }, []);
 
   return (
     <div className="w-full flex flex-col gap-6">

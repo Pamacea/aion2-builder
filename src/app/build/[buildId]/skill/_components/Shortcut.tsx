@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { ShortcutSkill } from "@/types/shortcut.type";
-import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
+import { canEditBuild } from "@/utils/buildUtils";
 import { isSameSkill, isStigmaOnlySlot } from "@/utils/skillUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResetShortcutButton } from "../_client/buttons/reset-shortcut-button";
@@ -44,9 +44,7 @@ export const Shortcut = () => {
   useEffect(() => {
     shortcutsRef.current = shortcuts;
   }, [shortcuts]);
-  const isStarter = isStarterBuild(build);
-  const isOwner = isBuildOwner(build, userId);
-  const canEdit = !isStarter && isOwner;
+  const canEdit = canEditBuild(build, userId);
 
   // Récupérer les labels depuis le build ou utiliser les valeurs par défaut
   const getLabel = useCallback((columnId: string): string => {

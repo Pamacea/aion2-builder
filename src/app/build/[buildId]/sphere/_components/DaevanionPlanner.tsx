@@ -4,7 +4,7 @@ import { MAX_POINTS_BY_TYPE } from "@/constants/daevanion.constant";
 import { useDaevanionPoints, useDaevanionStats } from "@/hooks/useDaevanionData";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { DaevanionPath, DaevanionStats } from "@/types/daevanion.type";
-import { isBuildOwner } from "@/utils/buildUtils";
+import { canEditBuild } from "@/utils/buildUtils";
 import { useCallback, useMemo, useState } from "react";
 import { useDaevanionInitializer } from "../../_utils/useDaevanionInitializer";
 import { DaevanionButtons } from "../_client/daevanion-buttons";
@@ -22,8 +22,8 @@ export function DaevanionPlanner() {
   // Initialiser le store Daevanion avec les données du build
   useDaevanionInitializer();
   
-  // Vérifier si l'utilisateur est propriétaire du build
-  const isOwner = build ? isBuildOwner(build, currentUserId) : false;
+  // Vérifier si l'utilisateur peut éditer le build (propriétaire ou admin)
+  const canEdit = build ? canEditBuild(build, currentUserId) : false;
 
   // Mémoriser les runes actives pour éviter les recalculs
   const activeRunes = useMemo(() => {
@@ -126,7 +126,7 @@ export function DaevanionPlanner() {
             onResetPath={handleResetPath}
             onResetAll={handleResetAll}
             onActivateAll={handleActivateAll}
-            isOwner={isOwner}
+            isOwner={canEdit}
           />
         </div>
         
@@ -151,7 +151,7 @@ export function DaevanionPlanner() {
             path={activePath}
             activeRunes={activeRunes}
             onToggleRune={handleToggleRune}
-            isOwner={isOwner}
+            isOwner={canEdit}
           />
         </div>
       </div>

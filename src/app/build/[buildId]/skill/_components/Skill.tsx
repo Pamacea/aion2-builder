@@ -3,7 +3,7 @@
 import { useDaevanionStore } from "@/app/build/[buildId]/sphere/_store/useDaevanionStore";
 import { Loading } from "@/components/Loading";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { isBuildOwner } from "@/utils/buildUtils";
+import { canEditBuild } from "@/utils/buildUtils";
 import { useEffect, useMemo, useState } from "react";
 import { ActiveSkill } from "../_client/active-skill";
 import { MinusButton } from "../_client/buttons/minus-button";
@@ -434,16 +434,16 @@ export const Skill = () => {
           <div className="flex-1">
             <SkillsPoints />
           </div>
-          {/* Cacher les boutons "Rank to 10" si l'utilisateur n'est pas propriétaire */}
-          {isBuildOwner(build, currentUserId) && (
+          {/* Cacher les boutons "Rank to 10" si l'utilisateur ne peut pas éditer */}
+          {canEditBuild(build, currentUserId) && (
             <div className="flex-1">
               <SkillLevelModifier />
             </div>
           )}
         </section>
 
-        {/* Cacher les boutons reset, plus, minus si l'utilisateur n'est pas propriétaire */}
-        {!isChainSkill && isBuildOwner(build, currentUserId) && (
+        {/* Cacher les boutons reset, plus, minus si l'utilisateur ne peut pas éditer */}
+        {!isChainSkill && canEditBuild(build, currentUserId) && (
           <section className="w-full flex items-center justify-center sm:justify-between gap-2 sm:gap-3 pt-2 sm:pt-4">
             <ResetSkillButton disabled={!hasSelectedSkill} />
             <PlusButton

@@ -2,7 +2,7 @@
 
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
-import { isBuildOwner } from "@/utils/buildUtils";
+import { canEditBuild } from "@/utils/buildUtils";
 import { useEffect, useMemo } from "react";
 import { SpecialtyChoice } from "./speciality-choice";
 
@@ -24,7 +24,7 @@ export const AvailableSpecialityStigma = ({
   onToggleSpecialtyChoice,
 }: AvailableSpecialityStigmaProps) => {
   const { toggleSpecialtyChoiceStigma, build, currentUserId } = useBuildStore();
-  const isOwner = isBuildOwner(build, currentUserId);
+  const canEdit = canEditBuild(build, currentUserId);
 
   // Determine which stigma and data to use
   const targetStigma = buildStigma?.stigma || stigma;
@@ -36,7 +36,7 @@ export const AvailableSpecialityStigma = ({
 
   // Auto-activate/deactivate specialty choices based on level
   useEffect(() => {
-    if (!buildStigma || !targetStigma || !targetStigma.specialtyChoices || !isOwner) return;
+    if (!buildStigma || !targetStigma || !targetStigma.specialtyChoices || !canEdit) return;
 
     const newActiveIds: number[] = [];
     
@@ -82,7 +82,7 @@ export const AvailableSpecialityStigma = ({
         }
       });
     }
-  }, [stigmaLevel, buildStigma, targetStigma, activeIds, toggleSpecialtyChoiceStigma, isOwner]);
+  }, [stigmaLevel, buildStigma, targetStigma, activeIds, toggleSpecialtyChoiceStigma, canEdit]);
 
   if (!targetStigma || !targetStigma.specialtyChoices || targetStigma.specialtyChoices.length === 0) {
     return null;
@@ -114,7 +114,7 @@ export const AvailableSpecialityStigma = ({
         // Specialty choice is locked if not in build, level is 0, level is too low, or user is not the owner (no max limit for stigmas)
         // But keep active specialties visible even if not owner (important information)
         const isLockedByRules = isLockedByNotInBuild || isLockedByLevel;
-        const isLocked = isLockedByRules || !isOwner;
+        const isLocked = isLockedByRules || !canEdit;
         // For active specialties, keep full opacity even if not owner (important information)
         const shouldReduceOpacity = isLocked && !isActive;
         

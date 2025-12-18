@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { useBuildStore } from "@/store/useBuildEditor";
+import { canEditBuild } from "@/utils/buildUtils";
 
 export const SkillLevelModifier = () => {
-  const { build, updateAbilityLevel, updatePassiveLevel, updateStigmaLevel } =
+  const { build, currentUserId, updateAbilityLevel, updatePassiveLevel, updateStigmaLevel } =
     useBuildStore();
+  const canEdit = canEditBuild(build, currentUserId);
 
   const handleSetAllAbilitiesTo10 = () => {
     if (!build?.abilities) return;
@@ -38,7 +40,7 @@ export const SkillLevelModifier = () => {
     });
   };
 
-  if (!build) return null;
+  if (!build || !canEdit) return null;
 
   const hasAbilities = build.abilities && build.abilities.length > 0;
   const hasPassives = build.passives && build.passives.length > 0;

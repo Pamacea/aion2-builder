@@ -6,7 +6,7 @@ import {
   BuildState,
   BuildStigmaType,
 } from "@/types/schema";
-import { isBuildOwner, isStarterBuild, syncChainSkills } from "@/utils/buildUtils";
+import { canEditBuild, isBuildOwner, isStarterBuild, syncChainSkills } from "@/utils/buildUtils";
 import { filterChainSkills } from "@/utils/chainSkillsUtils";
 import { create } from "zustand";
 
@@ -98,8 +98,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
         return;
       }
 
-      // Prevent updating builds if user is not the owner
-      if (!isBuildOwner(currentBuild, currentUserId)) {
+      // Prevent updating builds if user is not the owner or admin
+      if (!canEditBuild(currentBuild, currentUserId)) {
         console.warn("Cannot modify builds that you don't own");
         return;
       }

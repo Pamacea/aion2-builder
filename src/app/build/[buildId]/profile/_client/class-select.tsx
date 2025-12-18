@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
+import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
 import { memo, useCallback, useMemo } from "react";
 import { StarterBuildMessage } from "../_components/starterBuildMessage";
 import { CLASSES } from "../_utils/constants";
@@ -12,8 +12,8 @@ export const ClassSelect = memo(() => {
 
   // Mémoriser les valeurs calculées
   const isStarter = useMemo(() => build ? isStarterBuild(build) : false, [build]);
-  const isOwner = useMemo(() => build ? isBuildOwner(build, currentUserId) : false, [build, currentUserId]);
-  const isDisabled = useMemo(() => isStarter || !isOwner, [isStarter, isOwner]);
+  const canEdit = useMemo(() => build ? canEditBuild(build, currentUserId) : false, [build, currentUserId]);
+  const isDisabled = useMemo(() => isStarter || !canEdit, [isStarter, canEdit]);
   const currentClassName = useMemo(() => build?.class.name || "", [build?.class.name]);
 
   // Mémoriser le handler pour éviter les re-renders

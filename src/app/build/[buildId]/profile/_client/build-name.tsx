@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { useBuildStore } from "@/store/useBuildEditor";
-import { isBuildOwner, isStarterBuild } from "@/utils/buildUtils";
+import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
 import { memo, useCallback, useMemo } from "react";
 import { StarterBuildMessage } from "../_components/starterBuildMessage";
 
@@ -11,8 +11,8 @@ export const BuildName = memo(() => {
 
   // Mémoriser les valeurs calculées
   const isStarter = useMemo(() => build ? isStarterBuild(build) : false, [build]);
-  const isOwner = useMemo(() => build ? isBuildOwner(build, currentUserId) : false, [build, currentUserId]);
-  const isDisabled = useMemo(() => isStarter || !isOwner, [isStarter, isOwner]);
+  const canEdit = useMemo(() => build ? canEditBuild(build, currentUserId) : false, [build, currentUserId]);
+  const isDisabled = useMemo(() => isStarter || !canEdit, [isStarter, canEdit]);
 
   // Mémoriser le handler pour éviter les re-renders
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

@@ -31,9 +31,9 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       return;
     }
 
-    // Prevent saving if user is not the owner
-    const { isBuildOwner } = await import("@/utils/buildUtils");
-    if (!isBuildOwner(build, buildStore.currentUserId)) {
+    // Prevent saving if user cannot edit (not owner or admin)
+    const { canEditBuild } = await import("@/utils/buildUtils");
+    if (!canEditBuild(build, buildStore.currentUserId)) {
       return;
     }
 
@@ -111,9 +111,9 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       const build = buildStore.build;
       if (!build) return;
       
-      const { isBuildOwner } = await import("@/utils/buildUtils");
-      if (!isBuildOwner(build, buildStore.currentUserId)) {
-        console.warn("Cannot modify Daevanion planner: user is not the owner");
+      const { canEditBuild } = await import("@/utils/buildUtils");
+      if (!canEditBuild(build, buildStore.currentUserId)) {
+        console.warn("Cannot modify Daevanion planner: user cannot edit this build");
         return;
       }
       
@@ -492,14 +492,14 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
   },
 
   resetPath: async (path) => {
-    // Vérifier que l'utilisateur est propriétaire du build
+    // Vérifier que l'utilisateur peut éditer le build (propriétaire ou admin)
     const buildStore = useBuildStore.getState();
     const build = buildStore.build;
     if (!build) return;
     
-    const { isBuildOwner } = await import("@/utils/buildUtils");
-    if (!isBuildOwner(build, buildStore.currentUserId)) {
-      console.warn("Cannot reset Daevanion path: user is not the owner");
+    const { canEditBuild } = await import("@/utils/buildUtils");
+    if (!canEditBuild(build, buildStore.currentUserId)) {
+      console.warn("Cannot reset Daevanion path: user cannot edit this build");
       return;
     }
     
@@ -713,9 +713,9 @@ export const useDaevanionStore = create<DaevanionStore>((set, get) => {
       const build = buildStore.build;
       if (!build) return;
       
-      const { isBuildOwner } = await import("@/utils/buildUtils");
-      if (!isBuildOwner(build, buildStore.currentUserId)) {
-        console.warn("Cannot modify Daevanion planner: user is not the owner");
+      const { canEditBuild } = await import("@/utils/buildUtils");
+      if (!canEditBuild(build, buildStore.currentUserId)) {
+        console.warn("Cannot modify Daevanion planner: user cannot edit this build");
         return;
       }
 
