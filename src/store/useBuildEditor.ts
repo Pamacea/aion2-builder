@@ -441,13 +441,25 @@ export const useBuildStore = create<BuildState>((set, get) => {
       );
       if (!specialtyChoice) return;
 
+      // Calculer le niveau effectif (niveau de base + boost Daevanion)
+      // pour vérifier si on peut activer la spécialité
+      let effectiveLevel = buildAbility.level;
+      try {
+        const { useDaevanionStore } = await import("@/app/build/[buildId]/sphere/_store/useDaevanionStore");
+        const daevanionBoost = await useDaevanionStore.getState().getDaevanionBoostForSkill(abilityId, "ability");
+        effectiveLevel = buildAbility.level + daevanionBoost;
+      } catch (error) {
+        // Si on ne peut pas calculer le boost, utiliser le niveau de base
+        console.warn("Could not calculate daevanion boost, using base level:", error);
+      }
+
       // Check if trying to activate a locked specialtyChoice (level is 0 or too low)
       const isActive =
         buildAbility.activeSpecialtyChoiceIds.includes(specialtyChoiceId);
       if (
         !isActive &&
-        (buildAbility.level === 0 ||
-          buildAbility.level < specialtyChoice.unlockLevel)
+        (effectiveLevel === 0 ||
+          effectiveLevel < specialtyChoice.unlockLevel)
       ) {
         // Cannot activate: level is 0 or too low
         return;
@@ -456,7 +468,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       // If trying to activate the 3rd specialty choice, require level 20
       if (!isActive && buildAbility.activeSpecialtyChoiceIds.length >= 2) {
         // Trying to activate 3rd specialty choice - require level 20
-        if (buildAbility.level < 20) {
+        if (effectiveLevel < 20) {
           return;
         }
       }

@@ -51,15 +51,37 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
 
     if (selectedSkill.buildAbility) {
       const abilityId = selectedSkill.buildAbility.abilityId;
+      const buildAbility = build?.abilities?.find((a) => a.abilityId === abilityId);
+      
+      // Réinitialiser toutes les spécialités actives avant de reset le niveau
+      if (build && buildAbility && buildAbility.activeSpecialtyChoiceIds.length > 0) {
+        try {
+          const { updateAbilitySpecialtyChoicesOnly } = await import("@/actions/buildActions");
+          await updateAbilitySpecialtyChoicesOnly(build.id, abilityId, []);
+          
+          // Mettre à jour localement le store pour refléter immédiatement les changements
+          const currentBuild = useBuildStore.getState().build;
+          if (currentBuild) {
+            const updatedAbilities = currentBuild.abilities?.map((a) =>
+              a.abilityId === abilityId
+                ? { ...a, activeSpecialtyChoiceIds: [] }
+                : a
+            );
+            useBuildStore.setState({ build: { ...currentBuild, abilities: updatedAbilities } });
+          }
+        } catch (error) {
+          console.error("Error resetting specialty choices:", error);
+        }
+      }
       
       // First ability (auto-attack) cannot be reset to level 0, reset to level 1 instead
       if (abilityId === firstAbilityId) {
         // Reset le niveau de base à 1 (le boost Daevanion sera ajouté automatiquement à l'affichage)
-        updateAbilityLevel(abilityId, 1);
+        await updateAbilityLevel(abilityId, 1);
         // Don't remove first ability from shortcuts (it must stay in reserved slot)
       } else {
         // Reset le niveau de base à 0 (le boost Daevanion sera ajouté automatiquement à l'affichage)
-        updateAbilityLevel(abilityId, 0);
+        await updateAbilityLevel(abilityId, 0);
         
         // Calculer le boost Daevanion pour vérifier si le niveau effectif est 0
         const daevanionBoost = await getDaevanionBoostForSkill(abilityId, "ability");
@@ -101,8 +123,32 @@ export const ResetSkillButton = ({ disabled = false }: ResetSkillButtonProps) =>
       });
     } else if (selectedSkill.buildStigma) {
       const stigmaId = selectedSkill.buildStigma.stigmaId;
+      const buildStigma = build?.stigmas?.find((s) => s.stigmaId === stigmaId);
+      
+      // Réinitialiser toutes les spécialités actives avant de reset le niveau
+      if (build && buildStigma && buildStigma.activeSpecialtyChoiceIds.length > 0) {
+        try {
+          const { updateStigmaSpecialtyChoicesOnly } = await import("@/actions/buildActions");
+          if (!build) return; // Double vérification pour TypeScript
+          await updateStigmaSpecialtyChoicesOnly(build.id, stigmaId, []);
+          
+          // Mettre à jour localement le store pour refléter immédiatement les changements
+          const currentBuild = useBuildStore.getState().build;
+          if (currentBuild) {
+            const updatedStigmas = currentBuild.stigmas?.map((s) =>
+              s.stigmaId === stigmaId
+                ? { ...s, activeSpecialtyChoiceIds: [] }
+                : s
+            );
+            useBuildStore.setState({ build: { ...currentBuild, stigmas: updatedStigmas } });
+          }
+        } catch (error) {
+          console.error("Error resetting stigma specialty choices:", error);
+        }
+      }
+      
       // Les stigmas ne sont pas affectés par Daevanion
-      updateStigmaLevel(stigmaId, 0);
+      await updateStigmaLevel(stigmaId, 0);
       // Remove from shortcuts
       removeSkillFromShortcuts("stigma", stigmaId);
       
