@@ -51,35 +51,35 @@ export type BuildState = {
   setClassByName: (className: string) => Promise<void>;
   
   // Ability management
-  updateAbilityLevel: (abilityId: number, level: number) => void;
-  addAbility: (abilityId: number, level?: number) => void;
-  removeAbility: (abilityId: number) => void;
+  updateAbilityLevel: (abilityId: number, level: number) => Promise<void>;
+  addAbility: (abilityId: number, level?: number) => Promise<void>;
+  removeAbility: (abilityId: number) => Promise<void>;
   toggleSpecialtyChoice: (abilityId: number, specialtyChoiceId: number) => Promise<void>;
   getAbilitiesBySpellTag: (spellTagName: string) => BuildType["abilities"];
   getAvailableAbilities: () => BuildType["class"]["abilities"];
   
   // Passive management
-  updatePassiveLevel: (passiveId: number, level: number) => void;
-  addPassive: (passiveId: number, level?: number) => void;
-  removePassive: (passiveId: number) => void;
+  updatePassiveLevel: (passiveId: number, level: number) => Promise<void>;
+  addPassive: (passiveId: number, level?: number) => Promise<void>;
+  removePassive: (passiveId: number) => Promise<void>;
   getPassivesBySpellTag: (spellTagName: string) => BuildType["passives"];
   getAvailablePassives: () => BuildType["class"]["passives"];
   
   // Stigma management
-  updateStigma: (stigmaId: number, stigmaCost: number) => void;
-  updateStigmaLevel: (stigmaId: number, level: number) => void;
-  addStigma: (stigmaId: number, level?: number, stigmaCost?: number) => void;
-  removeStigma: (stigmaId: number) => void;
+  updateStigma: (stigmaId: number, stigmaCost: number) => Promise<void>;
+  updateStigmaLevel: (stigmaId: number, level: number) => Promise<void>;
+  addStigma: (stigmaId: number, level?: number, stigmaCost?: number) => Promise<void>;
+  removeStigma: (stigmaId: number) => Promise<void>;
   toggleSpecialtyChoiceStigma: (stigmaId: number, specialtyChoiceId: number) => Promise<void>;
   getStigmasBySpellTag: (spellTagName: string) => BuildType["stigmas"];
   getAvailableStigmas: () => BuildType["class"]["stigmas"];
   
   // Shortcuts management
-  updateShortcuts: (shortcuts: BuildType["shortcuts"]) => void;
+  updateShortcuts: (shortcuts: BuildType["shortcuts"]) => Promise<void>;
   updateShortcutLabels: (labels: BuildType["shortcutLabels"]) => void;
   
   // Chain Skills management
-  updateChainSkill: (skillId: number, chainSkillIds: number[], type: "ability" | "stigma") => void;
+  updateChainSkill: (skillId: number, chainSkillIds: number[], type: "ability" | "stigma") => Promise<void>;
   
   loadBuild: (buildId: number, userId?: string | null) => Promise<void> | void;
 };

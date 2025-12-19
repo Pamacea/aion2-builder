@@ -293,6 +293,21 @@ export async function updateBuild(
     include: fullBuildInclude,
   });
 
+  // Invalider le cache AVANT de retourner la réponse pour garantir que les prochaines requêtes
+  // récupèrent la version à jour (même si la revalidation est asynchrone, on force l'invalidation)
+  const hasAbilitiesChanges = "abilities" in data && data.abilities !== undefined;
+  const hasPassivesChanges = "passives" in data && data.passives !== undefined;
+  const hasStigmasChanges = "stigmas" in data && data.stigmas !== undefined;
+  const hasSkillsChanges = hasAbilitiesChanges || hasPassivesChanges || hasStigmasChanges;
+
+  // Invalider le cache de manière synchrone pour les modifications de skills
+  if (hasSkillsChanges) {
+    revalidateTag('builds', 'max');
+    revalidatePath(`/build/${buildId}`, 'page');
+    revalidatePath(`/build/${buildId}/skill`, 'page');
+    revalidatePath(`/build/${buildId}`, 'layout'); // Forcer la revalidation du layout aussi
+  }
+
   // Invalider le cache si le nom a été modifié
   if ("name" in data && data.name !== undefined) {
     revalidateTag('builds', 'max');
@@ -434,13 +449,10 @@ export async function updateDaevanionOnly(
     },
   });
 
-  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
-  // On les fait après la réponse pour ne pas bloquer
-  Promise.resolve().then(() => {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}/sphere`, 'page');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-  });
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/sphere`, 'page');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
 
   return { success: true };
 }
@@ -533,11 +545,9 @@ export async function updateAbilitySpecialtyChoicesOnly(
     },
   });
 
-  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
-  Promise.resolve().then(() => {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-  });
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
 
   return { success: true };
 }
@@ -581,11 +591,610 @@ export async function updateStigmaSpecialtyChoicesOnly(
     },
   });
 
-  // Invalider le cache (les revalidations sont déjà asynchrones dans Next.js)
-  Promise.resolve().then(() => {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE ABILITY CHAIN SKILLS ONLY (optimized)
+// ======================================
+export async function updateAbilityChainSkillsOnly(
+  buildId: number,
+  abilityId: number,
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
   });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement selectedChainSkillIds de l'ability spécifique
+  await prisma.buildAbility.updateMany({
+    where: {
+      buildId,
+      abilityId,
+    },
+    data: {
+      selectedChainSkillIds,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE STIGMA CHAIN SKILLS ONLY (optimized)
+// ======================================
+export async function updateStigmaChainSkillsOnly(
+  buildId: number,
+  stigmaId: number,
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement selectedChainSkillIds du stigma spécifique
+  await prisma.buildStigma.updateMany({
+    where: {
+      buildId,
+      stigmaId,
+    },
+    data: {
+      selectedChainSkillIds,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE STIGMA COST ONLY (optimized)
+// ======================================
+export async function updateStigmaCostOnly(
+  buildId: number,
+  stigmaId: number,
+  stigmaCost: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement le stigmaCost du stigma spécifique
+  await prisma.buildStigma.updateMany({
+    where: {
+      buildId,
+      stigmaId,
+    },
+    data: {
+      stigmaCost,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// ADD ABILITY ONLY (optimized - faster than full build update)
+// ======================================
+export async function addAbilityOnly(
+  buildId: number,
+  abilityId: number,
+  level: number,
+  maxLevel: number,
+  activeSpecialtyChoiceIds: number[] = [],
+  selectedChainSkillIds: number[] = []
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Vérifier si l'ability existe déjà
+  const existing = await prisma.buildAbility.findFirst({
+    where: {
+      buildId,
+      abilityId,
+    },
+  });
+
+  if (existing) {
+    // Si elle existe déjà, mettre à jour son niveau
+    await prisma.buildAbility.update({
+      where: { id: existing.id },
+      data: { level },
+    });
+  } else {
+    // Sinon, créer une nouvelle ability
+    await prisma.buildAbility.create({
+      data: {
+        buildId,
+        abilityId,
+        level,
+        maxLevel,
+        activeSpecialtyChoiceIds,
+        selectedChainSkillIds,
+      },
+    });
+  }
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// ADD PASSIVE ONLY (optimized - faster than full build update)
+// ======================================
+export async function addPassiveOnly(
+  buildId: number,
+  passiveId: number,
+  level: number,
+  maxLevel: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Vérifier si le passive existe déjà
+  const existing = await prisma.buildPassive.findFirst({
+    where: {
+      buildId,
+      passiveId,
+    },
+  });
+
+  if (existing) {
+    // Si il existe déjà, mettre à jour son niveau
+    await prisma.buildPassive.update({
+      where: { id: existing.id },
+      data: { level },
+    });
+  } else {
+    // Sinon, créer un nouveau passive
+    await prisma.buildPassive.create({
+      data: {
+        buildId,
+        passiveId,
+        level,
+        maxLevel,
+      },
+    });
+  }
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// ADD STIGMA ONLY (optimized - faster than full build update)
+// ======================================
+export async function addStigmaOnly(
+  buildId: number,
+  stigmaId: number,
+  level: number,
+  maxLevel: number,
+  stigmaCost: number,
+  activeSpecialtyChoiceIds: number[] = [],
+  selectedChainSkillIds: number[] = []
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Vérifier si le stigma existe déjà
+  const existing = await prisma.buildStigma.findFirst({
+    where: {
+      buildId,
+      stigmaId,
+    },
+  });
+
+  if (existing) {
+    // Si il existe déjà, mettre à jour son niveau
+    await prisma.buildStigma.update({
+      where: { id: existing.id },
+      data: { level },
+    });
+  } else {
+    // Sinon, créer un nouveau stigma
+    await prisma.buildStigma.create({
+      data: {
+        buildId,
+        stigmaId,
+        level,
+        maxLevel,
+        stigmaCost,
+        activeSpecialtyChoiceIds,
+        selectedChainSkillIds,
+      },
+    });
+  }
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// REMOVE ABILITY ONLY (optimized - faster than full build update)
+// ======================================
+export async function removeAbilityOnly(
+  buildId: number,
+  abilityId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Supprimer l'ability
+  await prisma.buildAbility.deleteMany({
+    where: {
+      buildId,
+      abilityId,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// REMOVE PASSIVE ONLY (optimized - faster than full build update)
+// ======================================
+export async function removePassiveOnly(
+  buildId: number,
+  passiveId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Supprimer le passive
+  await prisma.buildPassive.deleteMany({
+    where: {
+      buildId,
+      passiveId,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// REMOVE STIGMA ONLY (optimized - faster than full build update)
+// ======================================
+export async function removeStigmaOnly(
+  buildId: number,
+  stigmaId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Supprimer le stigma
+  await prisma.buildStigma.deleteMany({
+    where: {
+      buildId,
+      stigmaId,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE ABILITY LEVEL ONLY (optimized - much faster than full build update)
+// ======================================
+export async function updateAbilityLevelOnly(
+  buildId: number,
+  abilityId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement le niveau de l'ability spécifique
+  await prisma.buildAbility.updateMany({
+    where: {
+      buildId,
+      abilityId,
+    },
+    data: {
+      level,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE PASSIVE LEVEL ONLY (optimized - much faster than full build update)
+// ======================================
+export async function updatePassiveLevelOnly(
+  buildId: number,
+  passiveId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement le niveau du passive spécifique
+  await prisma.buildPassive.updateMany({
+    where: {
+      buildId,
+      passiveId,
+    },
+    data: {
+      level,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// UPDATE STIGMA LEVEL ONLY (optimized - much faster than full build update)
+// ======================================
+export async function updateStigmaLevelOnly(
+  buildId: number,
+  stigmaId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
+  const currentBuild = await prisma.build.findUnique({
+    where: { id: buildId },
+    select: { userId: true },
+  });
+
+  if (!currentBuild) {
+    throw new Error("Build not found");
+  }
+
+  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
+  const userIsAdmin = isAdmin(session?.user?.id);
+  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
+    throw new Error(
+      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
+    );
+  }
+
+  // Mettre à jour uniquement le niveau du stigma spécifique
+  await prisma.buildStigma.updateMany({
+    where: {
+      buildId,
+      stigmaId,
+    },
+    data: {
+      level,
+    },
+  });
+
+  // Invalider le cache immédiatement
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
 
   return { success: true };
 }

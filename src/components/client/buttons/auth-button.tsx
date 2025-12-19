@@ -44,7 +44,7 @@ export const AuthButton = ({
       const isMyProfile = pathname === "/myprofile";
       return (
         <div className={`h-full flex items-center hover:border-b-2 hover:border-b-primary border-b-2 ${
-          isMyProfile ? "border-b-foreground" : "border-b-background/30"
+          isMyProfile ? "border-b-foreground" : "border-b-secondary"
         }`}>
           {userName && (
             <Button

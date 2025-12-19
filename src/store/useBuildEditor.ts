@@ -12,44 +12,74 @@ import { create } from "zustand";
 
 export const useBuildStore = create<BuildState>((set, get) => {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null;
-
   let isSaving = false;
+  let needsSave = false; // Flag pour indiquer qu'une nouvelle sauvegarde est nécessaire
 
   const autoSave = async () => {
-    // Empêcher les sauvegardes multiples simultanées
+    // Si une sauvegarde est déjà en cours, on marque juste qu'une nouvelle sauvegarde est nécessaire
     if (isSaving) {
+      needsSave = true;
       return;
     }
 
     const build = get().build;
-    if (!build) return;
+    if (!build) {
+      needsSave = false;
+      return;
+    }
 
     // Prevent saving starter builds
     if (isStarterBuild(build)) {
+      needsSave = false;
       return;
     }
+
+    // Capturer le build au moment où on commence la sauvegarde
+    // pour éviter de sauvegarder un état obsolète
+    const buildToSave = build;
 
     isSaving = true;
     set({ saving: true });
     try {
       // Use dynamic import to avoid bundling server actions in client
       const { saveBuildAction } = await import("actions/buildActions");
-      const savedBuild = await saveBuildAction(build.id, build);
-      // Mettre à jour le build avec la réponse du serveur pour s'assurer que les données sont synchronisées
-      if (savedBuild) {
-        set({ build: savedBuild });
-      }
+      await saveBuildAction(buildToSave.id, buildToSave);
     } catch (error) {
       console.error("Error saving build:", error);
     } finally {
       isSaving = false;
       set({ saving: false });
+      
+      // Si une nouvelle sauvegarde est nécessaire (modifications faites pendant la sauvegarde),
+      // la planifier immédiatement
+      if (needsSave) {
+        needsSave = false;
+        // Petit délai pour éviter de surcharger le serveur
+        setTimeout(() => {
+          autoSave();
+        }, 100);
+      }
     }
   };
 
   const scheduleSave = () => {
-    if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(autoSave, 300);
+    // Annuler le timeout précédent pour regrouper les modifications rapides
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+      saveTimeout = null;
+    }
+
+    // Si une sauvegarde est en cours, marquer qu'une nouvelle sauvegarde est nécessaire
+    if (isSaving) {
+      needsSave = true;
+      return;
+    }
+
+    // Sinon, planifier une sauvegarde après un délai
+    saveTimeout = setTimeout(() => {
+      saveTimeout = null;
+      autoSave();
+    }, 200); // Délai pour regrouper les modifications rapides
   };
 
   return {
@@ -70,15 +100,17 @@ export const useBuildStore = create<BuildState>((set, get) => {
       }
       
       try {
-        // Use dynamic import to avoid bundling server actions in client
-        const { loadBuildAction } = await import("actions/buildActions");
-        const data = await loadBuildAction(buildId);
-        
         // Annuler toutes les sauvegardes en attente avant de charger un nouveau build
         if (saveTimeout) {
           clearTimeout(saveTimeout);
           saveTimeout = null;
         }
+        // Réinitialiser le flag de sauvegarde nécessaire
+        needsSave = false;
+        
+        // Use dynamic import to avoid bundling server actions in client
+        const { loadBuildAction } = await import("actions/buildActions");
+        const data = await loadBuildAction(buildId);
         
         set({ build: data, loading: false });
       } catch (error) {
@@ -174,7 +206,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
       });
     },
 
-    updateAbilityLevel: (abilityId, level) => {
+    updateAbilityLevel: async (abilityId, level) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -238,34 +270,79 @@ export const useBuildStore = create<BuildState>((set, get) => {
             )
           : updatedAbilities;
 
-      get().updateBuild({ abilities: finalAbilities });
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, abilities: finalAbilities } : null,
+      }));
+
+      // Sauvegarder de manière optimisée (seulement le niveau)
+      // Utiliser la fonction optimisée pour une sauvegarde beaucoup plus rapide
+      try {
+        const { updateAbilityLevelOnly } = await import("@/actions/buildActions");
+        await updateAbilityLevelOnly(build.id, abilityId, level);
+      } catch (error) {
+        console.error("Error saving ability level:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ abilities: finalAbilities });
+      }
     },
 
-    updatePassiveLevel: (passiveId, level) => {
+    updatePassiveLevel: async (passiveId, level) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
-      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
-      const passives = build?.passives?.map((p) =>
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
+      
+      const passives = build.passives?.map((p) =>
         p.passiveId === passiveId ? { ...p, level } : p
       );
-      get().updateBuild({ passives });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, passives } : null,
+      }));
+
+      // Sauvegarder de manière optimisée (seulement le niveau)
+      try {
+        const { updatePassiveLevelOnly } = await import("@/actions/buildActions");
+        if (!build) return; // Double vérification pour TypeScript
+        await updatePassiveLevelOnly(build.id, passiveId, level);
+      } catch (error) {
+        console.error("Error saving passive level:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ passives });
+      }
     },
 
-    updateStigma: (stigmaId, stigmaCost) => {
+    updateStigma: async (stigmaId, stigmaCost) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
-      if (isStarterBuild(build) || !isBuildOwner(build, currentUserId)) return;
-      const stigmas = build?.stigmas?.map((s) =>
+      if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
+      
+      const stigmas = build.stigmas?.map((s) =>
         s.stigmaId === stigmaId ? { ...s, stigmaCost } : s
       );
-      get().updateBuild({ stigmas });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, stigmas } : null,
+      }));
+
+      // Sauvegarder de manière optimisée (seulement le stigmaCost)
+      try {
+        const { updateStigmaCostOnly } = await import("@/actions/buildActions");
+        await updateStigmaCostOnly(build.id, stigmaId, stigmaCost);
+      } catch (error) {
+        console.error("Error saving stigma cost:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ stigmas });
+      }
     },
 
     // ==========================================================
     // ABILITY MANAGEMENT
     // ==========================================================
 
-    addAbility: (abilityId, level = 0) => {
+    addAbility: async (abilityId, level = 0) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -277,19 +354,21 @@ export const useBuildStore = create<BuildState>((set, get) => {
       if (existingAbility) return;
 
       // Find the ability in class abilities to get maxLevel
-      const classAbility = build.class.abilities?.find(
+      const classAbility = build.class?.abilities?.find(
         (a) => a.id === abilityId
       );
       if (!classAbility) return;
+
+      const maxLevel = ("maxLevel" in classAbility
+        ? classAbility.maxLevel
+        : 20) as number;
 
       const newBuildAbility = {
         id: 0, // Will be set by the server
         buildId: build.id,
         abilityId,
         level,
-        maxLevel: ("maxLevel" in classAbility
-          ? classAbility.maxLevel
-          : 20) as number,
+        maxLevel,
         activeSpecialtyChoiceIds: [],
         selectedChainSkillIds: [],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -299,17 +378,46 @@ export const useBuildStore = create<BuildState>((set, get) => {
       } as BuildAbilityType;
 
       const abilities = [...(build.abilities || []), newBuildAbility];
-      get().updateBuild({ abilities });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, abilities } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { addAbilityOnly } = await import("@/actions/buildActions");
+        await addAbilityOnly(build.id, abilityId, level, maxLevel, [], []);
+      } catch (error) {
+        console.error("Error adding ability:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ abilities });
+      }
     },
 
-    removeAbility: (abilityId) => {
+    removeAbility: async (abilityId) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
+      
       const abilities = build.abilities?.filter(
         (a) => a.abilityId !== abilityId
       );
-      get().updateBuild({ abilities });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, abilities } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { removeAbilityOnly } = await import("@/actions/buildActions");
+        await removeAbilityOnly(build.id, abilityId);
+      } catch (error) {
+        console.error("Error removing ability:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ abilities });
+      }
     },
 
     toggleSpecialtyChoice: async (abilityId, specialtyChoiceId) => {
@@ -414,7 +522,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // PASSIVE MANAGEMENT
     // ==========================================================
 
-    addPassive: (passiveId, level = 0) => {
+    addPassive: async (passiveId, level = 0) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -426,19 +534,21 @@ export const useBuildStore = create<BuildState>((set, get) => {
       if (existingPassive) return;
 
       // Find the passive in class passives to get maxLevel
-      const classPassive = build.class.passives?.find(
+      const classPassive = build.class?.passives?.find(
         (p) => p.id === passiveId
       );
       if (!classPassive) return;
+
+      const maxLevel = ("maxLevel" in classPassive
+        ? classPassive.maxLevel
+        : 20) as number;
 
       const newBuildPassive = {
         id: 0, // Will be set by the server
         buildId: build.id,
         passiveId,
         level,
-        maxLevel: ("maxLevel" in classPassive
-          ? classPassive.maxLevel
-          : 20) as number,
+        maxLevel,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         build: build as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -446,15 +556,44 @@ export const useBuildStore = create<BuildState>((set, get) => {
       } as BuildPassiveType;
 
       const passives = [...(build.passives || []), newBuildPassive];
-      get().updateBuild({ passives });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, passives } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { addPassiveOnly } = await import("@/actions/buildActions");
+        await addPassiveOnly(build.id, passiveId, level, maxLevel);
+      } catch (error) {
+        console.error("Error adding passive:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ passives });
+      }
     },
 
-    removePassive: (passiveId) => {
+    removePassive: async (passiveId) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
+      
       const passives = build.passives?.filter((p) => p.passiveId !== passiveId);
-      get().updateBuild({ passives });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, passives } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { removePassiveOnly } = await import("@/actions/buildActions");
+        await removePassiveOnly(build.id, passiveId);
+      } catch (error) {
+        console.error("Error removing passive:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ passives });
+      }
     },
 
     getPassivesBySpellTag: (spellTagName) => {
@@ -474,7 +613,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // STIGMA MANAGEMENT
     // ==========================================================
 
-    updateStigmaLevel: (stigmaId, level) => {
+    updateStigmaLevel: async (stigmaId, level) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -515,10 +654,23 @@ export const useBuildStore = create<BuildState>((set, get) => {
             )
           : updatedStigmas;
 
-      get().updateBuild({ stigmas: finalStigmas });
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, stigmas: finalStigmas } : null,
+      }));
+
+      // Sauvegarder de manière optimisée (seulement le niveau)
+      try {
+        const { updateStigmaLevelOnly } = await import("@/actions/buildActions");
+        await updateStigmaLevelOnly(build.id, stigmaId, level);
+      } catch (error) {
+        console.error("Error saving stigma level:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ stigmas: finalStigmas });
+      }
     },
 
-    addStigma: (stigmaId, level = 0, stigmaCost) => {
+    addStigma: async (stigmaId, level = 0, stigmaCost) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -530,21 +682,24 @@ export const useBuildStore = create<BuildState>((set, get) => {
       if (existingStigma) return;
 
       // Find the stigma in class stigmas to get maxLevel and baseCost
-      const classStigma = build.class.stigmas?.find((s) => s.id === stigmaId);
+      const classStigma = build.class?.stigmas?.find((s) => s.id === stigmaId);
       if (!classStigma) return;
+
+      const maxLevel = ("maxLevel" in classStigma
+        ? classStigma.maxLevel
+        : 20) as number;
+      const finalStigmaCost =
+        stigmaCost ??
+        ("baseCost" in classStigma ? classStigma.baseCost : 10) ??
+        10;
 
       const newBuildStigma = {
         id: 0, // Will be set by the server
         buildId: build.id,
         stigmaId,
         level,
-        maxLevel: ("maxLevel" in classStigma
-          ? classStigma.maxLevel
-          : 20) as number,
-        stigmaCost:
-          stigmaCost ??
-          ("baseCost" in classStigma ? classStigma.baseCost : 10) ??
-          10,
+        maxLevel,
+        stigmaCost: finalStigmaCost,
         activeSpecialtyChoiceIds: [],
         selectedChainSkillIds: [],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -554,15 +709,44 @@ export const useBuildStore = create<BuildState>((set, get) => {
       } as BuildStigmaType;
 
       const stigmas = [...(build.stigmas || []), newBuildStigma];
-      get().updateBuild({ stigmas });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, stigmas } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { addStigmaOnly } = await import("@/actions/buildActions");
+        await addStigmaOnly(build.id, stigmaId, level, maxLevel, finalStigmaCost, [], []);
+      } catch (error) {
+        console.error("Error adding stigma:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ stigmas });
+      }
     },
 
-    removeStigma: (stigmaId) => {
+    removeStigma: async (stigmaId) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
+      
       const stigmas = build.stigmas?.filter((s) => s.stigmaId !== stigmaId);
-      get().updateBuild({ stigmas });
+
+      // Mettre à jour localement immédiatement
+      set((state) => ({
+        build: state.build ? { ...state.build, stigmas } : null,
+      }));
+
+      // Sauvegarder de manière optimisée
+      try {
+        const { removeStigmaOnly } = await import("@/actions/buildActions");
+        await removeStigmaOnly(build.id, stigmaId);
+      } catch (error) {
+        console.error("Error removing stigma:", error);
+        // En cas d'erreur, fallback sur la sauvegarde complète
+        get().updateBuild({ stigmas });
+      }
     },
 
     toggleSpecialtyChoiceStigma: async (stigmaId, specialtyChoiceId) => {
@@ -726,7 +910,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
     // CHAIN SKILLS MANAGEMENT
     // ==========================================================
 
-    updateChainSkill: (skillId, chainSkillIds, type) => {
+    updateChainSkill: async (skillId, chainSkillIds, type) => {
       const build = get().build;
       const currentUserId = get().currentUserId;
       if (isStarterBuild(build) || !build || !isBuildOwner(build, currentUserId)) return;
@@ -736,7 +920,8 @@ export const useBuildStore = create<BuildState>((set, get) => {
         const parentAbility = build.abilities?.find(
           (a) => a.abilityId === skillId
         );
-        const parentLevel = parentAbility?.level || 0;
+        if (!parentAbility) return;
+        const parentLevel = parentAbility.level || 0;
 
         const abilities =
           build.abilities?.map((a) => {
@@ -748,7 +933,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
           }) || [];
 
         // Add or update chain skills with parent's level
-        chainSkillIds.forEach((chainSkillId) => {
+        for (const chainSkillId of chainSkillIds) {
           const chainSkillIndex = abilities.findIndex(
             (ba) => ba.abilityId === chainSkillId
           );
@@ -758,14 +943,15 @@ export const useBuildStore = create<BuildState>((set, get) => {
               (ca) => ca.id === chainSkillId
             );
             if (chainClassAbility) {
+              const maxLevel = ("maxLevel" in chainClassAbility
+                ? chainClassAbility.maxLevel
+                : 20) as number;
               const newChainSkillAbility = {
                 id: 0, // Will be set by the server
                 buildId: build.id,
                 abilityId: chainSkillId,
                 level: parentLevel,
-                maxLevel: ("maxLevel" in chainClassAbility
-                  ? chainClassAbility.maxLevel
-                  : 20) as number,
+                maxLevel,
                 activeSpecialtyChoiceIds: [],
                 selectedChainSkillIds: [],
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -774,6 +960,14 @@ export const useBuildStore = create<BuildState>((set, get) => {
                 ability: chainClassAbility as any,
               } as BuildAbilityType;
               abilities.push(newChainSkillAbility);
+              
+              // Sauvegarder la nouvelle chain skill
+              try {
+                const { addAbilityOnly } = await import("@/actions/buildActions");
+                await addAbilityOnly(build.id, chainSkillId, parentLevel, maxLevel, [], []);
+              } catch (error) {
+                console.error("Error adding chain skill:", error);
+              }
             }
           } else {
             // Chain skill already in build, update its level to match parent
@@ -781,14 +975,22 @@ export const useBuildStore = create<BuildState>((set, get) => {
               ...abilities[chainSkillIndex],
               level: parentLevel,
             };
+            
+            // Sauvegarder le niveau mis à jour
+            try {
+              const { updateAbilityLevelOnly } = await import("@/actions/buildActions");
+              await updateAbilityLevelOnly(build.id, chainSkillId, parentLevel);
+            } catch (error) {
+              console.error("Error updating chain skill level:", error);
+            }
           }
-        });
+        }
 
         // Remove chain skills that are no longer selected (if they're not used elsewhere)
         const removedChainSkillIds = (
-          parentAbility?.selectedChainSkillIds || []
+          parentAbility.selectedChainSkillIds || []
         ).filter((id) => !chainSkillIds.includes(id));
-        removedChainSkillIds.forEach((removedId) => {
+        for (const removedId of removedChainSkillIds) {
           // Check if this chain skill is used by another parent
           const isUsedElsewhere = abilities.some(
             (a) =>
@@ -802,15 +1004,37 @@ export const useBuildStore = create<BuildState>((set, get) => {
             );
             if (index !== -1) {
               abilities.splice(index, 1);
+              
+              // Sauvegarder la suppression
+              try {
+                const { removeAbilityOnly } = await import("@/actions/buildActions");
+                await removeAbilityOnly(build.id, removedId);
+              } catch (error) {
+                console.error("Error removing chain skill:", error);
+              }
             }
           }
-        });
+        }
 
-        get().updateBuild({ abilities });
+        // Mettre à jour localement immédiatement
+        set((state) => ({
+          build: state.build ? { ...state.build, abilities } : null,
+        }));
+
+        // Sauvegarder les selectedChainSkillIds du parent
+        try {
+          const { updateAbilityChainSkillsOnly } = await import("@/actions/buildActions");
+          await updateAbilityChainSkillsOnly(build.id, skillId, chainSkillIds);
+        } catch (error) {
+          console.error("Error saving chain skills:", error);
+          // En cas d'erreur, fallback sur la sauvegarde complète
+          get().updateBuild({ abilities });
+        }
       } else if (type === "stigma") {
         // Find the parent stigma to get its level
         const parentStigma = build.stigmas?.find((s) => s.stigmaId === skillId);
-        const parentLevel = parentStigma?.level || 0;
+        if (!parentStigma) return;
+        const parentLevel = parentStigma.level || 0;
 
         const stigmas =
           build.stigmas?.map((s) => {
@@ -822,7 +1046,7 @@ export const useBuildStore = create<BuildState>((set, get) => {
           }) || [];
 
         // Add or update chain skills with parent's level
-        chainSkillIds.forEach((chainSkillId) => {
+        for (const chainSkillId of chainSkillIds) {
           const chainSkillIndex = stigmas.findIndex(
             (bs) => bs.stigmaId === chainSkillId
           );
@@ -832,18 +1056,20 @@ export const useBuildStore = create<BuildState>((set, get) => {
               (cs) => cs.id === chainSkillId
             );
             if (chainClassStigma) {
+              const maxLevel = ("maxLevel" in chainClassStigma
+                ? chainClassStigma.maxLevel
+                : 20) as number;
+              const stigmaCost =
+                ("baseCost" in chainClassStigma
+                  ? chainClassStigma.baseCost
+                  : 10) ?? 10;
               const newChainSkillStigma = {
                 id: 0, // Will be set by the server
                 buildId: build.id,
                 stigmaId: chainSkillId,
                 level: parentLevel,
-                maxLevel: ("maxLevel" in chainClassStigma
-                  ? chainClassStigma.maxLevel
-                  : 20) as number,
-                stigmaCost:
-                  ("baseCost" in chainClassStigma
-                    ? chainClassStigma.baseCost
-                    : 10) ?? 10,
+                maxLevel,
+                stigmaCost,
                 activeSpecialtyChoiceIds: [],
                 selectedChainSkillIds: [],
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -852,6 +1078,14 @@ export const useBuildStore = create<BuildState>((set, get) => {
                 stigma: chainClassStigma as any,
               } as BuildStigmaType;
               stigmas.push(newChainSkillStigma);
+              
+              // Sauvegarder la nouvelle chain skill
+              try {
+                const { addStigmaOnly } = await import("@/actions/buildActions");
+                await addStigmaOnly(build.id, chainSkillId, parentLevel, maxLevel, stigmaCost, [], []);
+              } catch (error) {
+                console.error("Error adding chain skill:", error);
+              }
             }
           } else {
             // Chain skill already in build, update its level to match parent
@@ -859,14 +1093,22 @@ export const useBuildStore = create<BuildState>((set, get) => {
               ...stigmas[chainSkillIndex],
               level: parentLevel,
             };
+            
+            // Sauvegarder le niveau mis à jour
+            try {
+              const { updateStigmaLevelOnly } = await import("@/actions/buildActions");
+              await updateStigmaLevelOnly(build.id, chainSkillId, parentLevel);
+            } catch (error) {
+              console.error("Error updating chain skill level:", error);
+            }
           }
-        });
+        }
 
         // Remove chain skills that are no longer selected (if they're not used elsewhere)
         const removedChainSkillIds = (
-          parentStigma?.selectedChainSkillIds || []
+          parentStigma.selectedChainSkillIds || []
         ).filter((id) => !chainSkillIds.includes(id));
-        removedChainSkillIds.forEach((removedId) => {
+        for (const removedId of removedChainSkillIds) {
           // Check if this chain skill is used by another parent
           const isUsedElsewhere = stigmas.some(
             (s) =>
@@ -878,11 +1120,32 @@ export const useBuildStore = create<BuildState>((set, get) => {
             const index = stigmas.findIndex((bs) => bs.stigmaId === removedId);
             if (index !== -1) {
               stigmas.splice(index, 1);
+              
+              // Sauvegarder la suppression
+              try {
+                const { removeStigmaOnly } = await import("@/actions/buildActions");
+                await removeStigmaOnly(build.id, removedId);
+              } catch (error) {
+                console.error("Error removing chain skill:", error);
+              }
             }
           }
-        });
+        }
 
-        get().updateBuild({ stigmas });
+        // Mettre à jour localement immédiatement
+        set((state) => ({
+          build: state.build ? { ...state.build, stigmas } : null,
+        }));
+
+        // Sauvegarder les selectedChainSkillIds du parent
+        try {
+          const { updateStigmaChainSkillsOnly } = await import("@/actions/buildActions");
+          await updateStigmaChainSkillsOnly(build.id, skillId, chainSkillIds);
+        } catch (error) {
+          console.error("Error saving chain skills:", error);
+          // En cas d'erreur, fallback sur la sauvegarde complète
+          get().updateBuild({ stigmas });
+        }
       }
     },
   };
