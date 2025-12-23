@@ -129,6 +129,8 @@ model Ability {
   attackModifier             Int?
   criticalHitResist          Int?
   criticalHitResistModifier  Int?
+  criticalHit                Int?
+  criticalHitModifier        Int?
   damageBoost                Int?
   damageBoostModifier        Int?
   damageBoostModifiers       Json?
@@ -242,6 +244,8 @@ model Passive {
   cooldown                   String?        @default("Instant Cast")
   criticalHitResist          Int?
   criticalHitResistModifier  Int?
+  criticalHit                Int?
+  criticalHitModifier        Int?
   damageBoost                Int?
   damageMax                  Int?
   damageMaxModifier          Int?
@@ -258,6 +262,8 @@ model Passive {
   healMinModifier            Int?
   impactTypeResist           Int?
   impactTypeResistModifier   Int?
+  impactTypeChance           Int?
+  impactTypeChanceModifier   Int?
   incomingHeal               Int?
   incomingHealModifier       Int?
   manaCost                   Int?
@@ -266,6 +272,10 @@ model Passive {
   maxHPModifier              Int?
   maxMP                      Int?
   maxMPModifier              Int?
+  perfect                    Float?
+  perfectModifier            Float?
+  smite                      Float?
+  smiteModifier              Float?
   range                      Int?           @default(20)
   staggerDamage              Int?
   statusEffectResist         Int?
@@ -332,6 +342,8 @@ model Stigma {
   attackModifier             Int?
   criticalHitResist          Int?
   criticalHitResistModifier  Int?
+  criticalHit                Int?
+  criticalHitModifier        Int?
   damageBoost                Int?
   damageBoostModifier        Int?
   damageBoostModifiers       Json?
@@ -351,6 +363,8 @@ model Stigma {
   healMinModifiers           Json?
   impactTypeResist           Int?
   impactTypeResistModifier   Int?
+  impactTypeChance           Int?
+  impactTypeChanceModifier   Int?
   incomingHeal               Int?
   incomingHealModifier       Int?
   incomingHealModifiers      Int?

@@ -194,7 +194,7 @@ nezekanRunes.push(null); // (7,10) - Vide
 // Ligne 9 (row 8): rare common legend vide common legend common vide common common rare
 nezekanRunes.push(createNezekanRune(8, 0, "rare", 5)); // (8,0) - Rare - Passive ID 5
 nezekanRunes.push(createNezekanRune(8, 1, "common", {mp: commonStats.mp })); // (8,1) - Common
-nezekanRunes.push(createNezekanRune(8, 2, "rare", 3)); // (8,2) - Rare - Passive ID 3
+nezekanRunes.push(createNezekanRune(8, 2, "legend", 9)); // (8,5) - Legend - Ability ID 9
 nezekanRunes.push(null); // (8,3) - Vide
 nezekanRunes.push(createNezekanRune(8, 4, "common", {mp: commonStats.mp })); // (8,4) - Common
 nezekanRunes.push(createNezekanRune(8, 5, "legend", 11)); // (8,5) - Legend - Ability ID 11
@@ -207,7 +207,7 @@ nezekanRunes.push(createNezekanRune(8, 10, "rare", 2)); // (8,10) - Rare - Passi
 // Ligne 10 (row 9): common vide rare common common vide common common legend rare common
 nezekanRunes.push(createNezekanRune(9, 0, "common", {maxHP: commonStats.maxHP })); // (9,0) - Common
 nezekanRunes.push(null); // (9,1) - Vide
-nezekanRunes.push(createNezekanRune(9, 2, "rare", 3)); // (9,2) - Rare - Passive ID 3
+nezekanRunes.push(createNezekanRune(9, 2, "common", {criticalHit: commonStats.criticalHit })); // (9,2)
 nezekanRunes.push(createNezekanRune(9, 3, "common", {attack: commonStats.attack})); // (9,3) - Common
 nezekanRunes.push(createNezekanRune(9, 4, "common", {maxHP: commonStats.maxHP})); // (9,4) - Common
 nezekanRunes.push(null); // (9,5) - Vide

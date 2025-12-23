@@ -92,10 +92,14 @@ export const PassiveSchemaBase = z.object({
 
   criticalHitResist: z.number().nullish(),
   criticalHitResistModifier: z.number().nullish(),
+  criticalHit: z.number().nullish(),
+  criticalHitModifier: z.number().nullish(),
   statusEffectResist: z.number().nullish(),
   statusEffectResistModifier: z.number().nullish(),
   impactTypeResist: z.number().nullish(),
   impactTypeResistModifier: z.number().nullish(),
+  impactTypeChance: z.number().nullish(),
+  impactTypeChanceModifier: z.number().nullish(),
 
   attack: z.number().nullish(),
   attackModifier: z.number().nullish(),
@@ -120,6 +124,10 @@ export const PassiveSchemaBase = z.object({
 
   manaCost: z.number().nullish(),
   manaRegen: z.number().nullish(),
+  perfect: z.number().nullish(),
+  perfectModifier: z.number().nullish(),
+  smite: z.number().nullish(),
+  smiteModifier: z.number().nullish(),
 
   range: z.number().default(20).nullish(),
   area: z.number().default(4).nullish(),

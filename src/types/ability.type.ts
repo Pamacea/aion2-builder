@@ -84,10 +84,14 @@ export const AbilitySchemaBase = z.object({
 
   criticalHitResist: z.number().nullish(),
   criticalHitResistModifier: z.number().nullish(),
+  criticalHit: z.number().nullish(),
+  criticalHitModifier: z.number().nullish(),
   statusEffectResist: z.number().nullish(),
   statusEffectResistModifier: z.number().nullish(),
   impactTypeResist: z.number().nullish(),
   impactTypeResistModifier: z.number().nullish(),
+  impactTypeChance: z.number().nullish(),
+  impactTypeChanceModifier: z.number().nullish(),
 
   attack: z.number().nullish(),
   attackModifier: z.number().nullish(),
