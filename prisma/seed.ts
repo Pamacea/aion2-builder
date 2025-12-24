@@ -38,7 +38,7 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Seeding TAGS...");
+  console.log("🌱 Seeding data...");
 
   // --- Seed TAGS ---
   for (const tag of tagsList) {
@@ -49,8 +49,6 @@ async function main() {
     });
   }
 
-  console.log("🌱 Seeding SPELL TAGS...");
-
   // --- Seed SPELL TAGS ---
   for (const spellTag of spellTagsList) {
    await prisma.spellTag.upsert({
@@ -59,8 +57,6 @@ async function main() {
      create: { name: spellTag },
    });
  }
-
-  console.log("🌱 Seeding CLASSES...");
 
   // --- Seed CLASSES ---
   for (const c of classesData) {
@@ -224,9 +220,7 @@ async function main() {
           });
 
           if (parentAbility && ability.chainSkills && ability.chainSkills.length > 0) {
-            console.log(`🔗 Seeding chain skills for ${ability.name}...`);
             for (const chainSkillName of ability.chainSkills) {
-              // Find the chain skill ability
               const chainSkillAbility = await prisma.ability.findFirst({
                 where: {
                   name: chainSkillName,
@@ -235,7 +229,6 @@ async function main() {
               });
 
               if (chainSkillAbility) {
-                // Check if chain skill relation already exists
                 const existingChainSkill = await prisma.chainSkill.findFirst({
                   where: {
                     parentAbilityId: parentAbility.id,
@@ -250,12 +243,7 @@ async function main() {
                       chainAbilityId: chainSkillAbility.id,
                     },
                   });
-                  console.log(`  ✅ Created chain skill: ${ability.name} -> ${chainSkillName}`);
-                } else {
-                  console.log(`  ℹ️  Chain skill already exists: ${ability.name} -> ${chainSkillName}`);
                 }
-              } else {
-                console.log(`  ⚠️  Chain skill ability not found: ${chainSkillName} for class ${classRecord.name}`);
               }
             }
           }
@@ -495,13 +483,11 @@ async function main() {
     }
   }
 
-  console.log("🌱 Seeding DAEVANION RUNES...");
-
   // Helper function to seed runes for a path
   const seedDaevanionPath = async (pathName: string, runes: (DaevanionRune | null)[]) => {
     let count = 0;
     for (const rune of runes) {
-      if (!rune) continue; // Skip null slots
+      if (!rune) continue;
       
       await prisma.daevanionRune.upsert({
         where: {
@@ -528,37 +514,20 @@ async function main() {
     return count;
   };
 
-  // --- Seed DAEVANION RUNES for Nezekan ---
+  // --- Seed DAEVANION RUNES ---
   const { nezekanRunes } = await import("../src/data/daevanion/nezekan");
-  const nezekanCount = await seedDaevanionPath("nezekan", nezekanRunes);
-  console.log(`✅ ${nezekanCount} Daevanion runes seeded for Nezekan`);
-
-  // --- Seed DAEVANION RUNES for Zikel ---
   const { zikelRunes } = await import("../src/data/daevanion/zikel");
-  const zikelCount = await seedDaevanionPath("zikel", zikelRunes);
-  console.log(`✅ ${zikelCount} Daevanion runes seeded for Zikel`);
-
-  // --- Seed DAEVANION RUNES for Vaizel ---
   const { vaizelRunes } = await import("../src/data/daevanion/vaizel");
-  const vaizelCount = await seedDaevanionPath("vaizel", vaizelRunes);
-  console.log(`✅ ${vaizelCount} Daevanion runes seeded for Vaizel`);
-
-  // --- Seed DAEVANION RUNES for Triniel ---
   const { trinielRunes } = await import("../src/data/daevanion/triniel");
-  const trinielCount = await seedDaevanionPath("triniel", trinielRunes);
-  console.log(`✅ ${trinielCount} Daevanion runes seeded for Triniel`);
-
-  // --- Seed DAEVANION RUNES for Ariel ---
   const { arielRunes } = await import("../src/data/daevanion/ariel");
-  const arielCount = await seedDaevanionPath("ariel", arielRunes);
-  console.log(`✅ ${arielCount} Daevanion runes seeded for Ariel`);
-
-  // --- Seed DAEVANION RUNES for Azphel ---
   const { azphelRunes } = await import("../src/data/daevanion/azphel");
-  const azphelCount = await seedDaevanionPath("azphel", azphelRunes);
-  console.log(`✅ ${azphelCount} Daevanion runes seeded for Azphel`);
-
-  console.log("🌱 Seeding BUILDS...");
+  
+  await seedDaevanionPath("nezekan", nezekanRunes);
+  await seedDaevanionPath("zikel", zikelRunes);
+  await seedDaevanionPath("vaizel", vaizelRunes);
+  await seedDaevanionPath("triniel", trinielRunes);
+  await seedDaevanionPath("ariel", arielRunes);
+  await seedDaevanionPath("azphel", azphelRunes);
 
     // --- Seed BUILDS ---
   for (const c of classesData) {
@@ -570,10 +539,7 @@ async function main() {
       },
     });
 
-    if (!classRecord) {
-      console.warn(`⚠️ Classe "${c.name}" non trouvée, skipping build...`);
-      continue;
-    }
+    if (!classRecord) continue;
 
     const buildName = `Starter Build - ${c.name.charAt(0).toUpperCase()}${c.name.slice(1)}`;
 
@@ -585,7 +551,6 @@ async function main() {
     });
 
     if (!existingBuild) {
-      // Get all abilities and passives for this class
       const classAbilities = classRecord.abilities || [];
       const classPassives = classRecord.passives || [];
 
@@ -615,13 +580,10 @@ async function main() {
           stigmas: { create: [] },
         },
       });
-      console.log(`✅ Build "${buildName}" seeded for class "${c.name}" with ${classAbilities.length} abilities and ${classPassives.length} passives`);
-    } else {
-      console.log(`⚠️ Build "${buildName}" already exists for class "${c.name}", skipping.`);
     }
   }
 
-  console.log("✅ All data seeded successfully!");
+  console.log("✅ Seeding completed!");
 }
 
 

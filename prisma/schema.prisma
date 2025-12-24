@@ -307,6 +307,11 @@ model Passive {
   damagePerSecondModifiers   Json?
   chargeLevels               String?
   effectCondition            String?
+  defenseModifiers           Json?
+  statusEffectResistModifiers Json?
+  impactTypeResistModifiers   Json?
+  impactTypeChanceModifiers   Json?
+  smiteModifiers              Json?
   buildPassives              BuildPassive[]
   class                      Class          @relation(fields: [classId], references: [id])
   spellTag                   SpellTag[]     @relation("PassiveToSpellTag")
@@ -390,6 +395,16 @@ model Stigma {
   damagePerSecondModifiers   Json?
   chargeLevels               String
   effectCondition            String?
+  defenseModifiers            Json?
+  enmity                     Int?
+  enmityModifier             Int?
+  enmityModifiers            Json?
+  duration                   Int?
+  durationModifier           Int?
+  durationModifiers          Json?
+  protectiveShield           Int?
+  protectiveShieldModifier   Int?
+  protectiveShieldModifiers Json?
   buildStigmas               BuildStigma[]
   chainSkills                ChainSkillStigma[] @relation("StigmaChainSkills")
   parentStigmas              ChainSkillStigma[] @relation("StigmaParentSkills")

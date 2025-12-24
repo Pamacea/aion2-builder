@@ -92,6 +92,10 @@ export const StigmaSchemaBase = z.object({
   statusEffectResistModifier: z.number().nullish(),
   impactTypeResist: z.number().nullish(),
   impactTypeResistModifier: z.number().nullish(),
+  impactTypeResistModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
   impactTypeChance: z.number().nullish(),
   impactTypeChanceModifier: z.number().nullish(),
 
@@ -99,6 +103,10 @@ export const StigmaSchemaBase = z.object({
   attackModifier: z.number().nullish(),
   defense: z.number().nullish(),
   defenseModifier: z.number().nullish(),
+  defenseModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
 
   blockDamage: z.number().nullish(),
   blockDamageModifier: z.number().nullish(),
@@ -131,6 +139,27 @@ export const StigmaSchemaBase = z.object({
 
   effectCondition: z.string().nullish(),
   chargeLevels: z.string(),
+
+  enmity: z.number().nullish(),
+  enmityModifier: z.number().nullish(),
+  enmityModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+
+  duration: z.number().nullish(),
+  durationModifier: z.number().nullish(),
+  durationModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
+
+  protectiveShield: z.number().nullish(),
+  protectiveShieldModifier: z.number().nullish(),
+  protectiveShieldModifiers: z
+    .union([z.array(z.number()), z.null()])
+    .transform((val) => (Array.isArray(val) ? val : null))
+    .nullish(),
 
   baseCost: z.number().default(10),
   baseCostModifier: z.number().default(2),

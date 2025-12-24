@@ -25,6 +25,13 @@ import React from "react";
  * - {{STATUS_EFFECT_RESIST}} -> statusEffectResist calculé
  * - {{IMPACT_TYPE_RESIST}} -> impactTypeResist calculé
  * - {{DAMAGE_TOLERANCE}} -> damageTolerance calculé
+ * - {{DURATION}} -> duration calculé
+ * - {{ENMITY}} -> enmity calculé
+ * - {{PROTECTIVE_SHIELD}} -> protectiveShield calculé
+ * - {{MP}} -> minMP calculé
+ * - {{SMITE_PERCENTAGE}} -> smite calculé (en pourcentage)
+ * - {{IMPACT_TYPE_CHANCE_PERCENTAGE}} -> impactTypeChance calculé (en pourcentage)
+ * - {{MAX_HP}} -> maxHP calculé (en flat)
  */
 function processDescription(
   description: string,
@@ -183,6 +190,51 @@ function processDescription(
           "damageToleranceModifier",
           "damageToleranceModifiers"
         );
+        break;
+      case "DURATION":
+        value = getCalculatedValue(
+          "duration",
+          "durationModifier",
+          "durationModifiers"
+        );
+        break;
+      case "ENMITY":
+        value = getCalculatedValue(
+          "enmity",
+          "enmityModifier",
+          "enmityModifiers"
+        );
+        break;
+      case "PROTECTIVE_SHIELD":
+        value = getCalculatedValue(
+          "protectiveShield",
+          "protectiveShieldModifier",
+          "protectiveShieldModifiers"
+        );
+        break;
+      case "MP":
+        value = getCalculatedValue(
+          "minMP",
+          "minMPModifier",
+          "minMPModifiers"
+        );
+        break;
+      case "SMITE_PERCENTAGE":
+        value = getCalculatedValue(
+          "smite",
+          "smiteModifier",
+          "smiteModifiers"
+        );
+        break;
+      case "IMPACT_TYPE_CHANCE_PERCENTAGE":
+        value = getCalculatedValue(
+          "impactTypeChance",
+          "impactTypeChanceModifier",
+          "impactTypeChanceModifiers"
+        );
+        break;
+      case "MAX_HP":
+        value = getCalculatedValue("maxHP", "maxHPModifier", "maxHPModifiers");
         break;
       default:
         // Si le placeholder n'est pas reconnu, garder le texte original
