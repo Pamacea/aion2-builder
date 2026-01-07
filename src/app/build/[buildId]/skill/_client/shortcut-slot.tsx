@@ -4,6 +4,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { ShortcutSlotProps } from "@/types/shortcut.type";
 import { isStarterBuild } from "@/utils/buildUtils";
+import { getIconUrl } from "@/utils/iconUrl";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
@@ -110,22 +111,25 @@ export const ShortcutSlot = ({ slotId, skill, onDrop, onClear, className = "", i
 
   const getIconSrc = () => {
     if (!skill) return null;
-    
+
     if (skill.ability) {
       const className = skill.ability.class?.name || build?.class?.name;
       if (!className) return null;
-      return `${ABILITY_PATH}${className}/${skill.ability.iconUrl || "default-icon.webp"}`;
+      const localPath = `${ABILITY_PATH}${className}/`;
+      return getIconUrl(skill.ability.iconUrl, localPath);
     }
     if (skill.passive) {
       const className = skill.passive.class?.name || build?.class?.name;
       if (!className) return null;
-      return `${ABILITY_PATH}${className}/${skill.passive.iconUrl || "default-icon.webp"}`;
+      const localPath = `${ABILITY_PATH}${className}/`;
+      return getIconUrl(skill.passive.iconUrl, localPath);
     }
     if (skill.stigma) {
       // Use build class name first, then stigma classes, never use "default"
       const className = build?.class?.name || skill.stigma.classes?.[0]?.name;
       if (!className) return null;
-      return `${ABILITY_PATH}${className}/${skill.stigma.iconUrl || "default-icon.webp"}`;
+      const localPath = `${ABILITY_PATH}${className}/`;
+      return getIconUrl(skill.stigma.iconUrl, localPath);
     }
     return null;
   };

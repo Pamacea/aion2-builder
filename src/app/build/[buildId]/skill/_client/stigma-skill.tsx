@@ -4,6 +4,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildStigmaType, StigmaType } from "@/types/schema";
 import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
+import { getIconUrl } from "@/utils/iconUrl";
 import Image from "next/image";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -74,17 +75,14 @@ export const StigmaSkill = ({
   };
 
   // Build image path with fallback
-  const iconUrl = stigma.iconUrl || "default-icon.webp";
-  const baseImageSrc = classNameForPath 
-    ? `${ABILITY_PATH}${classNameForPath}/${iconUrl}`
-    : "/icons/default-spell-icon.webp";
-  const imageSrc = imageError 
+  const localPath = classNameForPath ? `${ABILITY_PATH}${classNameForPath}/` : "/icons/";
+  const imageSrc = imageError
     ? "/icons/IC_Ability_Default.webp"
-    : baseImageSrc;
+    : getIconUrl(stigma.iconUrl, localPath);
 
   // Create a unique key for the image component to force remount when image changes
   // This resets the error state automatically when the image source changes
-  const imageKey = `${stigma.id}-${baseImageSrc}`;
+  const imageKey = `${stigma.id}-${imageSrc}`;
   
   // Reset image error when image key changes (using startTransition to avoid cascading renders)
   useEffect(() => {

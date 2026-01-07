@@ -5,6 +5,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { BuildPassiveType, PassiveType } from "@/types/schema";
 import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
+import { getIconUrl } from "@/utils/iconUrl";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -76,10 +77,10 @@ export const PassiveSkill = ({
 
   // Build image path with fallback
   const classNameForPath = passive.class?.name || "default";
-  const iconUrl = passive.iconUrl || "default-icon.webp";
-  const imageSrc = imageError 
+  const localPath = `${ABILITY_PATH}${classNameForPath}/`;
+  const imageSrc = imageError
     ? "/icons/IC_Ability_Default.webp"
-    : `${ABILITY_PATH}${classNameForPath}/${iconUrl}`;
+    : getIconUrl(passive.iconUrl, localPath);
 
   const [{ isDragging }, drag] = useDrag({
     type: "skill",

@@ -5,6 +5,7 @@ import { ABILITY_PATH } from "@/constants/paths";
 import { useBuildStore } from "@/store/useBuildEditor";
 import { AbilityType, BuildAbilityType } from "@/types/schema";
 import { canEditBuild, isStarterBuild } from "@/utils/buildUtils";
+import { getIconUrl } from "@/utils/iconUrl";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
@@ -79,10 +80,10 @@ export const ActiveSkill = ({
 
   // Build image path
   const classNameForPath = ability.class?.name || "default";
-  const iconUrl = ability.iconUrl || "default-icon.webp";
-  const imageSrc = imageError 
+  const localPath = `${ABILITY_PATH}${classNameForPath}/`;
+  const imageSrc = imageError
     ? "/icons/IC_Ability_Default.webp"
-    : `${ABILITY_PATH}${classNameForPath}/${iconUrl}`;
+    : getIconUrl(ability.iconUrl, localPath);
   
   // Check if this skill is selected for shortcut
   const isSelectedForShortcut = selectedSkill?.type === "ability" && 
