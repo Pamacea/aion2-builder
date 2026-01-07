@@ -15,13 +15,18 @@ const nextConfig: NextConfig = {
   // Exclude Prisma and database packages from client bundles
   serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg'],
   
-  // Configuration des images pour autoriser les avatars Discord
+  // Configuration des images pour autoriser les avatars Discord et les icônes de jeu
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'cdn.discordapp.com',
         pathname: '/avatars/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.playnccdn.com',
+        pathname: '/static-aion2-gamedata/resources/**',
       },
     ],
     // Optimisation des images
