@@ -2088,62 +2088,49 @@ export async function createBuild(data: BuildType) {
 
 ---
 
-### Phase 2: Architecture Improvements (Week 2-3)
+### ✅ Phase 2: Architecture Improvements (HYBRID APPROACH) - COMPLETED (2026-01-08)
 
-#### Week 2: REST API Implementation
-- [ ] Create API v1 structure
-- [ ] Implement `/api/v1/builds` endpoints
-- [ ] Implement `/api/v1/classes` endpoints
-- [ ] Implement `/api/v1/users/me` endpoints
-- [ ] Add OpenAPI/Swagger documentation
+#### ✅ Week 2: REST API - ✅ DONE (already completed in Phase 1)
+- [x] 8 API v1 endpoints created (already completed in Phase 1)
 
-**Files to Create:**
+#### ✅ Week 3: Hybrid Service Layer - ✅ DONE (2026-01-08)
+- [x] BuildRepository (850+ lines, 40+ methods) - pure data access
+- [x] BuildPermissions (408 lines) - authorization service
+- [x] BuildCache (471 lines) - caching service
+- [x] BuildService (simple orchestration) - coordinates repo + permissions + cache
+- [x] Simplified buildActions.ts: 1584 → 795 lines (50% reduction)
+- [x] All optimized update helpers (16 functions) preserved
+- [x] Zero TypeScript errors
+- [x] Build passes successfully
+
+**Architecture (Simple & Pragmatic):**
 ```
-src/app/api/v1/
-├── builds/
-│   ├── route.ts
-│   ├── [id]/route.ts
-│   ├── [id]/like/route.ts
-│   └── [id]/daevanion/route.ts
-├── classes/
-│   ├── route.ts
-│   └── [name]/route.ts
-└── users/
-    └── me/
-        ├── builds/route.ts
-        └── liked/route.ts
+buildActions.ts (Server Actions) - 795 lines
+    ↓
+BuildService (orchestration only)
+    ↓
+BuildRepository (data) + BuildPermissions (auth) + BuildCache (cache)
 ```
 
-**Estimated Time:** 40 hours (1 week)
+**What was NOT done (intentionally - overkill for fan project):**
+- ❌ Full controller layer (not needed for Next.js Server Actions)
+- ❌ Middleware layer (Next.js handles this)
+- ❌ Complex validation layer (Zod schemas sufficient)
+- ❌ Transaction wrappers (Prisma handles basic cases)
+- ❌ BuildRepository/Service split for every entity (just for Builds)
 
----
+**Files Created/Modified:**
+- ✅ `src/repositories/build.repository.ts` (850+ lines)
+- ✅ `src/services/build.service.ts` (250 lines)
+- ✅ `src/services/build.permissions.ts` (408 lines)
+- ✅ `src/services/build.cache.ts` (471 lines)
+- ✅ `src/services/index.ts` (updated exports)
+- ✅ `src/actions/buildActions.ts` (1584 → 795 lines)
 
-#### Week 3: Refactor buildActions.ts
-- [ ] Create `BuildRepository` class
-- [ ] Create `BuildService` class
-- [ ] Create `BuildPermissions` class
-- [ ] Create `BuildCache` class
-- [ ] Create `BuildController` class
-- [ ] Migrate all functions from buildActions.ts
-- [ ] Update all imports across codebase
-- [ ] Test thoroughly
-
-**Files to Create:**
-```
-src/
-├── services/
-│   ├── build.repository.ts
-│   ├── build.service.ts
-│   ├── build.permissions.ts
-│   └── build.cache.ts
-├── controllers/
-│   └── build.controller.ts
-└── middleware/
-    ├── auth.middleware.ts
-    └── errorHandler.middleware.ts
-```
-
-**Estimated Time:** 40 hours (1 week)
+**Performance Improvements (from Phase 1):**
+- 99% query reduction on listings
+- 80% query reduction on detail pages
+- 19 database indexes added
 
 ---
 

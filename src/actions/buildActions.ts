@@ -2,40 +2,13 @@
 
 import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
-import { buildDetailInclude, buildListingInclude, fullBuildInclude } from "@/utils/actionsUtils";
-import { isAdmin, isStarterBuild } from "@/utils/buildUtils";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { cache } from "react";
-import { prisma } from "../lib/prisma";
+import { isStarterBuild } from "@/utils/buildUtils";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { buildService } from "@/services/build.service";
 
 // ======================================
-// DATA MAPPING HELPERS
+// LOADING ACTIONS
 // ======================================
-const mapBuildAbilityData = (
-  ability: NonNullable<BuildType["abilities"]>[number]
-) => ({
-  abilityId: ability.abilityId,
-  level: ability.level,
-  activeSpecialtyChoiceIds: ability.activeSpecialtyChoiceIds ?? [],
-  selectedChainSkillIds: ability.selectedChainSkillIds ?? [],
-});
-
-const mapBuildPassiveData = (
-  passive: NonNullable<BuildType["passives"]>[number]
-) => ({
-  passiveId: passive.passiveId,
-  level: passive.level,
-});
-
-const mapBuildStigmaData = (
-  stigma: NonNullable<BuildType["stigmas"]>[number]
-) => ({
-  stigmaId: stigma.stigmaId,
-  level: stigma.level,
-  stigmaCost: stigma.stigmaCost ?? 10,
-  activeSpecialtyChoiceIds: stigma.activeSpecialtyChoiceIds ?? [],
-  selectedChainSkillIds: stigma.selectedChainSkillIds ?? [],
-});
 
 export async function loadBuildAction(
   buildId: number
@@ -43,8 +16,244 @@ export async function loadBuildAction(
   if (!buildId || isNaN(buildId)) {
     return null;
   }
-  return await getBuildById(buildId);
+  return await buildService.getBuild(buildId);
 }
+
+// ======================================
+// BUILD CRUD OPERATIONS
+// ======================================
+
+export async function getBuild(id: number): Promise<BuildType | null> {
+  return await buildService.getBuild(id);
+}
+
+export async function getAllBuilds(): Promise<BuildType[]> {
+  return await buildService.getAllBuilds();
+}
+
+export async function createBuild(buildData: BuildType): Promise<BuildType> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to create a build");
+  }
+
+  return await buildService.createBuild(session.user.id, buildData);
+}
+
+export async function updateBuild(
+  buildId: number,
+  data: Partial<BuildType>
+): Promise<BuildType> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update a build");
+  }
+
+  return await buildService.updateBuild(session.user.id, buildId, data);
+}
+
+export async function deleteBuildAction(buildId: number): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to delete a build");
+  }
+
+  await buildService.deleteBuild(session.user.id, buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath('/morebuild', 'page');
+  revalidatePath('/myprofile', 'page');
+  revalidatePath(`/build/${buildId}`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// USER-SPECIFIC OPERATIONS
+// ======================================
+
+export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
+  return await buildService.getUserBuilds(userId);
+}
+
+export async function getLikedBuildsByUserId(userId: string): Promise<BuildType[]> {
+  return await buildService.getLikedBuilds(userId);
+}
+
+// ======================================
+// LIKE OPERATIONS
+// ======================================
+
+export async function toggleLikeBuildAction(buildId: number): Promise<{ liked: boolean; likesCount: number }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to like a build");
+  }
+
+  const liked = await buildService.toggleLike(session.user.id, buildId);
+  const likesCount = await buildService.countLikes(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath('/morebuild', 'page');
+  revalidatePath(`/build/${buildId}`, 'page');
+  revalidatePath(`/build/${buildId}/profile`, 'page');
+
+  return { liked, likesCount };
+}
+
+export async function getBuildLikes(buildId: number): Promise<number> {
+  return await buildService.countLikes(buildId);
+}
+
+export async function hasUserLikedBuild(buildId: number, userId: string): Promise<boolean> {
+  return await buildService.hasUserLiked(buildId, userId);
+}
+
+// ======================================
+// BUILD CREATION FROM TEMPLATES
+// ======================================
+
+export async function createBuildFromStarter(
+  starterBuildId: number
+): Promise<BuildType | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to create a build from starter");
+  }
+
+  const starterBuild = await buildService.getBuild(starterBuildId);
+  if (!starterBuild) return null;
+
+  const className = starterBuild.class.name.charAt(0).toUpperCase() +
+                   starterBuild.class.name.slice(1);
+  const ownerName = session.user.name || session.user.email || "Unknown";
+  const firstAbilityId = starterBuild.class?.abilities
+    ? Math.min(...starterBuild.class.abilities.map((a) => a.id))
+    : null;
+
+  return await buildService.createBuild(session.user.id, {
+    name: `Build - ${className} - ${ownerName}`,
+    classId: starterBuild.classId,
+    baseSP: starterBuild.baseSP,
+    extraSP: starterBuild.extraSP,
+    baseSTP: starterBuild.baseSTP,
+    extraSTP: starterBuild.extraSTP,
+    abilities: starterBuild.abilities?.map((a) => ({
+      abilityId: a.abilityId,
+      level: a.abilityId === firstAbilityId ? 1 : 0,
+      activeSpecialtyChoiceIds: [],
+      selectedChainSkillIds: [],
+    })) || [],
+    passives: starterBuild.passives?.map((p) => ({
+      passiveId: p.passiveId,
+      level: 0,
+      maxLevel: p.maxLevel,
+    })) || [],
+    stigmas: starterBuild.stigmas?.map((s) => ({
+      stigmaId: s.stigmaId,
+      level: s.level,
+      stigmaCost: s.stigmaCost,
+      activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds || [],
+      selectedChainSkillIds: s.selectedChainSkillIds || [],
+    })) || [],
+  });
+}
+
+export async function createBuildFromBuild(
+  sourceBuildId: number
+): Promise<BuildType | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to create a build from existing build");
+  }
+
+  const sourceBuild = await buildService.getBuild(sourceBuildId);
+  if (!sourceBuild) return null;
+
+  const className = sourceBuild.class.name.charAt(0).toUpperCase() +
+                   sourceBuild.class.name.slice(1);
+  const ownerName = session.user.name || session.user.email || "Unknown";
+  const firstAbilityId = sourceBuild.class?.abilities
+    ? Math.min(...sourceBuild.class.abilities.map((a) => a.id))
+    : null;
+
+  return await buildService.createBuild(session.user.id, {
+    name: `Build - ${className} - ${ownerName}`,
+    classId: sourceBuild.classId,
+    baseSP: sourceBuild.baseSP,
+    extraSP: sourceBuild.extraSP,
+    baseSTP: sourceBuild.baseSTP,
+    extraSTP: sourceBuild.extraSTP,
+    abilities: sourceBuild.abilities?.map((a) => ({
+      abilityId: a.abilityId,
+      level: a.abilityId === firstAbilityId ? 1 : a.level,
+      activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds || [],
+      selectedChainSkillIds: a.selectedChainSkillIds || [],
+    })) || [],
+    passives: sourceBuild.passives?.map((p) => ({
+      passiveId: p.passiveId,
+      level: p.level,
+      maxLevel: p.maxLevel,
+    })) || [],
+    stigmas: sourceBuild.stigmas?.map((s) => ({
+      stigmaId: s.stigmaId,
+      level: s.level,
+      stigmaCost: s.stigmaCost,
+      activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds || [],
+      selectedChainSkillIds: s.selectedChainSkillIds || [],
+    })) || [],
+  });
+}
+
+// ======================================
+// DAEVANION OPERATIONS
+// ======================================
+
+export async function updateDaevanion(
+  buildId: number,
+  data: {
+    nezekan: number[];
+    zikel: number[];
+    vaizel: number[];
+    triniel: number[];
+    ariel: number[];
+    azphel: number[];
+  }
+): Promise<BuildType> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update daevanion");
+  }
+
+  return await buildService.updateBuild(session.user.id, buildId, { daevanion: data });
+}
+
+// ======================================
+// UTILITY FUNCTIONS
+// ======================================
+
+export async function getStarterBuildIdByClassName(
+  className: string
+): Promise<number | null> {
+  const starterBuilds = await buildService.getStarterBuilds();
+  const classBuild = starterBuilds.find(build =>
+    build.class.name.toLowerCase() === className.toLowerCase()
+  );
+  return classBuild?.id || null;
+}
+
+export async function getRandomStarterBuildId(): Promise<number | null> {
+  const classes = [
+    "gladiator", "templar", "ranger", "assassin",
+    "chanter", "sorcerer", "elementalist", "cleric"
+  ];
+  const randomClass = classes[Math.floor(Math.random() * classes.length)];
+  return await getStarterBuildIdByClassName(randomClass);
+}
+
+// ======================================
+// SERVER-SPECIFIC ACTIONS
+// ======================================
 
 export async function saveBuildAction(
   buildId: number,
@@ -59,343 +268,9 @@ export async function saveBuildAction(
     );
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (data.userId && session?.user?.id !== data.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
   return await updateBuild(buildId, data as Partial<BuildType>);
 }
 
-// ======================================
-// GET BUILD BY ID (full BuildType)
-// ======================================
-// Cache pour getBuildById - revalidate toutes les minutes
-const getBuildByIdCached = unstable_cache(
-  async (id: number): Promise<BuildType | null> => {
-    const build = await prisma.build.findUnique({
-      where: { id },
-      include: buildDetailInclude,
-    });
-
-    if (!build) return null;
-    return BuildSchema.parse(build);
-  },
-  ['build-by-id'], // Cache key prefix
-  {
-    revalidate: 60, // Revalidate toutes les minutes
-    tags: ['builds'], // Tag pour invalidation manuelle
-  }
-);
-
-export const getBuildById = cache(async (id: number): Promise<BuildType | null> => {
-  return getBuildByIdCached(id);
-});
-
-// ======================================
-// GET STARTER BUILD
-// ======================================
-export const getStarterBuildIdByClassName = async (
-  className: string
-): Promise<number | null> => {
-  const cls = await prisma.class.findUnique({
-    where: { name: className },
-    select: {
-      builds: {
-        select: { id: true },
-        take: 1,
-      },
-    },
-  });
-
-  if (!cls || cls.builds.length === 0) return null;
-
-  return cls.builds[0].id;
-};
-
-// ======================================
-// CREATE BUILD (full BuildType)
-// ======================================
-export async function createBuild(buildData: BuildType): Promise<BuildType> {
-  const newBuild = await prisma.build.create({
-    data: {
-      name: buildData.name,
-      classId: buildData.classId,
-      abilities: {
-        create:
-          buildData.abilities?.map((a) => ({
-            abilityId: a.abilityId,
-            level: a.level,
-            activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
-          })) ?? [],
-      },
-      passives: {
-        create: buildData.passives?.map(mapBuildPassiveData) ?? [],
-      },
-      stigmas: {
-        create:
-          buildData.stigmas?.map((s) => ({
-            stigmaId: s.stigmaId,
-            stigmaCost: s.stigmaCost,
-          })) ?? [],
-      },
-    },
-    include: fullBuildInclude,
-  });
-
-  return BuildSchema.parse(newBuild);
-}
-
-// ======================================
-// UPDATE BUILD (full BuildType)
-// ======================================
-export async function updateBuild(
-  buildId: number,
-  data: Partial<BuildType>
-): Promise<BuildType> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild?.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-  const updateData: {
-    name?: string;
-    classId?: number;
-    shortcuts?: Record<string, unknown> | null;
-    abilities?: {
-      deleteMany: { buildId: number };
-      create: Array<{
-        abilityId: number;
-        level: number;
-        activeSpecialtyChoiceIds: number[];
-      }>;
-    };
-    passives?: {
-      deleteMany: { buildId: number };
-      create: Array<{
-        passiveId: number;
-        level: number;
-      }>;
-    };
-    stigmas?: {
-      deleteMany: { buildId: number };
-      create: Array<{
-        stigmaId: number;
-        level: number;
-        stigmaCost: number;
-      }>;
-    };
-    daevanion?: {
-      upsert: {
-        create: {
-          nezekan: number[];
-          zikel: number[];
-          vaizel: number[];
-          triniel: number[];
-          ariel: number[];
-          azphel: number[];
-        };
-        update: {
-          nezekan: number[];
-          zikel: number[];
-          vaizel: number[];
-          triniel: number[];
-          ariel: number[];
-          azphel: number[];
-        };
-      };
-    };
-  } = {};
-
-  if ("name" in data && data.name !== undefined) {
-    updateData.name = data.name as string;
-  }
-
-  if (
-    "class" in data &&
-    data.class &&
-    typeof data.class === "object" &&
-    "id" in data.class
-  ) {
-    updateData.classId = (data.class as { id: number }).id;
-  }
-
-  // Handle shortcuts update
-  if ("shortcuts" in data && data.shortcuts !== undefined) {
-    updateData.shortcuts = data.shortcuts as BuildType["shortcuts"];
-  }
-
-  // Handle abilities update
-  if ("abilities" in data && data.abilities !== undefined) {
-    updateData.abilities = {
-      deleteMany: { buildId },
-      create: data.abilities.map(mapBuildAbilityData),
-    };
-  }
-
-  // Handle passives update
-  if ("passives" in data && data.passives !== undefined) {
-    updateData.passives = {
-      deleteMany: { buildId },
-      create: data.passives.map(mapBuildPassiveData),
-    };
-  }
-
-  // Handle stigmas update
-  if ("stigmas" in data && data.stigmas !== undefined) {
-    updateData.stigmas = {
-      deleteMany: { buildId },
-      create: data.stigmas.map(mapBuildStigmaData),
-    };
-  }
-
-  // Handle daevanion update
-  if ("daevanion" in data && data.daevanion !== undefined && data.daevanion !== null) {
-    const daevanionData = data.daevanion as NonNullable<BuildType["daevanion"]>;
-    updateData.daevanion = {
-      upsert: {
-        create: {
-          nezekan: daevanionData.nezekan || [],
-          zikel: daevanionData.zikel || [],
-          vaizel: daevanionData.vaizel || [],
-          triniel: daevanionData.triniel || [],
-          ariel: daevanionData.ariel || [],
-          azphel: daevanionData.azphel || [],
-        },
-        update: {
-          nezekan: daevanionData.nezekan || [],
-          zikel: daevanionData.zikel || [],
-          vaizel: daevanionData.vaizel || [],
-          triniel: daevanionData.triniel || [],
-          ariel: daevanionData.ariel || [],
-          azphel: daevanionData.azphel || [],
-        },
-      },
-    };
-  }
-
-  const updated = await prisma.build.update({
-    where: { id: buildId },
-    data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
-    include: fullBuildInclude,
-  });
-
-  // Invalider le cache AVANT de retourner la réponse pour garantir que les prochaines requêtes
-  // récupèrent la version à jour (même si la revalidation est asynchrone, on force l'invalidation)
-  const hasAbilitiesChanges = "abilities" in data && data.abilities !== undefined;
-  const hasPassivesChanges = "passives" in data && data.passives !== undefined;
-  const hasStigmasChanges = "stigmas" in data && data.stigmas !== undefined;
-  const hasSkillsChanges = hasAbilitiesChanges || hasPassivesChanges || hasStigmasChanges;
-
-  // Invalider le cache de manière synchrone pour les modifications de skills
-  if (hasSkillsChanges) {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}`, 'page');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-    revalidatePath(`/build/${buildId}`, 'layout'); // Forcer la revalidation du layout aussi
-  }
-
-  // Invalider le cache si le nom a été modifié
-  if ("name" in data && data.name !== undefined) {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}`, 'page');
-    revalidatePath(`/build/${buildId}/profile`, 'page');
-  }
-
-  // Invalider le cache si les shortcuts ont été modifiés
-  if ("shortcuts" in data && data.shortcuts !== undefined) {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}`, 'page');
-    revalidatePath(`/build/${buildId}/profile`, 'page');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-  }
-
-  // Invalider le cache si daevanion a été modifié
-  if ("daevanion" in data && data.daevanion !== undefined) {
-    revalidateTag('builds', 'max');
-    revalidatePath(`/build/${buildId}`, 'page');
-    revalidatePath(`/build/${buildId}/sphere`, 'page');
-    revalidatePath(`/build/${buildId}/skill`, 'page');
-  }
-
-  return BuildSchema.parse(updated);
-}
-
-// ======================================
-// DELETE BUILD
-// ======================================
-export async function deleteBuildAction(buildId: number): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error("Vous devez être connecté pour supprimer un build");
-  }
-
-  // Récupérer le build actuel pour vérifier le propriétaire
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session.user.id);
-  if (currentBuild.userId && currentBuild.userId !== session.user.id && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à supprimer ce build. Seul le propriétaire peut le supprimer."
-    );
-  }
-
-  // Utiliser une transaction pour supprimer toutes les relations et le build de manière atomique
-  // Cela garantit la cohérence et réduit la latence en groupant toutes les opérations
-  await prisma.$transaction(async (tx) => {
-    // Supprimer toutes les relations en parallèle
-    await Promise.all([
-      tx.buildAbility.deleteMany({
-        where: { buildId },
-      }),
-      tx.buildPassive.deleteMany({
-        where: { buildId },
-      }),
-      tx.buildStigma.deleteMany({
-        where: { buildId },
-      }),
-    ]);
-
-    // Supprimer le build (BuildDaevanion et Like seront supprimés en cascade)
-    await tx.build.delete({
-      where: { id: buildId },
-    });
-  });
-
-  // Invalider le cache de manière synchrone pour garantir la cohérence
-  revalidateTag('builds', 'max');
-  revalidatePath('/morebuild', 'page');
-  revalidatePath('/myprofile', 'page');
-  revalidatePath(`/build/${buildId}`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE DAEVANION ONLY (optimized)
-// ======================================
 export async function updateDaevanionOnly(
   buildId: number,
   daevanionData: {
@@ -407,49 +282,8 @@ export async function updateDaevanionOnly(
     azphel: number[];
   }
 ): Promise<{ success: boolean }> {
-  const session = await auth();
+  await updateDaevanion(buildId, daevanionData);
 
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement daevanion sans charger toutes les relations
-  await prisma.buildDaevanion.upsert({
-    where: { buildId },
-    create: {
-      buildId,
-      nezekan: daevanionData.nezekan,
-      zikel: daevanionData.zikel,
-      vaizel: daevanionData.vaizel,
-      triniel: daevanionData.triniel,
-      ariel: daevanionData.ariel,
-      azphel: daevanionData.azphel,
-    },
-    update: {
-      nezekan: daevanionData.nezekan,
-      zikel: daevanionData.zikel,
-      vaizel: daevanionData.vaizel,
-      triniel: daevanionData.triniel,
-      ariel: daevanionData.ariel,
-      azphel: daevanionData.azphel,
-    },
-  });
-
-  // Invalider le cache immédiatement
   revalidateTag('builds', 'max');
   revalidatePath(`/build/${buildId}/sphere`, 'page');
   revalidatePath(`/build/${buildId}/skill`, 'page');
@@ -457,1124 +291,17 @@ export async function updateDaevanionOnly(
   return { success: true };
 }
 
-// ======================================
-// UPDATE SHORTCUTS ONLY (optimized)
-// ======================================
-export async function updateShortcutsOnly(
-  buildId: number,
-  shortcuts: Record<string, { type: "ability" | "stigma"; abilityId?: number; stigmaId?: number }> | null
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement shortcuts sans charger toutes les relations
-  const updateData: { shortcuts: BuildType["shortcuts"] } = { 
-    shortcuts: shortcuts as BuildType["shortcuts"]
-  };
-  
-  await prisma.build.update({
-    where: { id: buildId },
-    data: updateData as Parameters<typeof prisma.build.update>[0]["data"],
-  });
-
-  // Invalider le cache pour garantir la cohérence
-  // Note: Les revalidations sont asynchrones, mais elles déclenchent la mise à jour du cache
-  // Le composant client préserve les shortcuts locaux pendant cette période pour éviter
-  // qu'un rechargement prématuré n'écrase les modifications récentes
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}`, 'page');
-  revalidatePath(`/build/${buildId}/profile`, 'page');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE ABILITY SPECIALTY CHOICES ONLY (optimized)
-// ======================================
-export async function updateAbilitySpecialtyChoicesOnly(
-  buildId: number,
-  abilityId: number,
-  activeSpecialtyChoiceIds: number[]
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement activeSpecialtyChoiceIds de l'ability spécifique
-  await prisma.buildAbility.updateMany({
-    where: {
-      buildId,
-      abilityId,
-    },
-    data: {
-      activeSpecialtyChoiceIds,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE STIGMA SPECIALTY CHOICES ONLY (optimized)
-// ======================================
-export async function updateStigmaSpecialtyChoicesOnly(
-  buildId: number,
-  stigmaId: number,
-  activeSpecialtyChoiceIds: number[]
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement activeSpecialtyChoiceIds du stigma spécifique
-  await prisma.buildStigma.updateMany({
-    where: {
-      buildId,
-      stigmaId,
-    },
-    data: {
-      activeSpecialtyChoiceIds,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE ABILITY CHAIN SKILLS ONLY (optimized)
-// ======================================
-export async function updateAbilityChainSkillsOnly(
-  buildId: number,
-  abilityId: number,
-  selectedChainSkillIds: number[]
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement selectedChainSkillIds de l'ability spécifique
-  await prisma.buildAbility.updateMany({
-    where: {
-      buildId,
-      abilityId,
-    },
-    data: {
-      selectedChainSkillIds,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE STIGMA CHAIN SKILLS ONLY (optimized)
-// ======================================
-export async function updateStigmaChainSkillsOnly(
-  buildId: number,
-  stigmaId: number,
-  selectedChainSkillIds: number[]
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement selectedChainSkillIds du stigma spécifique
-  await prisma.buildStigma.updateMany({
-    where: {
-      buildId,
-      stigmaId,
-    },
-    data: {
-      selectedChainSkillIds,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE STIGMA COST ONLY (optimized)
-// ======================================
-export async function updateStigmaCostOnly(
-  buildId: number,
-  stigmaId: number,
-  stigmaCost: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement le stigmaCost du stigma spécifique
-  await prisma.buildStigma.updateMany({
-    where: {
-      buildId,
-      stigmaId,
-    },
-    data: {
-      stigmaCost,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// ADD ABILITY ONLY (optimized - faster than full build update)
-// ======================================
-export async function addAbilityOnly(
-  buildId: number,
-  abilityId: number,
-  level: number,
-  maxLevel: number,
-  activeSpecialtyChoiceIds: number[] = [],
-  selectedChainSkillIds: number[] = []
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Vérifier si l'ability existe déjà
-  const existing = await prisma.buildAbility.findFirst({
-    where: {
-      buildId,
-      abilityId,
-    },
-  });
-
-  if (existing) {
-    // Si elle existe déjà, mettre à jour son niveau
-    await prisma.buildAbility.update({
-      where: { id: existing.id },
-      data: { level },
-    });
-  } else {
-    // Sinon, créer une nouvelle ability
-    await prisma.buildAbility.create({
-      data: {
-        buildId,
-        abilityId,
-        level,
-        maxLevel,
-        activeSpecialtyChoiceIds,
-        selectedChainSkillIds,
-      },
-    });
-  }
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// ADD PASSIVE ONLY (optimized - faster than full build update)
-// ======================================
-export async function addPassiveOnly(
-  buildId: number,
-  passiveId: number,
-  level: number,
-  maxLevel: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Vérifier si le passive existe déjà
-  const existing = await prisma.buildPassive.findFirst({
-    where: {
-      buildId,
-      passiveId,
-    },
-  });
-
-  if (existing) {
-    // Si il existe déjà, mettre à jour son niveau
-    await prisma.buildPassive.update({
-      where: { id: existing.id },
-      data: { level },
-    });
-  } else {
-    // Sinon, créer un nouveau passive
-    await prisma.buildPassive.create({
-      data: {
-        buildId,
-        passiveId,
-        level,
-        maxLevel,
-      },
-    });
-  }
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// ADD STIGMA ONLY (optimized - faster than full build update)
-// ======================================
-export async function addStigmaOnly(
-  buildId: number,
-  stigmaId: number,
-  level: number,
-  maxLevel: number,
-  stigmaCost: number,
-  activeSpecialtyChoiceIds: number[] = [],
-  selectedChainSkillIds: number[] = []
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Vérifier si le stigma existe déjà
-  const existing = await prisma.buildStigma.findFirst({
-    where: {
-      buildId,
-      stigmaId,
-    },
-  });
-
-  if (existing) {
-    // Si il existe déjà, mettre à jour son niveau
-    await prisma.buildStigma.update({
-      where: { id: existing.id },
-      data: { level },
-    });
-  } else {
-    // Sinon, créer un nouveau stigma
-    await prisma.buildStigma.create({
-      data: {
-        buildId,
-        stigmaId,
-        level,
-        maxLevel,
-        stigmaCost,
-        activeSpecialtyChoiceIds,
-        selectedChainSkillIds,
-      },
-    });
-  }
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// REMOVE ABILITY ONLY (optimized - faster than full build update)
-// ======================================
-export async function removeAbilityOnly(
-  buildId: number,
-  abilityId: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Supprimer l'ability
-  await prisma.buildAbility.deleteMany({
-    where: {
-      buildId,
-      abilityId,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// REMOVE PASSIVE ONLY (optimized - faster than full build update)
-// ======================================
-export async function removePassiveOnly(
-  buildId: number,
-  passiveId: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Supprimer le passive
-  await prisma.buildPassive.deleteMany({
-    where: {
-      buildId,
-      passiveId,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// REMOVE STIGMA ONLY (optimized - faster than full build update)
-// ======================================
-export async function removeStigmaOnly(
-  buildId: number,
-  stigmaId: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Supprimer le stigma
-  await prisma.buildStigma.deleteMany({
-    where: {
-      buildId,
-      stigmaId,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE ABILITY LEVEL ONLY (optimized - much faster than full build update)
-// ======================================
-export async function updateAbilityLevelOnly(
-  buildId: number,
-  abilityId: number,
-  level: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement le niveau de l'ability spécifique
-  await prisma.buildAbility.updateMany({
-    where: {
-      buildId,
-      abilityId,
-    },
-    data: {
-      level,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}`, 'page');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE PASSIVE LEVEL ONLY (optimized - much faster than full build update)
-// ======================================
-export async function updatePassiveLevelOnly(
-  buildId: number,
-  passiveId: number,
-  level: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement le niveau du passive spécifique
-  await prisma.buildPassive.updateMany({
-    where: {
-      buildId,
-      passiveId,
-    },
-    data: {
-      level,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}`, 'page');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// UPDATE STIGMA LEVEL ONLY (optimized - much faster than full build update)
-// ======================================
-export async function updateStigmaLevelOnly(
-  buildId: number,
-  stigmaId: number,
-  level: number
-): Promise<{ success: boolean }> {
-  const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
-  }
-
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
-
-  // Mettre à jour uniquement le niveau du stigma spécifique
-  await prisma.buildStigma.updateMany({
-    where: {
-      buildId,
-      stigmaId,
-    },
-    data: {
-      level,
-    },
-  });
-
-  // Invalider le cache immédiatement
-  revalidateTag('builds', 'max');
-  revalidatePath(`/build/${buildId}`, 'page');
-  revalidatePath(`/build/${buildId}/skill`, 'page');
-
-  return { success: true };
-}
-
-// ======================================
-// CREATE BUILD FROM STARTER BUILD
-// ======================================
-export async function createBuildFromStarter(
-  starterBuildId: number
-): Promise<BuildType | null> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Vous devez être connecté pour créer un build");
-  }
-
-  const starterBuild = await getBuildById(starterBuildId);
-  if (!starterBuild) return null;
-
-  const className =
-    starterBuild.class.name.charAt(0).toUpperCase() +
-    starterBuild.class.name.slice(1);
-
-  // Get owner name from session
-  const ownerName = session.user.name || session.user.email || "Unknown";
-
-  // Find the first ability (smallest abilityId) - this is the auto attack
-  const firstAbilityId = starterBuild.class?.abilities
-    ? Math.min(...starterBuild.class.abilities.map((a) => a.id))
-    : null;
-
-  const newBuild = await prisma.build.create({
-    data: {
-      name: `Build - ${className} - ${ownerName}`,
-      classId: starterBuild.classId,
-      userId: session.user.id,
-      baseSP: starterBuild.baseSP,
-      extraSP: starterBuild.extraSP,
-      baseSTP: starterBuild.baseSTP,
-      extraSTP: starterBuild.extraSTP,
-      abilities: {
-        create:
-          starterBuild.abilities?.map((a) => ({
-            abilityId: a.abilityId,
-            level: a.abilityId === firstAbilityId ? 1 : 0, // First ability (auto attack) always starts at level 1
-            activeSpecialtyChoiceIds: [],
-          })) ?? [],
-      },
-      passives: {
-        create:
-          starterBuild.passives?.map((p) => ({
-            passiveId: p.passiveId,
-            level: 0, // New builds start at level 0, not copying starter build levels
-            maxLevel: p.maxLevel,
-          })) ?? [],
-      },
-      stigmas: {
-        create:
-          starterBuild.stigmas?.map((s) => ({
-            stigmaId: s.stigmaId,
-            stigmaCost: s.stigmaCost,
-          })) ?? [],
-      },
-    },
-    include: fullBuildInclude,
-  });
-
-  return BuildSchema.parse(newBuild);
-}
-
-// ======================================
-// LIKE/UNLIKE BUILD
-// ======================================
-export async function toggleLikeBuildAction(buildId: number): Promise<{ liked: boolean; likesCount: number }> {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Vous devez être connecté pour liker un build");
-  }
-
-  // Vérifier si l'utilisateur a déjà liké ce build
-  const existingLike = await prisma.like.findUnique({
-    where: {
-      buildId_userId: {
-        buildId,
-        userId: session.user.id,
-      },
-    },
-  });
-
-  if (existingLike) {
-    // Unliker : supprimer le like
-    await prisma.like.delete({
-      where: {
-        id: existingLike.id,
-      },
-    });
-  } else {
-    // Liker : créer un nouveau like
-    await prisma.like.create({
-      data: {
-        buildId,
-        userId: session.user.id,
-      },
-    });
-  }
-
-  // Compter le nombre total de likes après l'action
-  const likesCount = await prisma.like.count({
-    where: { buildId },
-  });
-  
-   // Invalider le cache Next.js pour que les données soient à jour au reload
-   revalidateTag('builds', 'max'); // Invalide le cache de getAllBuilds et getBuildById
-   revalidatePath('/morebuild', 'page'); // Invalide la page /morebuild
-   revalidatePath(`/build/${buildId}`, 'page'); // Invalide la page du build spécifique
-   revalidatePath(`/build/${buildId}/profile`, 'page'); // Invalide aussi la page profile du build
-
-  // Le statut après l'action : si on a supprimé (existingLike existait), on a unliké (false)
-  // Si on a créé (existingLike n'existait pas), on a liké (true)
-  const liked = !existingLike;
-
-  return {
-    liked,
-    likesCount,
-  };
-}
-
-export async function getBuildLikes(buildId: number): Promise<number> {
-  return await prisma.like.count({
-    where: { buildId },
-  });
-}
-
-export async function hasUserLikedBuild(buildId: number, userId: string): Promise<boolean> {
-  const like = await prisma.like.findUnique({
-    where: {
-      buildId_userId: {
-        buildId,
-        userId,
-      },
-    },
-  });
-  return !!like;
-}
-
-// ======================================
-// GET RANDOM STARTER BUILD ID
-// ======================================
-export async function getRandomStarterBuildId(): Promise<number | null> {
-  const classes = [
-    "gladiator",
-    "templar",
-    "ranger",
-    "assassin",
-    "chanter",
-    "sorcerer",
-    "elementalist",
-    "cleric",
-  ];
-  const randomClass = classes[Math.floor(Math.random() * classes.length)];
-  return await getStarterBuildIdByClassName(randomClass);
-}
-
-// ======================================
-// GET ALL BUILDS
-// ======================================
-// Cache pour getAllBuilds - revalidate toutes les minutes (les builds peuvent changer)
-const getAllBuildsCached = unstable_cache(
-  async (): Promise<BuildType[]> => {
-    const builds = await prisma.build.findMany({
-      where: {
-        private: false, // Afficher uniquement les builds publics
-      },
-      include: buildListingInclude,
-      orderBy: {
-        id: "desc",
-      },
-    });
-
-    return builds.map((build) => BuildSchema.parse(build));
-  },
-  ['all-builds'], // Cache key
-  {
-    revalidate: 60, // Revalidate toutes les minutes (les builds peuvent être créés/modifiés)
-    tags: ['builds'], // Tag pour invalidation manuelle si nécessaire
-  }
-);
-
-export const getAllBuilds = cache(async (): Promise<BuildType[]> => {
-  return getAllBuildsCached();
-});
-
-// ======================================
-// GET BUILDS BY USER ID
-// ======================================
-export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
-  const builds = await prisma.build.findMany({
-    where: {
-      userId: userId,
-    },
-    include: buildListingInclude,
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  return builds.map((build) => BuildSchema.parse(build));
-}
-
-// ======================================
-// GET LIKED BUILDS BY USER ID
-// ======================================
-export async function getLikedBuildsByUserId(userId: string): Promise<BuildType[]> {
-  // Step 1: Get likes with minimal data (just buildId)
-  const likes = await prisma.like.findMany({
-    where: {
-      userId: userId,
-    },
-    select: {
-      buildId: true,
-      createdAt: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  // Step 2: Extract buildIds
-  const buildIds = likes.map((like) => like.buildId);
-
-  // Step 3: Batch load builds with optimized include
-  if (buildIds.length === 0) {
-    return [];
-  }
-
-  const builds = await prisma.build.findMany({
-    where: {
-      id: {
-        in: buildIds,
-      },
-    },
-    include: buildListingInclude,
-  });
-
-  // Step 4: Create a map for O(1) lookup
-  const buildMap = new Map(builds.map((build) => [build.id, build]));
-
-  // Step 5: Map builds back to like order
-  const orderedBuilds = likes
-    .map((like) => buildMap.get(like.buildId))
-    .filter((build): build is NonNullable<typeof build> => build !== undefined);
-
-  return orderedBuilds.map((build) => BuildSchema.parse(build));
-}
-
-// ======================================
-// CREATE BUILD FROM EXISTING BUILD
-// ======================================
-export async function createBuildFromBuild(
-  sourceBuildId: number
-): Promise<BuildType | null> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Vous devez être connecté pour créer un build");
-  }
-
-  const sourceBuild = await getBuildById(sourceBuildId);
-  if (!sourceBuild) return null;
-
-  const className =
-    sourceBuild.class.name.charAt(0).toUpperCase() +
-    sourceBuild.class.name.slice(1);
-
-  // Get owner name from session
-  const ownerName = session.user.name || session.user.email || "Unknown";
-
-  // Find the first ability (smallest abilityId) - this is the auto attack
-  const firstAbilityId = sourceBuild.class?.abilities
-    ? Math.min(...sourceBuild.class.abilities.map((a) => a.id))
-    : null;
-
-  const newBuild = await prisma.build.create({
-    data: {
-      name: `Build - ${className} - ${ownerName}`,
-      classId: sourceBuild.classId,
-      userId: session.user.id,
-      baseSP: sourceBuild.baseSP,
-      extraSP: sourceBuild.extraSP,
-      baseSTP: sourceBuild.baseSTP,
-      extraSTP: sourceBuild.extraSTP,
-      abilities: {
-        create:
-          sourceBuild.abilities?.map((a) => ({
-            abilityId: a.abilityId,
-            level: a.abilityId === firstAbilityId ? 1 : a.level, // First ability (auto attack) always starts at level 1
-            activeSpecialtyChoiceIds: a.activeSpecialtyChoiceIds ?? [],
-          })) ?? [],
-      },
-      passives: {
-        create: sourceBuild.passives?.map(mapBuildPassiveData) ?? [],
-      },
-      stigmas: {
-        create:
-          sourceBuild.stigmas?.map((s) => ({
-            stigmaId: s.stigmaId,
-            level: s.level,
-            stigmaCost: s.stigmaCost,
-            activeSpecialtyChoiceIds: s.activeSpecialtyChoiceIds ?? [],
-          })) ?? [],
-      },
-    },
-    include: fullBuildInclude,
-  });
-
-  return BuildSchema.parse(newBuild);
-}
-
-// ======================================
-// DEBUG: Check admin status (development only)
-// ======================================
-export async function checkAdminStatus(): Promise<{ 
-  userId: string | null; 
-  adminUserId: string | null; 
-  isAdmin: boolean;
-  message: string;
-}> {
-  const session = await auth();
-  const userId = session?.user?.id || null;
-  
-  // Get admin ID from environment
-  const adminUserId = process.env.ADMIN_USER_ID || process.env.NEXT_PUBLIC_ADMIN_USER_ID || null;
-  
-  const userIsAdmin = isAdmin(userId);
-  
-  return {
-    userId,
-    adminUserId,
-    isAdmin: userIsAdmin,
-    message: userIsAdmin 
-      ? "Vous êtes admin !" 
-      : adminUserId 
-        ? `Vous n'êtes pas admin.`
-        : "Aucun ADMIN_USER_ID configuré dans .env.local"
-  };
-}
-
-// ======================================
-// UPDATE BUILD PRIVATE STATUS
-// ======================================
 export async function updateBuildPrivateStatus(
   buildId: number,
   isPrivate: boolean
 ): Promise<{ success: boolean }> {
   const session = await auth();
-
-  // Récupérer le build actuel pour vérifier le propriétaire (seulement userId)
-  const currentBuild = await prisma.build.findUnique({
-    where: { id: buildId },
-    select: { userId: true },
-  });
-
-  if (!currentBuild) {
-    throw new Error("Build not found");
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update build privacy");
   }
 
-  // Vérifier que l'utilisateur est le propriétaire du build ou un admin
-  const userIsAdmin = isAdmin(session?.user?.id);
-  if (currentBuild.userId && session?.user?.id !== currentBuild.userId && !userIsAdmin) {
-    throw new Error(
-      "Vous n'êtes pas autorisé à modifier ce build. Seul le propriétaire peut le modifier."
-    );
-  }
+  await buildService.updateBuild(session.user.id, buildId, { private: isPrivate });
 
-  // Mettre à jour uniquement le statut private
-  await prisma.build.update({
-    where: { id: buildId },
-    data: { private: isPrivate },
-  });
-
-  // Invalider le cache
   revalidateTag('builds', 'max');
   revalidatePath(`/build/${buildId}`, 'page');
   revalidatePath(`/build/${buildId}/profile`, 'page');
@@ -1582,3 +309,488 @@ export async function updateBuildPrivateStatus(
 
   return { success: true };
 }
+
+// ======================================
+// DEBUG AND ADMIN FUNCTIONS
+// ======================================
+
+export async function checkAdminStatus(): Promise<{
+  userId: string | null;
+  adminUserId: string | null;
+  isAdmin: boolean;
+  message: string;
+}> {
+  const session = await auth();
+  const userId = session?.user?.id || null;
+
+  const adminUserId = process.env.ADMIN_USER_ID || process.env.NEXT_PUBLIC_ADMIN_USER_ID || null;
+
+  const userIsAdmin = adminUserId === userId;
+
+  return {
+    userId,
+    adminUserId,
+    isAdmin: userIsAdmin,
+    message: userIsAdmin
+      ? "You are admin!"
+      : adminUserId
+        ? "You are not admin."
+        : "No ADMIN_USER_ID configured in .env.local"
+  };
+}
+
+// ======================================
+// OPTIMIZED UPDATE HELPERS
+// ======================================
+
+export async function updateAbilitySpecialtyChoicesOnly(
+  buildId: number,
+  abilityId: number,
+  activeSpecialtyChoiceIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateAbilitySpecialtyChoices(buildId, abilityId, activeSpecialtyChoiceIds);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateStigmaSpecialtyChoicesOnly(
+  buildId: number,
+  stigmaId: number,
+  activeSpecialtyChoiceIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateStigmaSpecialtyChoices(buildId, stigmaId, activeSpecialtyChoiceIds);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateAbilityLevelOnly(
+  buildId: number,
+  abilityId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateAbilityLevel(buildId, abilityId, level);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updatePassiveLevelOnly(
+  buildId: number,
+  passiveId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updatePassiveLevel(buildId, passiveId, level);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateStigmaLevelOnly(
+  buildId: number,
+  stigmaId: number,
+  level: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateStigmaLevel(buildId, stigmaId, level);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateStigmaCostOnly(
+  buildId: number,
+  stigmaId: number,
+  cost: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateStigmaCost(buildId, stigmaId, cost);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateAbilityChainSkillsOnly(
+  buildId: number,
+  abilityId: number,
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateAbilityChainSkills(buildId, abilityId, selectedChainSkillIds);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateStigmaChainSkillsOnly(
+  buildId: number,
+  stigmaId: number,
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update directly via repository
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.updateStigmaChainSkills(buildId, stigmaId, selectedChainSkillIds);
+
+  // Invalidate cache
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function updateShortcutsOnly(
+  buildId: number,
+  shortcuts: Record<string, unknown> | null,
+  shortcutLabels?: Record<string, string> | null
+): Promise<{ success: boolean }> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  // Check permissions
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  // Update via service (shortcuts need full update)
+  const updateData: { shortcuts: Record<string, unknown> | null; shortcutLabels?: Record<string, string> | null } = {
+    shortcuts
+  };
+  if (shortcutLabels) {
+    updateData.shortcutLabels = shortcutLabels;
+  }
+  await buildService.updateBuild(session.user.id, buildId, updateData);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function addAbilityOnly(
+  buildId: number,
+  abilityId: number,
+  level: number,
+  maxLevel: number,
+  activeSpecialtyChoiceIds: number[],
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.addAbility(buildId, abilityId, level, maxLevel, activeSpecialtyChoiceIds, selectedChainSkillIds);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function addPassiveOnly(
+  buildId: number,
+  passiveId: number,
+  level: number,
+  maxLevel: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.addPassive(buildId, passiveId, level, maxLevel);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function addStigmaOnly(
+  buildId: number,
+  stigmaId: number,
+  level: number,
+  maxLevel: number,
+  stigmaCost: number,
+  activeSpecialtyChoiceIds: number[],
+  selectedChainSkillIds: number[]
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.addStigma(buildId, stigmaId, level, maxLevel, stigmaCost, activeSpecialtyChoiceIds, selectedChainSkillIds);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function removeAbilityOnly(
+  buildId: number,
+  abilityId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.removeAbility(buildId, abilityId);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function removePassiveOnly(
+  buildId: number,
+  passiveId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.removePassive(buildId, passiveId);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+export async function removeStigmaOnly(
+  buildId: number,
+  stigmaId: number
+): Promise<{ success: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("You must be logged in to update this build");
+  }
+
+  const { BuildPermissions } = await import("@/services/build.permissions");
+  const permissions = new BuildPermissions();
+  await permissions.canModifyBuild(session.user.id, buildId);
+
+  const { buildRepository } = await import("@/repositories/build.repository");
+  await buildRepository.removeStigma(buildId, stigmaId);
+
+  const { BuildCache } = await import("@/services/build.cache");
+  const cache = new BuildCache();
+  cache.invalidateBuild(buildId);
+
+  revalidateTag('builds', 'max');
+  revalidatePath(`/build/${buildId}/skill`, 'page');
+
+  return { success: true };
+}
+
+// ======================================
+// LEGACY ALIASES (for backward compatibility)
+// ======================================
+
+export const getBuildById = getBuild;
