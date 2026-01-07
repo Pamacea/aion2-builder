@@ -134,7 +134,7 @@ export const buildListingInclude = {
     select: {
       id: true,
       name: true,
-      icon: true,
+      iconUrl: true,
     },
   },
   user: {
