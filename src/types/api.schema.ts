@@ -97,3 +97,30 @@ export const DaevanionSchema = z.object({
 });
 
 export type DaevanionBody = z.infer<typeof DaevanionSchema>;
+
+// ========================================
+// Class Schemas
+// ========================================
+
+export const ClassBasicSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  description: z.string().nullable(),
+  iconUrl: z.string().nullable(),
+  bannerUrl: z.string().nullable(),
+  characterUrl: z.string().nullable(),
+});
+
+export type ClassBasic = z.infer<typeof ClassBasicSchema>;
+
+export const ClassDetailSchema = ClassBasicSchema.extend({
+  tags: z.array(z.object({
+    id: z.number(),
+    name: z.string(),
+  })).optional(),
+  abilities: z.array(z.any()).optional(), // Full ability data
+  passives: z.array(z.any()).optional(), // Full passive data
+  stigmas: z.array(z.any()).optional(), // Full stigma data
+});
+
+export type ClassDetail = z.infer<typeof ClassDetailSchema>;

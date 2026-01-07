@@ -1,0 +1,1067 @@
+/**
+ * BuildService
+ *
+ * Business Logic Layer for Build operations.
+ * Coordinates between Repository, Permissions, and Cache layers.
+ *
+ * Responsibilities:
+ * - Business logic validation and orchestration
+ * - Transaction management
+ * - Cache invalidation coordination
+ * - Input validation using Zod schemas
+ * - Permission checking delegation
+ *
+ * Architecture:
+ * - Uses BuildRepository for all data access
+ * - Uses BuildPermissions for authorization
+ * - Uses BuildCache for caching strategy
+ * - Throws proper errors for client handling
+ */
+
+import { revalidatePath } from "next/cache";
+import { BuildSchema, BuildType } from "@/types/schema";
+import { BuildRepository } from "@/repositories/build.repository";
+import { BuildPermissions } from "@/services/build.permissions";
+import buildCache from "@/services/build.cache";
+import {
+  BuildNotFoundError,
+  StarterBuildLockedError,
+  BuildOwnershipError,
+  AuthenticationError,
+  BusinessLogicError,
+} from "@/lib/errors";
+
+// ======================================
+// TYPES
+// ======================================
+
+export type BuildCreateInput = {
+  name: string;
+  classId: number;
+  baseSP?: number;
+  extraSP?: number;
+  baseSTP?: number;
+  extraSTP?: number;
+  abilities?: Array<{
+    abilityId: number;
+    level: number;
+    maxLevel?: number;
+    activeSpecialtyChoiceIds?: number[];
+    selectedChainSkillIds?: number[];
+  }>;
+  passives?: Array<{
+    passiveId: number;
+    level: number;
+    maxLevel?: number;
+  }>;
+  stigmas?: Array<{
+    stigmaId: number;
+    level?: number;
+    stigmaCost?: number;
+    maxLevel?: number;
+    activeSpecialtyChoiceIds?: number[];
+    selectedChainSkillIds?: number[];
+  }>;
+  shortcuts?: BuildType["shortcuts"];
+  private?: boolean;
+};
+
+export type BuildUpdateInput = Partial<{
+  name: string;
+  classId: number;
+  shortcuts: BuildType["shortcuts"];
+  private: boolean;
+  abilities: Array<{
+    abilityId: number;
+    level: number;
+    activeSpecialtyChoiceIds?: number[];
+    selectedChainSkillIds?: number[];
+  }>;
+  passives: Array<{
+    passiveId: number;
+    level: number;
+  }>;
+  stigmas: Array<{
+    stigmaId: number;
+    level: number;
+    stigmaCost?: number;
+    activeSpecialtyChoiceIds?: number[];
+    selectedChainSkillIds?: number[];
+  }>;
+  daevanion: {
+    nezekan: number[];
+    zikel: number[];
+    vaizel: number[];
+    triniel: number[];
+    ariel: number[];
+    azphel: number[];
+  };
+}>;
+
+export type DaevanionInput = {
+  nezekan: number[];
+  zikel: number[];
+  vaizel: number[];
+  triniel: number[];
+  ariel: number[];
+  azphel: number[];
+};
+
+export type BuildFilter = {
+  classId?: number;
+  private?: boolean;
+  userId?: string;
+};
+
+// ======================================
+// SERVICE CLASS
+// ======================================
+
+/**
+ * BuildService - Business Logic Layer
+ *
+ * Coordinates all business operations for builds:
+ * - Validates inputs using Zod schemas
+ * - Checks permissions via BuildPermissions
+ * - Persists data via BuildRepository
+ * - Manages cache invalidation via BuildCache
+ * - Handles business logic and validation
+ *
+ * @example
+ * ```typescript
+ * const service = new BuildService();
+ * const build = await service.getBuildById(123);
+ * ```
+ */
+export class BuildService {
+  constructor(
+    private repo: BuildRepository,
+    private permissions = new BuildPermissions(),
+    private cache = buildCache
+  ) {}
+
+  // ======================================
+  // QUERY OPERATIONS
+  // ======================================
+
+  /**
+   * Get a single build by ID (with caching)
+   *
+   * @param id - Build ID
+   * @returns Build object or null if not found
+   */
+  async getBuildById(id: number): Promise<BuildType | null> {
+    if (!id || isNaN(id)) {
+      return null;
+    }
+
+    // Get from cache
+    const build = await this.cache.getBuild(id);
+
+    if (!build) {
+      return null;
+    }
+
+    // Validate with Zod schema
+    return BuildSchema.parse(build);
+  }
+
+  /**
+   * Get all builds with optional filtering (with caching)
+   *
+   * @param filter - Optional filter criteria
+   * @returns Array of builds
+   */
+  async getAllBuilds(filter?: BuildFilter): Promise<BuildType[]> {
+    let builds = await this.cache.getAllBuilds();
+
+    // Apply additional filtering if needed
+    if (filter?.classId !== undefined) {
+      builds = builds.filter((b) => b.classId === filter.classId);
+    }
+
+    if (filter?.userId !== undefined) {
+      builds = builds.filter((b) => b.userId === filter.userId);
+    }
+
+    return builds.map((build) => BuildSchema.parse(build));
+  }
+
+  /**
+   * Get builds by user ID (with caching)
+   *
+   * @param userId - User ID
+   * @returns Array of user's builds
+   */
+  async getBuildsByUserId(userId: string): Promise<BuildType[]> {
+    const builds = await this.cache.getBuildsByUserId(userId);
+    return builds.map((build) => BuildSchema.parse(build));
+  }
+
+  /**
+   * Get builds liked by user (with caching)
+   *
+   * @param userId - User ID
+   * @returns Array of liked builds in chronological order
+   */
+  async getLikedBuilds(userId: string): Promise<BuildType[]> {
+    const builds = await this.cache.getLikedBuildsByUserId(userId);
+    return builds.map((build) => BuildSchema.parse(build));
+  }
+
+  /**
+   * Check if user liked a specific build
+   *
+   * @param userId - User ID
+   * @param buildId - Build ID
+   * @returns true if user liked the build
+   */
+  async hasUserLiked(userId: string, buildId: number): Promise<boolean> {
+    return this.repo.hasUserLiked(buildId, userId);
+  }
+
+  // ======================================
+  // STARTER BUILD OPERATIONS
+  // ======================================
+
+  // TODO: Implement starter builds feature
+  // async getStarterBuilds(): Promise<BuildType[]> {
+  //   const builds = await this.repo.findStarterBuilds();
+  //   return builds.map((build) => BuildSchema.parse(build));
+  // }
+
+  // TODO: Implement starter builds feature
+  // async getStarterBuildByClass(className: string): Promise<BuildType | null> {
+  //   const build = await this.repo.findStarterBuildIdByClassName(className);
+  //   if (!build) return null;
+  //   return this.getBuildById(build.id);
+  // }
+
+  // TODO: Implement starter builds feature
+  // async getRandomStarterBuildId(): Promise<number | null> {
+  //   return this.repo.findRandomStarterBuildId();
+  // }
+
+  // ======================================
+  // MUTATION OPERATIONS
+  // ======================================
+
+  /**
+   * Create a new build
+   *
+   * @param userId - User ID of the creator
+   * @param data - Build data
+   * @returns Created build
+   */
+  async createBuild(userId: string, data: BuildCreateInput): Promise<BuildType> {
+    // Validate input
+    // Note: Simplified validation, full validation can be added later
+    const validated = data;
+
+    // TODO: Check permissions
+    // this.permissions.canCreateBuild(userId);
+
+    // Persist
+    const build = await this.repo.create({
+      ...validated,
+      userId,
+    });
+
+    // Invalidate cache
+    this.cache.invalidateAllBuilds();
+    this.cache.invalidateUserBuilds(userId);
+
+    return BuildSchema.parse(build);
+  }
+
+  /**
+   * Update a build
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param data - Partial build data to update
+   * @returns Updated build
+   */
+  async updateBuild(
+    userId: string,
+    buildId: number,
+    data: BuildUpdateInput
+  ): Promise<BuildType> {
+    // Get current build for permission check
+    const currentBuild = await this.repo.findById(buildId);
+    if (!currentBuild) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, currentBuild);
+
+    // Validate input
+    const validated = BuildSchema.partial().omit({
+      id: true,
+      user: true,
+      class: true,
+    }).parse(data);
+
+    // Persist
+    const updated = await this.repo.update(buildId, validated);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.revalidateBuildPages(buildId, data);
+
+    return BuildSchema.parse(updated);
+  }
+
+  /**
+   * Delete a build
+   *
+   * @param userId - User ID of the deleter
+   * @param buildId - Build ID to delete
+   */
+  async deleteBuild(userId: string, buildId: number): Promise<void> {
+    // Get current build for permission check
+    const currentBuild = await this.repo.findById(buildId);
+    if (!currentBuild) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canDeleteBuild(userId, currentBuild);
+
+    // Get userId for cache invalidation
+    const buildUserId = currentBuild.userId;
+
+    // Persist (uses transaction)
+    await this.repo.delete(buildId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.cache.invalidateAllBuilds();
+    if (buildUserId) {
+      this.cache.invalidateUserBuilds(buildUserId);
+    }
+
+    // Revalidate paths
+    revalidatePath("/morebuild", "page");
+    revalidatePath("/myprofile", "page");
+    revalidatePath(`/build/${buildId}`, "page");
+  }
+
+  /**
+   * Duplicate a build (create from existing)
+   *
+   * @param userId - User ID creating the duplicate
+   * @param sourceBuildId - Build ID to duplicate
+   * @returns New build
+   */
+  async duplicateBuild(userId: string, sourceBuildId: number): Promise<BuildType> {
+    // Check permissions
+    this.permissions.canDuplicateBuild(userId);
+
+    // Get source build
+    const sourceBuild = await this.repo.findByIdFull(sourceBuildId);
+    if (!sourceBuild) {
+      throw new BuildNotFoundError();
+    }
+
+    // Get user info for naming
+    const session = await this.permissions.getSession();
+    const ownerName = session?.user?.name || session?.user?.email || "Unknown";
+
+    // Clone via repository
+    const newBuild = await this.repo.clone(sourceBuildId, userId, `Build - ${sourceBuild.class.name} - ${ownerName}`);
+
+    // Invalidate cache
+    this.cache.invalidateAllBuilds();
+    this.cache.invalidateUserBuilds(userId);
+
+    return BuildSchema.parse(newBuild);
+  }
+
+  /**
+   * Create a build from a starter build
+   *
+   * @param userId - User ID creating the build
+   * @param starterBuildId - Starter build ID
+   * @returns New build
+   */
+  async createFromStarterBuild(userId: string, starterBuildId: number): Promise<BuildType> {
+    // Check permissions
+    this.permissions.canCreateBuild(userId);
+
+    // Get starter build
+    const starterBuild = await this.repo.findByIdFull(starterBuildId);
+    if (!starterBuild) {
+      throw new BuildNotFoundError();
+    }
+
+    // Verify it's a starter build
+    if (!this.permissions.isStarterBuild(starterBuild)) {
+      throw new BusinessLogicError("Build is not a starter build", "NOT_STARTER_BUILD");
+    }
+
+    // Get user info for naming
+    const session = await this.permissions.getSession();
+    const ownerName = session?.user?.name || session?.user?.email || "Unknown";
+
+    // Create via repository
+    const newBuild = await this.repo.createFromStarter(starterBuildId, userId, ownerName);
+
+    // Invalidate cache
+    this.cache.invalidateAllBuilds();
+    this.cache.invalidateUserBuilds(userId);
+
+    return BuildSchema.parse(newBuild);
+  }
+
+  // ======================================
+  // DAEVANION OPERATIONS
+  // ======================================
+
+  /**
+   * Update daevanion data for a build
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param daevanion - Daevanion data
+   */
+  async updateDaevanion(userId: string, buildId: number, daevanion: DaevanionInput): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateDaevanion(buildId, daevanion);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/sphere`, "page");
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  // ======================================
+  // LIKE OPERATIONS
+  // ======================================
+
+  /**
+   * Toggle like on a build
+   *
+   * @param userId - User ID liking/unliking
+   * @param buildId - Build ID to like/unlike
+   * @returns Object with liked status and count
+   */
+  async toggleLike(userId: string, buildId: number): Promise<{ liked: boolean; likesCount: number }> {
+    // Check permissions
+    this.permissions.canLikeBuild(userId, buildId);
+
+    // Toggle via repository
+    const result = await this.repo.toggleLike(buildId, userId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.cache.invalidateLikedBuilds(userId);
+    this.cache.invalidateAllBuilds();
+
+    // Revalidate paths
+    revalidatePath("/morebuild", "page");
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/profile`, "page");
+
+    return result;
+  }
+
+  /**
+   * Add like to a build
+   *
+   * @param userId - User ID liking
+   * @param buildId - Build ID to like
+   */
+  async addLike(userId: string, buildId: number): Promise<void> {
+    // Check permissions
+    this.permissions.canLikeBuild(userId, buildId);
+
+    // Check if already liked
+    const existing = await this.repo.findLike(buildId, userId);
+    if (existing) {
+      throw new BusinessLogicError("Already liked", "ALREADY_LIKED");
+    }
+
+    // Persist
+    await this.repo.addLike(buildId, userId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.cache.invalidateLikedBuilds(userId);
+    this.cache.invalidateAllBuilds();
+  }
+
+  /**
+   * Remove like from a build
+   *
+   * @param userId - User ID unliking
+   * @param buildId - Build ID to unlike
+   */
+  async removeLike(userId: string, buildId: number): Promise<void> {
+    // Check permissions
+    this.permissions.canLikeBuild(userId, buildId);
+
+    // Check if liked
+    const existing = await this.repo.findLike(buildId, userId);
+    if (!existing) {
+      throw new BusinessLogicError("Not liked", "NOT_LIKED");
+    }
+
+    // Persist
+    await this.repo.removeLike(buildId, userId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.cache.invalidateLikedBuilds(userId);
+    this.cache.invalidateAllBuilds();
+  }
+
+  // ======================================
+  // OPTIMIZED UPDATE OPERATIONS
+  // ======================================
+
+  /**
+   * Update only the shortcuts (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param shortcuts - Shortcuts data
+   */
+  async updateShortcuts(userId: string, buildId: number, shortcuts: BuildType["shortcuts"]): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateShortcuts(buildId, shortcuts);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/profile`, "page");
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update ability specialty choices (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param abilityId - Ability ID to update
+   * @param activeSpecialtyChoiceIds - Specialty choice IDs
+   */
+  async updateAbilitySpecialtyChoices(
+    userId: string,
+    buildId: number,
+    abilityId: number,
+    activeSpecialtyChoiceIds: number[]
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateAbilitySpecialtyChoices(buildId, abilityId, activeSpecialtyChoiceIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update stigma specialty choices (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to update
+   * @param activeSpecialtyChoiceIds - Specialty choice IDs
+   */
+  async updateStigmaSpecialtyChoices(
+    userId: string,
+    buildId: number,
+    stigmaId: number,
+    activeSpecialtyChoiceIds: number[]
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateStigmaSpecialtyChoices(buildId, stigmaId, activeSpecialtyChoiceIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update ability chain skills (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param abilityId - Ability ID to update
+   * @param selectedChainSkillIds - Chain skill IDs
+   */
+  async updateAbilityChainSkills(
+    userId: string,
+    buildId: number,
+    abilityId: number,
+    selectedChainSkillIds: number[]
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateAbilityChainSkills(buildId, abilityId, selectedChainSkillIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update stigma chain skills (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to update
+   * @param selectedChainSkillIds - Chain skill IDs
+   */
+  async updateStigmaChainSkills(
+    userId: string,
+    buildId: number,
+    stigmaId: number,
+    selectedChainSkillIds: number[]
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateStigmaChainSkills(buildId, stigmaId, selectedChainSkillIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update stigma cost (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to update
+   * @param stigmaCost - New cost value
+   */
+  async updateStigmaCost(userId: string, buildId: number, stigmaId: number, stigmaCost: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateStigmaCost(buildId, stigmaId, stigmaCost);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update ability level (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param abilityId - Ability ID to update
+   * @param level - New level
+   */
+  async updateAbilityLevel(userId: string, buildId: number, abilityId: number, level: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateAbilityLevel(buildId, abilityId, level);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update passive level (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param passiveId - Passive ID to update
+   * @param level - New level
+   */
+  async updatePassiveLevel(userId: string, buildId: number, passiveId: number, level: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updatePassiveLevel(buildId, passiveId, level);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Update stigma level (optimized)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to update
+   * @param level - New level
+   */
+  async updateStigmaLevel(userId: string, buildId: number, stigmaId: number, level: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.updateStigmaLevel(buildId, stigmaId, level);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  // ======================================
+  // ADD/REMOVE OPERATIONS
+  // ======================================
+
+  /**
+   * Add ability to build (or update if exists)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param abilityId - Ability ID to add
+   * @param level - Ability level
+   * @param maxLevel - Max level (default 20)
+   * @param activeSpecialtyChoiceIds - Specialty choice IDs
+   * @param selectedChainSkillIds - Chain skill IDs
+   */
+  async addAbility(
+    userId: string,
+    buildId: number,
+    abilityId: number,
+    level: number,
+    maxLevel: number = 20,
+    activeSpecialtyChoiceIds: number[] = [],
+    selectedChainSkillIds: number[] = []
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.addAbility(buildId, abilityId, level, maxLevel, activeSpecialtyChoiceIds, selectedChainSkillIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Add passive to build (or update if exists)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param passiveId - Passive ID to add
+   * @param level - Passive level
+   * @param maxLevel - Max level (default 20)
+   */
+  async addPassive(
+    userId: string,
+    buildId: number,
+    passiveId: number,
+    level: number,
+    maxLevel: number = 20
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.addPassive(buildId, passiveId, level, maxLevel);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Add stigma to build (or update if exists)
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to add
+   * @param level - Stigma level
+   * @param maxLevel - Max level (default 20)
+   * @param stigmaCost - Stigma cost (default 10)
+   * @param activeSpecialtyChoiceIds - Specialty choice IDs
+   * @param selectedChainSkillIds - Chain skill IDs
+   */
+  async addStigma(
+    userId: string,
+    buildId: number,
+    stigmaId: number,
+    level: number,
+    maxLevel: number = 20,
+    stigmaCost: number = 10,
+    activeSpecialtyChoiceIds: number[] = [],
+    selectedChainSkillIds: number[] = []
+  ): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.addStigma(buildId, stigmaId, level, maxLevel, stigmaCost, activeSpecialtyChoiceIds, selectedChainSkillIds);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Remove ability from build
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param abilityId - Ability ID to remove
+   */
+  async removeAbility(userId: string, buildId: number, abilityId: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.removeAbility(buildId, abilityId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Remove passive from build
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param passiveId - Passive ID to remove
+   */
+  async removePassive(userId: string, buildId: number, passiveId: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.removePassive(buildId, passiveId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  /**
+   * Remove stigma from build
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param stigmaId - Stigma ID to remove
+   */
+  async removeStigma(userId: string, buildId: number, stigmaId: number): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions
+    this.permissions.canModifyBuild(userId, build);
+
+    // Persist
+    await this.repo.removeStigma(buildId, stigmaId);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    revalidatePath(`/build/${buildId}/skill`, "page");
+  }
+
+  // ======================================
+  // PRIVATE STATUS OPERATION
+  // ======================================
+
+  /**
+   * Update build private status
+   *
+   * @param userId - User ID of the modifier
+   * @param buildId - Build ID to update
+   * @param isPrivate - New private status
+   */
+  async updatePrivateStatus(userId: string, buildId: number, isPrivate: boolean): Promise<void> {
+    // Get build for permission check
+    const build = await this.repo.findById(buildId);
+    if (!build) {
+      throw new BuildNotFoundError();
+    }
+
+    // Check permissions (only owner can change private status)
+    if (build.userId !== userId) {
+      throw new BuildOwnershipError();
+    }
+
+    // Persist
+    await this.repo.updatePrivateStatus(buildId, isPrivate);
+
+    // Invalidate cache
+    this.cache.invalidateBuild(buildId);
+    this.cache.invalidateAllBuilds();
+    this.cache.invalidateUserBuilds(userId);
+
+    // Revalidate paths
+    revalidatePath(`/build/${buildId}`, "page");
+    revalidatePath(`/build/${buildId}/profile`, "page");
+    revalidatePath("/morebuild", "page");
+  }
+
+  // ======================================
+  // UTILITY METHODS
+  // ======================================
+
+  /**
+   * Helper method to revalidate build pages based on what changed
+   *
+   * @param buildId - Build ID
+   * @param data - Update data to determine which pages to revalidate
+   * @private
+   */
+  private revalidateBuildPages(buildId: number, data: BuildUpdateInput): void {
+    const hasSkillsChanges = data.abilities !== undefined || data.passives !== undefined || data.stigmas !== undefined;
+    const hasNameChanges = data.name !== undefined;
+    const hasShortcutsChanges = data.shortcuts !== undefined;
+    const hasDaevanionChanges = data.daevanion !== undefined;
+
+    if (hasSkillsChanges) {
+      revalidatePath(`/build/${buildId}/skill`, "page");
+    }
+
+    if (hasNameChanges) {
+      revalidatePath(`/build/${buildId}/profile`, "page");
+    }
+
+    if (hasShortcutsChanges) {
+      revalidatePath(`/build/${buildId}/profile`, "page");
+    }
+
+    if (hasDaevanionChanges) {
+      revalidatePath(`/build/${buildId}/sphere`, "page");
+    }
+  }
+}
+
+// ======================================
+// SINGLETON EXPORT
+// ======================================
+
+/**
+ * Default export of singleton BuildService instance
+ *
+ * Use this for consistent business logic across the application:
+ * ```typescript
+ * import buildService from "@/services/build.service";
+ * const build = await buildService.getBuildById(123);
+ * ```
+ */
+import { buildRepository } from "@/repositories/build.repository";
+
+const buildService = new BuildService(buildRepository);
+export default buildService;

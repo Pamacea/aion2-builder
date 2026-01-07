@@ -1,0 +1,2579 @@
+openapi: 3.0.3
+info:
+  title: AION2Builder API
+  version: 1.0.0
+  description: |
+    REST API for AION2Builder - MMORPG Build Calculator and Management System.
+
+    ## Overview
+    AION2Builder provides a comprehensive API for creating, managing, and sharing character builds for the MMORPG AION. Features include:
+
+    - **Build Management**: Create, read, update, and delete character builds
+    - **Skill Configuration**: Manage abilities, passives, and stigmas with advanced customization
+    - **Daevanion System**: Configure rune paths for endgame progression
+    - **Social Features**: Like builds, share configurations
+    - **User Authentication**: OAuth-based authentication with Discord
+
+    ## Authentication
+    Most endpoints require authentication using NextAuth session tokens. The session token is passed via cookies automatically when using the web interface.
+
+    For API clients, include the session cookie with your requests:
+    ```
+    Cookie: next-auth.session-token=<your-session-token>
+    ```
+
+    ## Rate Limiting
+    Currently, there are no rate limits enforced, but clients should implement reasonable rate limiting to avoid overwhelming the server.
+
+    ## Pagination
+    List endpoints support pagination via `limit` and `offset` query parameters:
+    - `limit`: Number of items to return (1-100, default: 20)
+    - `offset`: Number of items to skip (default: 0)
+
+    ## Error Responses
+    All error responses follow this format:
+    ```json
+    {
+      "success": false,
+      "error": "Error message description"
+    }
+    ```
+
+    Common HTTP status codes:
+    - `200` - Success
+    - `201` - Created
+    - `400` - Bad Request (validation error)
+    - `401` - Unauthorized (authentication required)
+    - `403` - Forbidden (permission denied)
+    - `404` - Not Found
+    - `500` - Internal Server Error
+
+  contact:
+    name: API Support
+    url: https://github.com/yourusername/aion2builder
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://aion2builder.com/api/v1
+    description: Production environment
+
+tags:
+  - name: Builds
+    description: Build management operations
+  - name: Classes
+    description: Class information and data
+  - name: Users
+    description: User-specific build operations
+
+security:
+  - SessionAuth: []
+
+paths:
+  /builds:
+    get:
+      tags:
+        - Builds
+      summary: List all builds
+      description: |
+        Retrieve a paginated list of builds with optional filtering.
+
+        Build visibility rules:
+        - **Public builds** (private: false): Visible to all users
+        - **Private builds** (private: true): Only visible to the owner
+        - **Starter builds** (userId: null): Always visible to all users
+
+        **Note**: This endpoint does not return full build details (abilities, passives, stigmas).
+        Use `GET /builds/{id}` to retrieve complete build information.
+      operationId: listBuilds
+      security: []
+      parameters:
+        - name: classId
+          in: query
+          description: Filter by class ID (e.g., 1 for Gladiator, 2 for Templar)
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: userId
+          in: query
+          description: Filter by user ID (only returns user's builds and public starter builds)
+          required: false
+          schema:
+            type: string
+            format: cuid
+            example: "clx1234567890"
+        - name: private
+          in: query
+          description: Filter by visibility (true for private, false for public)
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - name: limit
+          in: query
+          description: Number of builds to return (1-100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: offset
+          in: query
+          description: Number of builds to skip (for pagination)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Successfully retrieved builds
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BuildListing'
+                  count:
+                    type: integer
+                    description: Total number of builds matching the filter
+                    example: 42
+              examples:
+                successResponse:
+                  value:
+                    success: true
+                    data:
+                      - id: 1
+                        name: "PvP Burst Build"
+                        classId: 1
+                        baseSP: 231
+                        extraSP: 0
+                        baseSTP: 40
+                        extraSTP: 0
+                        private: false
+                        userId: "clx1234567890"
+                        class:
+                          id: 1
+                          name: "Gladiator"
+                          iconUrl: "/icons/classes/gladiator.png"
+                        user:
+                          id: "clx1234567890"
+                          name: "PlayerName"
+                          image: "/avatars/user.jpg"
+                        createdAt: "2024-01-15T10:30:00Z"
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        likes: []
+                        _count:
+                          likes: 15
+                    count: 42
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Builds
+      summary: Create a new build
+      description: |
+        Create a new character build with the specified configuration.
+
+        **Requirements:**
+        - User must be authenticated
+        - `name` and `classId` are required
+        - Build is created as private by default
+
+        **Default Values:**
+        - `baseSP`: 231 (base skill points)
+        - `extraSP`: 0 (extra skill points)
+        - `baseSTP`: 40 (base stigma points)
+        - `extraSTP`: 0 (extra stigma points)
+        - `private`: true (build visibility)
+      operationId: createBuild
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildCreateInput'
+            examples:
+              minimalBuild:
+                summary: Minimal build (name and class only)
+                value:
+                  name: "My First Build"
+                  classId: 1
+              fullBuild:
+                summary: Complete build with abilities, passives, and stigmas
+                value:
+                  name: "PvP DPS Build"
+                  classId: 1
+                  baseSP: 231
+                  extraSP: 10
+                  baseSTP: 40
+                  extraSTP: 5
+                  private: false
+                  abilities:
+                    - abilityId: 101
+                      level: 5
+                      activeSpecialtyChoiceIds: [1, 2]
+                      selectedChainSkillIds: [10]
+                  passives:
+                    - passiveId: 201
+                      level: 10
+                  stigmas:
+                    - stigmaId: 301
+                      level: 15
+                      stigmaCost: 10
+                      activeSpecialtyChoiceIds: [5]
+                  shortcuts:
+                    "1":
+                      type: "ability"
+                      abilityId: 101
+                    "2":
+                      type: "stigma"
+                      stigmaId: 301
+                  shortcutLabels:
+                    "1": "Burst"
+                    "2": "AoE"
+      responses:
+        '201':
+          description: Build created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Build'
+              examples:
+                createdBuild:
+                  value:
+                    success: true
+                    data:
+                      id: 123
+                      name: "PvP DPS Build"
+                      classId: 1
+                      baseSP: 231
+                      extraSP: 10
+                      baseSTP: 40
+                      extraSTP: 5
+                      private: false
+                      userId: "clx1234567890"
+                      shortcuts:
+                        "1":
+                          type: "ability"
+                          abilityId: 101
+                      shortcutLabels:
+                        "1": "Burst"
+                      class:
+                        id: 1
+                        name: "Gladiator"
+                        iconUrl: "/icons/classes/gladiator.png"
+                      user:
+                        id: "clx1234567890"
+                        name: "PlayerName"
+                      abilities:
+                        - id: 1001
+                          buildId: 123
+                          abilityId: 101
+                          level: 5
+                          maxLevel: 10
+                          activeSpecialtyChoiceIds: [1, 2]
+                          selectedChainSkillIds: [10]
+                          ability:
+                            id: 101
+                            name: "Severe Precision Cut"
+                            maxLevel: 10
+                            classId: 1
+                      passives:
+                        - id: 2001
+                          buildId: 123
+                          passiveId: 201
+                          level: 10
+                          maxLevel: 10
+                          passive:
+                            id: 201
+                            name: "Strength Training"
+                            maxLevel: 10
+                            classId: 1
+                      stigmas:
+                        - id: 3001
+                          buildId: 123
+                          stigmaId: 301
+                          level: 15
+                          maxLevel: 20
+                          stigmaCost: 10
+                          activeSpecialtyChoiceIds: [5]
+                          selectedChainSkillIds: []
+                          stigma:
+                            id: 301
+                            name: "Void Training"
+                            maxLevel: 20
+                      daevanion: null
+                      likes: []
+                      createdAt: "2024-01-15T10:30:00Z"
+                      updatedAt: "2024-01-15T10:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /builds/{id}:
+    get:
+      tags:
+        - Builds
+      summary: Get build by ID
+      description: |
+        Retrieve complete details of a specific build including all abilities, passives, stigmas, and daevanion configuration.
+
+        **Access Control:**
+        - Public builds: Accessible to all users
+        - Private builds: Only accessible to the owner
+        - Starter builds (userId: null): Accessible to all users
+      operationId: getBuild
+      security: []
+      parameters:
+        - name: id
+          in: path
+          description: Build ID
+          required: true
+          schema:
+            type: integer
+            example: 123
+      responses:
+        '200':
+          description: Successfully retrieved build
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Build'
+              examples:
+                buildDetails:
+                  value:
+                    success: true
+                    data:
+                      id: 123
+                      name: "Ultimate PvP Build"
+                      classId: 1
+                      baseSP: 231
+                      extraSP: 20
+                      baseSTP: 40
+                      extraSTP: 10
+                      private: false
+                      userId: "clx1234567890"
+                      shortcuts:
+                        "1":
+                          type: "ability"
+                          abilityId: 101
+                          buildAbilityId: 1001
+                      shortcutLabels:
+                        "1": "Main DPS"
+                      class:
+                        id: 1
+                        name: "Gladiator"
+                        description: "Melee DPS specialist"
+                        iconUrl: "/icons/classes/gladiator.png"
+                        bannerUrl: "/banners/gladiator.jpg"
+                      user:
+                        id: "clx1234567890"
+                        name: "ProPlayer"
+                        image: "/avatars/pro.jpg"
+                      abilities:
+                        - id: 1001
+                          buildId: 123
+                          abilityId: 101
+                          level: 10
+                          maxLevel: 10
+                          activeSpecialtyChoiceIds: [1, 2, 3]
+                          selectedChainSkillIds: [10, 11]
+                          ability:
+                            id: 101
+                            name: "Severe Precision Cut"
+                            description: "Powerful single-target attack"
+                            maxLevel: 10
+                            classId: 1
+                            iconUrl: "/icons/abilities/spc.png"
+                            damageMin: 1500
+                            damageMax: 2000
+                            cooldown: "30s"
+                            castingDuration: "Instant Cast"
+                            specialtyChoices:
+                              - id: 1
+                                description: "Increase damage by 20%"
+                                unlockLevel: 8
+                              - id: 2
+                                description: "Reduce cooldown by 5s"
+                                unlockLevel: 12
+                            chainSkills:
+                              - id: 10
+                                parentAbilityId: 101
+                                chainAbilityId: 102
+                                condition: ["Moving"]
+                                chainAbility:
+                                  id: 102
+                                  name: "Chain Attack"
+                      passives:
+                        - id: 2001
+                          buildId: 123
+                          passiveId: 201
+                          level: 10
+                          maxLevel: 10
+                          passive:
+                            id: 201
+                            name: "Strength Training"
+                            description: "Increases physical attack"
+                            maxLevel: 10
+                            classId: 1
+                            iconUrl: "/icons/passives/strength.png"
+                            attack: 50
+                            attackModifier: 5
+                      stigmas:
+                        - id: 3001
+                          buildId: 123
+                          stigmaId: 301
+                          level: 20
+                          maxLevel: 20
+                          stigmaCost: 15
+                          activeSpecialtyChoiceIds: [5]
+                          selectedChainSkillIds: []
+                          stigma:
+                            id: 301
+                            name: "Void Training"
+                            description: "Advanced combat technique"
+                            maxLevel: 20
+                            iconUrl: "/icons/stigmas/void.png"
+                            damageBoost: 100
+                            damageBoostModifier: 10
+                      daevanion:
+                        id: 500
+                        buildId: 123
+                        nezekan: [1, 2, 3]
+                        zikel: [4, 5]
+                        vaizel: [6, 7, 8]
+                        triniel: [9, 10]
+                        ariel: [11, 12]
+                        azphel: [13, 14]
+                      likes:
+                        - id: 1
+                          buildId: 123
+                          userId: "user999"
+                          createdAt: "2024-01-16T08:00:00Z"
+                          user:
+                            id: "user999"
+                            name: "FanBoy"
+                      _count:
+                        likes: 25
+                      createdAt: "2024-01-15T10:30:00Z"
+                      updatedAt: "2024-01-16T15:45:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Builds
+      summary: Update a build
+      description: |
+        Update an existing build's configuration.
+
+        **Requirements:**
+        - User must be authenticated
+        - User must own the build OR be an admin
+        - All fields are optional (partial updates supported)
+
+        **Note:** When updating arrays (abilities, passives, stigmas), the entire array is replaced.
+        Use the full array in your request, not just the changes.
+      operationId: updateBuild
+      parameters:
+        - name: id
+          in: path
+          description: Build ID
+          required: true
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildUpdateInput'
+            examples:
+              updateName:
+                summary: Update build name only
+                value:
+                  name: "Updated Build Name"
+              updateAbilities:
+                summary: Update abilities configuration
+                value:
+                  abilities:
+                    - abilityId: 101
+                      level: 10
+                      activeSpecialtyChoiceIds: [1, 2, 3]
+                      selectedChainSkillIds: [10]
+                    - abilityId: 102
+                      level: 8
+                      activeSpecialtyChoiceIds: []
+                      selectedChainSkillIds: []
+              updateStigmas:
+                summary: Update stigma configuration
+                value:
+                  stigmas:
+                    - stigmaId: 301
+                      level: 20
+                      stigmaCost: 15
+                      activeSpecialtyChoiceIds: [5]
+                      selectedChainSkillIds: []
+      responses:
+        '200':
+          description: Build updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Build'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Builds
+      summary: Delete a build
+      description: |
+        Permanently delete a build and all its associated data.
+
+        **Requirements:**
+        - User must be authenticated
+        - User must own the build OR be an admin
+
+        **Warning:** This action cannot be undone. All build data including abilities, passives, stigmas, daevanion configuration, and likes will be permanently deleted.
+      operationId: deleteBuild
+      parameters:
+        - name: id
+          in: path
+          description: Build ID
+          required: true
+          schema:
+            type: integer
+            example: 123
+      responses:
+        '200':
+          description: Build deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      deleted:
+                        type: boolean
+                        example: true
+              examples:
+                deleteSuccess:
+                  value:
+                    success: true
+                    data:
+                      deleted: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /builds/{id}/like:
+    post:
+      tags:
+        - Builds
+      summary: Toggle like on a build
+      description: |
+        Like or unlike a build. This is a toggle operation:
+        - If the user hasn't liked the build, it adds a like
+        - If the user has already liked the build, it removes the like
+
+        **Requirements:**
+        - User must be authenticated
+        - Build must exist
+        - A user can only like a build once
+
+        **Response includes:**
+        - `liked`: Current like status (true if liked, false if unliked)
+        - `likesCount`: Total number of likes on the build
+      operationId: toggleLikeBuild
+      parameters:
+        - name: id
+          in: path
+          description: Build ID
+          required: true
+          schema:
+            type: integer
+            example: 123
+      responses:
+        '200':
+          description: Like status toggled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      liked:
+                        type: boolean
+                        description: Current like status
+                        example: true
+                      likesCount:
+                        type: integer
+                        description: Total number of likes
+                        example: 42
+              examples:
+                liked:
+                  summary: Build liked successfully
+                  value:
+                    success: true
+                    data:
+                      liked: true
+                      likesCount: 43
+                unliked:
+                  summary: Build unliked successfully
+                  value:
+                    success: true
+                    data:
+                      liked: false
+                      likesCount: 42
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /builds/{id}/daevanion:
+    put:
+      tags:
+        - Builds
+      summary: Update daevanion configuration
+      description: |
+        Update the daevanion rune configuration for a build.
+
+        **Requirements:**
+        - User must be authenticated
+        - User must own the build OR be an admin
+
+        **Daevanion Paths:**
+        - `nezekan`: Path of the Protector (defense-focused)
+        - `zikel`: Path of the Conqueror (offense-focused)
+        - `vaizel`: Path of the Strategist (utility-focused)
+        - `triniel`: Path of the Hunter (crit-focused)
+        - `ariel`: Path of the Healer (support-focused)
+        - `azphel`: Path of the Destroyer (burst-focused)
+
+        Each path contains an array of slot IDs representing activated runes.
+      operationId: updateDaevanion
+      parameters:
+        - name: id
+          in: path
+          description: Build ID
+          required: true
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DaevanionInput'
+            examples:
+              balancedBuild:
+                summary: Balanced daevanion configuration
+                value:
+                  nezekan: [1, 2, 3, 4]
+                  zikel: [5, 6, 7, 8]
+                  vaizel: [9, 10]
+                  triniel: [11, 12, 13]
+                  ariel: [14, 15]
+                  azphel: [16, 17, 18, 19]
+              minimalConfig:
+                summary: Minimal configuration (early game)
+                value:
+                  nezekan: [1, 2]
+                  zikel: [5]
+                  vaizel: []
+                  triniel: []
+                  ariel: []
+                  azphel: []
+      responses:
+        '200':
+          description: Daevanion configuration updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/DaevanionInput'
+              examples:
+                successResponse:
+                  value:
+                    success: true
+                    data:
+                      nezekan: [1, 2, 3, 4]
+                      zikel: [5, 6, 7, 8]
+                      vaizel: [9, 10]
+                      triniel: [11, 12, 13]
+                      ariel: [14, 15]
+                      azphel: [16, 17, 18, 19]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    # ========================================
+    # Core Schemas
+    # ========================================
+
+    BuildListing:
+      type: object
+      description: Simplified build object for listings (without full details)
+      properties:
+        id:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: "PvP Burst Build"
+        classId:
+          type: integer
+          example: 1
+        userId:
+          type: string
+          format: cuid
+          nullable: true
+          description: null for starter builds, user ID for user builds
+          example: "clx1234567890"
+        baseSP:
+          type: integer
+          description: Base skill points
+          default: 231
+          example: 231
+        extraSP:
+          type: integer
+          description: Extra skill points
+          default: 0
+          example: 10
+        baseSTP:
+          type: integer
+          description: Base stigma points
+          default: 40
+          example: 40
+        extraSTP:
+          type: integer
+          description: Extra stigma points
+          default: 0
+          example: 5
+        private:
+          type: boolean
+          description: Build visibility
+          default: true
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        class:
+          $ref: '#/components/schemas/ClassBasic'
+        user:
+          $ref: '#/components/schemas/UserBasic'
+          nullable: true
+        likes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Like'
+          maxItems: 3
+          description: Preview of recent likes (max 3)
+        _count:
+          type: object
+          properties:
+            likes:
+              type: integer
+              example: 15
+      required:
+        - id
+        - name
+        - classId
+        - baseSP
+        - extraSP
+        - baseSTP
+        - extraSTP
+        - private
+        - createdAt
+        - updatedAt
+
+    Build:
+      type: object
+      description: Complete build object with all details
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            name:
+              type: string
+              example: "Ultimate PvP Build"
+            classId:
+              type: integer
+              example: 1
+            userId:
+              type: string
+              format: cuid
+              nullable: true
+              example: "clx1234567890"
+            baseSP:
+              type: integer
+              default: 231
+              example: 231
+            extraSP:
+              type: integer
+              default: 0
+              example: 20
+            baseSTP:
+              type: integer
+              default: 40
+              example: 40
+            extraSTP:
+              type: integer
+              default: 0
+              example: 10
+            shortcuts:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [ability, stigma]
+                  abilityId:
+                    type: integer
+                  stigmaId:
+                    type: integer
+                  buildAbilityId:
+                    type: integer
+                  buildStigmaId:
+                    type: integer
+              nullable: true
+              example:
+                "1":
+                  type: "ability"
+                  abilityId: 101
+                  buildAbilityId: 1001
+                "2":
+                  type: "stigma"
+                  stigmaId: 301
+                  buildStigmaId: 3001
+            shortcutLabels:
+              type: object
+              additionalProperties:
+                type: string
+              nullable: true
+              description: Labels for shortcut slots (column ID -> label)
+              example:
+                "1": "Main DPS"
+                "2": "AoE"
+            private:
+              type: boolean
+              default: true
+              example: false
+            createdAt:
+              type: string
+              format: date-time
+              example: "2024-01-15T10:30:00Z"
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2024-01-16T15:45:00Z"
+            class:
+              $ref: '#/components/schemas/Class'
+            user:
+              $ref: '#/components/schemas/UserBasic'
+              nullable: true
+            abilities:
+              type: array
+              items:
+                $ref: '#/components/schemas/BuildAbility'
+            passives:
+              type: array
+              items:
+                $ref: '#/components/schemas/BuildPassive'
+            stigmas:
+              type: array
+              items:
+                $ref: '#/components/schemas/BuildStigma'
+            daevanion:
+              $ref: '#/components/schemas/BuildDaevanion'
+              nullable: true
+            likes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Like'
+            _count:
+              type: object
+              properties:
+                likes:
+                  type: integer
+                  example: 25
+          required:
+            - id
+            - name
+            - classId
+            - baseSP
+            - extraSP
+            - baseSTP
+            - extraSTP
+            - private
+            - createdAt
+            - updatedAt
+
+    BuildCreateInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Build name
+          example: "My Awesome Build"
+        classId:
+          type: integer
+          description: Class ID (must exist in database)
+          example: 1
+        baseSP:
+          type: integer
+          default: 231
+          description: Base skill points
+          example: 231
+        extraSP:
+          type: integer
+          default: 0
+          description: Extra skill points
+          example: 10
+        baseSTP:
+          type: integer
+          default: 40
+          description: Base stigma points
+          example: 40
+        extraSTP:
+          type: integer
+          default: 0
+          description: Extra stigma points
+          example: 5
+        private:
+          type: boolean
+          default: true
+          description: Build visibility (true = private, false = public)
+          example: false
+        abilities:
+          type: array
+          description: Array of abilities to include in the build
+          items:
+            type: object
+            properties:
+              abilityId:
+                type: integer
+                example: 101
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+                example: 5
+              activeSpecialtyChoiceIds:
+                type: array
+                items:
+                  type: integer
+                default: []
+                description: IDs of active specialty choices
+                example: [1, 2]
+              selectedChainSkillIds:
+                type: array
+                items:
+                  type: integer
+                default: []
+                description: IDs of selected chain skills
+                example: [10, 11]
+            required:
+              - abilityId
+              - level
+        passives:
+          type: array
+          description: Array of passives to include in the build
+          items:
+            type: object
+            properties:
+              passiveId:
+                type: integer
+                example: 201
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+                example: 10
+            required:
+              - passiveId
+              - level
+        stigmas:
+          type: array
+          description: Array of stigmas to equip in the build
+          items:
+            type: object
+            properties:
+              stigmaId:
+                type: integer
+                example: 301
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+                example: 15
+              stigmaCost:
+                type: integer
+                description: Stigma point cost
+                example: 10
+              activeSpecialtyChoiceIds:
+                type: array
+                items:
+                  type: integer
+                default: []
+                example: [5]
+              selectedChainSkillIds:
+                type: array
+                items:
+                  type: integer
+                default: []
+                example: []
+            required:
+              - stigmaId
+              - level
+              - stigmaCost
+        shortcuts:
+          type: object
+          description: Keyboard shortcuts configuration
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [ability, stigma]
+              abilityId:
+                type: integer
+              stigmaId:
+                type: integer
+          example:
+            "1":
+              type: "ability"
+              abilityId: 101
+            "2":
+              type: "stigma"
+              stigmaId: 301
+        shortcutLabels:
+          type: object
+          description: Labels for shortcut slots
+          additionalProperties:
+            type: string
+          example:
+            "1": "Burst"
+            "2": "AoE"
+      required:
+        - name
+        - classId
+
+    BuildUpdateInput:
+      type: object
+      description: Partial update schema for builds (all fields optional)
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Updated Build Name"
+        classId:
+          type: integer
+          example: 2
+        baseSP:
+          type: integer
+          example: 250
+        extraSP:
+          type: integer
+          example: 15
+        baseSTP:
+          type: integer
+          example: 45
+        extraSTP:
+          type: integer
+          example: 8
+        private:
+          type: boolean
+          example: true
+        abilities:
+          type: array
+          items:
+            type: object
+            properties:
+              abilityId:
+                type: integer
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+              activeSpecialtyChoiceIds:
+                type: array
+                items:
+                  type: integer
+              selectedChainSkillIds:
+                type: array
+                items:
+                  type: integer
+            required:
+              - abilityId
+              - level
+        passives:
+          type: array
+          items:
+            type: object
+            properties:
+              passiveId:
+                type: integer
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+            required:
+              - passiveId
+              - level
+        stigmas:
+          type: array
+          items:
+            type: object
+            properties:
+              stigmaId:
+                type: integer
+              level:
+                type: integer
+                minimum: 1
+                maximum: 20
+              stigmaCost:
+                type: integer
+              activeSpecialtyChoiceIds:
+                type: array
+                items:
+                  type: integer
+              selectedChainSkillIds:
+                type: array
+                items:
+                  type: integer
+            required:
+              - stigmaId
+              - level
+              - stigmaCost
+        shortcuts:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [ability, stigma]
+              abilityId:
+                type: integer
+              stigmaId:
+                type: integer
+
+    BuildAbility:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1001
+        buildId:
+          type: integer
+          example: 123
+        abilityId:
+          type: integer
+          example: 101
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+          example: 5
+        maxLevel:
+          type: integer
+          default: 20
+          example: 10
+        activeSpecialtyChoiceIds:
+          type: array
+          items:
+            type: integer
+          description: IDs of activated specialty choices
+          example: [1, 2, 3]
+        selectedChainSkillIds:
+          type: array
+          items:
+            type: integer
+          description: IDs of selected chain skills
+          default: []
+          example: [10, 11]
+        build:
+          $ref: '#/components/schemas/BuildListing'
+          nullable: true
+        ability:
+          $ref: '#/components/schemas/Ability'
+      required:
+        - id
+        - buildId
+        - abilityId
+        - level
+        - maxLevel
+        - activeSpecialtyChoiceIds
+        - selectedChainSkillIds
+        - ability
+
+    BuildPassive:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2001
+        buildId:
+          type: integer
+          example: 123
+        passiveId:
+          type: integer
+          example: 201
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+          example: 10
+        maxLevel:
+          type: integer
+          default: 20
+          example: 10
+        build:
+          $ref: '#/components/schemas/BuildListing'
+          nullable: true
+        passive:
+          $ref: '#/components/schemas/Passive'
+      required:
+        - id
+        - buildId
+        - passiveId
+        - level
+        - maxLevel
+        - passive
+
+    BuildStigma:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3001
+        buildId:
+          type: integer
+          example: 123
+        stigmaId:
+          type: integer
+          example: 301
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+          example: 15
+        maxLevel:
+          type: integer
+          default: 20
+          example: 20
+        stigmaCost:
+          type: integer
+          description: Stigma point cost to equip
+          default: 10
+          example: 15
+        activeSpecialtyChoiceIds:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [5]
+        selectedChainSkillIds:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: []
+        build:
+          $ref: '#/components/schemas/BuildListing'
+          nullable: true
+        stigma:
+          $ref: '#/components/schemas/Stigma'
+      required:
+        - id
+        - buildId
+        - stigmaId
+        - level
+        - maxLevel
+        - stigmaCost
+        - activeSpecialtyChoiceIds
+        - selectedChainSkillIds
+        - stigma
+
+    BuildDaevanion:
+      type: object
+      description: Daevanion rune configuration for a build
+      properties:
+        id:
+          type: integer
+          example: 500
+        buildId:
+          type: integer
+          example: 123
+        nezekan:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Nezekan path (Defense)
+          default: []
+          example: [1, 2, 3, 4]
+        zikel:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Zikel path (Offense)
+          default: []
+          example: [5, 6, 7, 8]
+        vaizel:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Vaizel path (Utility)
+          default: []
+          example: [9, 10]
+        triniel:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Triniel path (Critical)
+          default: []
+          example: [11, 12, 13]
+        ariel:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Ariel path (Healing)
+          default: []
+          example: [14, 15]
+        azphel:
+          type: array
+          items:
+            type: integer
+          description: Slot IDs for Azphel path (Burst Damage)
+          default: []
+          example: [16, 17, 18, 19]
+      required:
+        - id
+        - buildId
+        - nezekan
+        - zikel
+        - vaizel
+        - triniel
+        - ariel
+        - azphel
+
+    DaevanionInput:
+      type: object
+      description: Input schema for updating daevanion configuration
+      properties:
+        nezekan:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [1, 2, 3, 4]
+        zikel:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [5, 6, 7, 8]
+        vaizel:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [9, 10]
+        triniel:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [11, 12, 13]
+        ariel:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [14, 15]
+        azphel:
+          type: array
+          items:
+            type: integer
+          default: []
+          example: [16, 17, 18, 19]
+
+    Ability:
+      type: object
+      description: Active skill/ability that can be learned and used in combat
+      properties:
+        id:
+          type: integer
+          example: 101
+        name:
+          type: string
+          example: "Severe Precision Cut"
+        description:
+          type: string
+          nullable: true
+          example: "Powerful single-target attack with high damage"
+        damageMin:
+          type: integer
+          nullable: true
+          example: 1500
+        damageMax:
+          type: integer
+          nullable: true
+          example: 2000
+        castingDuration:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "2.5s"
+        cooldown:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "30s"
+        maxLevel:
+          type: integer
+          default: 10
+          example: 10
+        classId:
+          type: integer
+          example: 1
+        iconUrl:
+          type: string
+          nullable: true
+          example: "/icons/abilities/severe_precision_cut.png"
+        area:
+          type: integer
+          nullable: true
+          default: 4
+          description: Area of effect radius in meters
+          example: 4
+        baseCost:
+          type: integer
+          default: 1
+          example: 1
+        baseCostModifier:
+          type: integer
+          default: 2
+          example: 2
+        damageMaxModifier:
+          type: integer
+          nullable: true
+          example: 150
+        damageMinModifier:
+          type: integer
+          nullable: true
+          example: 100
+        manaCost:
+          type: integer
+          nullable: true
+          example: 150
+        manaRegen:
+          type: integer
+          nullable: true
+          example: 10
+        range:
+          type: integer
+          nullable: true
+          default: 20
+          example: 20
+        staggerDamage:
+          type: integer
+          nullable: true
+          example: 500
+        target:
+          type: string
+          nullable: true
+          default: "Single Target"
+          example: "Single Target"
+        condition:
+          type: array
+          items:
+            type: string
+          default: []
+          example: ["Moving"]
+        attack:
+          type: integer
+          nullable: true
+          example: 100
+        attackModifier:
+          type: integer
+          nullable: true
+          example: 10
+        criticalHit:
+          type: integer
+          nullable: true
+          example: 50
+        criticalHitModifier:
+          type: integer
+          nullable: true
+          example: 5
+        damageBoost:
+          type: integer
+          nullable: true
+          example: 75
+        damageBoostModifier:
+          type: integer
+          nullable: true
+          example: 8
+        damageTolerance:
+          type: integer
+          nullable: true
+          example: 60
+        damageToleranceModifier:
+          type: integer
+          nullable: true
+          example: 6
+        defense:
+          type: integer
+          nullable: true
+          example: 40
+        defenseModifier:
+          type: integer
+          nullable: true
+          example: 4
+        healBoost:
+          type: integer
+          nullable: true
+          example: 30
+        healBoostModifier:
+          type: integer
+          nullable: true
+          example: 3
+        healMax:
+          type: integer
+          nullable: true
+          example: 500
+        healMaxModifier:
+          type: integer
+          nullable: true
+          example: 50
+        healMin:
+          type: integer
+          nullable: true
+          example: 400
+        healMinModifier:
+          type: integer
+          nullable: true
+          example: 40
+        incomingHeal:
+          type: integer
+          nullable: true
+          example: 25
+        incomingHealModifier:
+          type: integer
+          nullable: true
+          example: 3
+        maxHP:
+          type: integer
+          nullable: true
+          example: 1000
+        maxHPModifier:
+          type: integer
+          nullable: true
+          example: 100
+        maxMP:
+          type: integer
+          nullable: true
+          example: 500
+        maxMPModifier:
+          type: integer
+          nullable: true
+          example: 50
+        minHP:
+          type: integer
+          nullable: true
+          example: 100
+        minHPModifier:
+          type: integer
+          nullable: true
+          example: 10
+        minMP:
+          type: integer
+          nullable: true
+          example: 50
+        minMPModifier:
+          type: integer
+          nullable: true
+          example: 5
+        class:
+          $ref: '#/components/schemas/ClassBasic'
+        specialtyChoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialtyChoice'
+          description: Available specialty choices for this ability
+        chainSkills:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainSkill'
+          description: Chain skills that can follow this ability
+        parentAbilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainSkill'
+          description: Chain skills where this ability is the follow-up
+      required:
+        - id
+        - name
+        - maxLevel
+        - classId
+
+    Passive:
+      type: object
+      description: Passive skill that provides permanent stat bonuses
+      properties:
+        id:
+          type: integer
+          example: 201
+        name:
+          type: string
+          example: "Strength Training"
+        description:
+          type: string
+          nullable: true
+          example: "Permanently increases physical attack power"
+        maxLevel:
+          type: integer
+          default: 10
+          example: 10
+        classId:
+          type: integer
+          example: 1
+        iconUrl:
+          type: string
+          nullable: true
+          example: "/icons/passives/strength_training.png"
+        area:
+          type: integer
+          nullable: true
+          default: 4
+          example: 4
+        attack:
+          type: integer
+          nullable: true
+          example: 50
+        attackModifier:
+          type: integer
+          nullable: true
+          example: 5
+        baseCost:
+          type: integer
+          default: 1
+          example: 1
+        baseCostModifier:
+          type: integer
+          default: 2
+          example: 2
+        castingDuration:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "Instant Cast"
+        cooldown:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "Instant Cast"
+        criticalHitResist:
+          type: integer
+          nullable: true
+          example: 30
+        criticalHitResistModifier:
+          type: integer
+          nullable: true
+          example: 3
+        criticalHit:
+          type: integer
+          nullable: true
+          example: 25
+        criticalHitModifier:
+          type: integer
+          nullable: true
+          example: 3
+        damageBoost:
+          type: integer
+          nullable: true
+          example: 20
+        damageMax:
+          type: integer
+          nullable: true
+          example: 100
+        damageMaxModifier:
+          type: integer
+          nullable: true
+          example: 10
+        damageMin:
+          type: integer
+          nullable: true
+          example: 80
+        damageMinModifier:
+          type: integer
+          nullable: true
+          example: 8
+        damageTolerance:
+          type: integer
+          nullable: true
+          example: 40
+        defense:
+          type: integer
+          nullable: true
+          example: 35
+        defenseModifier:
+          type: integer
+          nullable: true
+          example: 4
+        healBoost:
+          type: integer
+          nullable: true
+          example: 15
+        healBoostModifier:
+          type: integer
+          nullable: true
+          example: 2
+        healMax:
+          type: integer
+          nullable: true
+          example: 200
+        healMaxModifier:
+          type: integer
+          nullable: true
+          example: 20
+        healMin:
+          type: integer
+          nullable: true
+          example: 150
+        healMinModifier:
+          type: integer
+          nullable: true
+          example: 15
+        impactTypeResist:
+          type: integer
+          nullable: true
+          example: 20
+        impactTypeResistModifier:
+          type: integer
+          nullable: true
+          example: 2
+        impactTypeChance:
+          type: integer
+          nullable: true
+          example: 10
+        impactTypeChanceModifier:
+          type: integer
+          nullable: true
+          example: 1
+        incomingHeal:
+          type: integer
+          nullable: true
+          example: 10
+        incomingHealModifier:
+          type: integer
+          nullable: true
+          example: 1
+        manaCost:
+          type: integer
+          nullable: true
+          example: 0
+        manaRegen:
+          type: integer
+          nullable: true
+          example: 5
+        maxHP:
+          type: integer
+          nullable: true
+          example: 500
+        maxHPModifier:
+          type: integer
+          nullable: true
+          example: 50
+        maxMP:
+          type: integer
+          nullable: true
+          example: 250
+        maxMPModifier:
+          type: integer
+          nullable: true
+          example: 25
+        perfect:
+          type: number
+          nullable: true
+          format: float
+          example: 0.5
+        perfectModifier:
+          type: number
+          nullable: true
+          format: float
+          example: 0.05
+        smite:
+          type: number
+          nullable: true
+          format: float
+          example: 1.0
+        smiteModifier:
+          type: number
+          nullable: true
+          format: float
+          example: 0.1
+        range:
+          type: integer
+          nullable: true
+          default: 20
+          example: 20
+        staggerDamage:
+          type: integer
+          nullable: true
+          example: 100
+        statusEffectResist:
+          type: integer
+          nullable: true
+          example: 15
+        statusEffectResistModifier:
+          type: integer
+          nullable: true
+          example: 2
+        target:
+          type: string
+          nullable: true
+          default: "Single Target"
+          example: "Self"
+        class:
+          $ref: '#/components/schemas/ClassBasic'
+      required:
+        - id
+        - name
+        - maxLevel
+        - classId
+
+    Stigma:
+      type: object
+      description: Advanced stigma skill that can be equipped in stigma slots
+      properties:
+        id:
+          type: integer
+          example: 301
+        name:
+          type: string
+          example: "Void Training"
+        description:
+          type: string
+          nullable: true
+          example: "Advanced combat techniques that harness void energy"
+        baseCost:
+          type: integer
+          default: 1
+          example: 1
+        iconUrl:
+          type: string
+          nullable: true
+          example: "/icons/stigmas/void_training.png"
+        maxLevel:
+          type: integer
+          default: 20
+          example: 20
+        area:
+          type: integer
+          nullable: true
+          default: 4
+          example: 4
+        baseCostModifier:
+          type: integer
+          default: 2
+          example: 2
+        castingDuration:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "1.5s"
+        cooldown:
+          type: string
+          nullable: true
+          default: "Instant Cast"
+          example: "45s"
+        damageMax:
+          type: integer
+          nullable: true
+          example: 2500
+        damageMaxModifier:
+          type: integer
+          nullable: true
+          example: 200
+        damageMin:
+          type: integer
+          nullable: true
+          example: 2000
+        damageMinModifier:
+          type: integer
+          nullable: true
+          example: 150
+        manaCost:
+          type: integer
+          nullable: true
+          example: 300
+        manaRegen:
+          type: integer
+          nullable: true
+          example: 15
+        range:
+          type: integer
+          nullable: true
+          default: 20
+          example: 25
+        staggerDamage:
+          type: integer
+          nullable: true
+          example: 800
+        target:
+          type: string
+          nullable: true
+          default: "Single Target"
+          example: "Area of Effect"
+        condition:
+          type: array
+          items:
+            type: string
+          default: []
+          example: ["Flying"]
+        attack:
+          type: integer
+          nullable: true
+          example: 150
+        attackModifier:
+          type: integer
+          nullable: true
+          example: 15
+        criticalHitResist:
+          type: integer
+          nullable: true
+          example: 40
+        criticalHitResistModifier:
+          type: integer
+          nullable: true
+          example: 4
+        criticalHit:
+          type: integer
+          nullable: true
+          example: 60
+        criticalHitModifier:
+          type: integer
+          nullable: true
+          example: 6
+        damageBoost:
+          type: integer
+          nullable: true
+          example: 100
+        damageBoostModifier:
+          type: integer
+          nullable: true
+          example: 10
+        damageTolerance:
+          type: integer
+          nullable: true
+          example: 50
+        damageToleranceModifier:
+          type: integer
+          nullable: true
+          example: 5
+        defense:
+          type: integer
+          nullable: true
+          example: 30
+        defenseModifier:
+          type: integer
+          nullable: true
+          example: 3
+        healBoost:
+          type: integer
+          nullable: true
+          example: 20
+        healBoostModifier:
+          type: integer
+          nullable: true
+          example: 2
+        healMax:
+          type: integer
+          nullable: true
+          example: 300
+        healMaxModifier:
+          type: integer
+          nullable: true
+          example: 30
+        healMin:
+          type: integer
+          nullable: true
+          example: 200
+        healMinModifier:
+          type: integer
+          nullable: true
+          example: 20
+        impactTypeResist:
+          type: integer
+          nullable: true
+          example: 25
+        impactTypeResistModifier:
+          type: integer
+          nullable: true
+          example: 3
+        impactTypeChance:
+          type: integer
+          nullable: true
+          example: 12
+        impactTypeChanceModifier:
+          type: integer
+          nullable: true
+          example: 1
+        incomingHeal:
+          type: integer
+          nullable: true
+          example: 15
+        incomingHealModifier:
+          type: integer
+          nullable: true
+          example: 2
+        maxHP:
+          type: integer
+          nullable: true
+          example: 800
+        maxHPModifier:
+          type: integer
+          nullable: true
+          example: 80
+        maxMP:
+          type: integer
+          nullable: true
+          example: 400
+        maxMPModifier:
+          type: integer
+          nullable: true
+          example: 40
+        minHP:
+          type: integer
+          nullable: true
+          example: 80
+        minHPModifier:
+          type: integer
+          nullable: true
+          example: 8
+        minMP:
+          type: integer
+          nullable: true
+          example: 40
+        minMPModifier:
+          type: integer
+          nullable: true
+          example: 4
+        statusEffectResist:
+          type: integer
+          nullable: true
+          example: 20
+        statusEffectResistModifier:
+          type: integer
+          nullable: true
+          example: 2
+        blockDamage:
+          type: integer
+          nullable: true
+          example: 100
+        blockDamageModifier:
+          type: integer
+          nullable: true
+          example: 10
+        damagePerSecond:
+          type: integer
+          nullable: true
+          example: 150
+        damagePerSecondModifier:
+          type: integer
+          nullable: true
+          example: 15
+        chargeLevels:
+          type: string
+          nullable: true
+          example: "3"
+        effectCondition:
+          type: string
+          nullable: true
+          example: "Must be equipped"
+        enmity:
+          type: integer
+          nullable: true
+          example: 100
+        enmityModifier:
+          type: integer
+          nullable: true
+          example: 10
+        duration:
+          type: integer
+          nullable: true
+          example: 10
+        durationModifier:
+          type: integer
+          nullable: true
+          example: 1
+        protectiveShield:
+          type: integer
+          nullable: true
+          example: 1000
+        protectiveShieldModifier:
+          type: integer
+          nullable: true
+          example: 100
+        classes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassBasic'
+          description: Classes that can equip this stigma
+        specialtyChoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialtyChoice'
+          description: Available specialty choices for this stigma
+        chainSkills:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainSkillStigma'
+          description: Chain skills that can follow this stigma
+        parentStigmas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainSkillStigma'
+          description: Chain skills where this stigma is the follow-up
+      required:
+        - id
+        - name
+        - maxLevel
+
+    SpecialtyChoice:
+      type: object
+      description: Specialization option for abilities/stigmas at specific levels
+      properties:
+        id:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: "Increase damage by 20%"
+        unlockLevel:
+          type: integer
+          description: Level at which this choice becomes available
+          example: 8
+        abilityId:
+          type: integer
+          nullable: true
+          example: 101
+        stigmaId:
+          type: integer
+          nullable: true
+          example: 301
+        ability:
+          $ref: '#/components/schemas/Ability'
+          nullable: true
+        stigma:
+          $ref: '#/components/schemas/Stigma'
+          nullable: true
+      required:
+        - id
+        - description
+        - unlockLevel
+
+    ChainSkill:
+      type: object
+      description: Chain skill relationship between two abilities
+      properties:
+        id:
+          type: integer
+          example: 10
+        parentAbilityId:
+          type: integer
+          example: 101
+        chainAbilityId:
+          type: integer
+          example: 102
+        condition:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Conditions required to activate the chain
+          example: ["Moving", "After Dodge"]
+        parentAbility:
+          $ref: '#/components/schemas/Ability'
+          nullable: true
+        chainAbility:
+          $ref: '#/components/schemas/Ability'
+      required:
+        - id
+        - parentAbilityId
+        - chainAbilityId
+        - chainAbility
+
+    ChainSkillStigma:
+      type: object
+      description: Chain skill relationship between two stigmas
+      properties:
+        id:
+          type: integer
+          example: 20
+        parentStigmaId:
+          type: integer
+          example: 301
+        chainStigmaId:
+          type: integer
+          example: 302
+        condition:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Conditions required to activate the chain
+          example: ["Critical Hit"]
+        parentStigma:
+          $ref: '#/components/schemas/Stigma'
+          nullable: true
+        chainStigma:
+          $ref: '#/components/schemas/Stigma'
+      required:
+        - id
+        - parentStigmaId
+        - chainStigmaId
+        - chainStigma
+
+    ClassBasic:
+      type: object
+      description: Basic class information
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Gladiator"
+        iconUrl:
+          type: string
+          nullable: true
+          example: "/icons/classes/gladiator.png"
+      required:
+        - id
+        - name
+
+    Class:
+      type: object
+      description: Complete class information with all data
+      allOf:
+        - $ref: '#/components/schemas/ClassBasic'
+        - type: object
+          properties:
+            description:
+              type: string
+              nullable: true
+              example: "Melee DPS specialist with powerful two-handed weapons"
+            bannerUrl:
+              type: string
+              nullable: true
+              example: "/banners/gladiator.jpg"
+            characterUrl:
+              type: string
+              nullable: true
+              example: "/characters/gladiator.png"
+            tags:
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+              description: Class archetypes/categories
+            abilities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Ability'
+              description: All abilities available to this class
+            passives:
+              type: array
+              items:
+                $ref: '#/components/schemas/Passive'
+              description: All passives available to this class
+            stigmas:
+              type: array
+              items:
+                $ref: '#/components/schemas/Stigma'
+              description: All stigmas this class can equip
+
+    Tag:
+      type: object
+      description: Class category/archetype tag
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "DPS"
+      required:
+        - id
+        - name
+
+    UserBasic:
+      type: object
+      description: Basic user information
+      properties:
+        id:
+          type: string
+          format: cuid
+          example: "clx1234567890"
+        name:
+          type: string
+          nullable: true
+          example: "PlayerName"
+        email:
+          type: string
+          nullable: true
+          format: email
+          example: "player@example.com"
+        image:
+          type: string
+          nullable: true
+          example: "/avatars/player.jpg"
+      required:
+        - id
+
+    Like:
+      type: object
+      description: Like relationship between user and build
+      properties:
+        id:
+          type: integer
+          example: 1
+        buildId:
+          type: integer
+          example: 123
+        userId:
+          type: string
+          format: cuid
+          example: "clx999888777"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-16T08:00:00Z"
+        user:
+          $ref: '#/components/schemas/UserBasic'
+          nullable: true
+      required:
+        - id
+        - buildId
+        - userId
+        - createdAt
+
+    # ========================================
+    # Response Schemas
+    # ========================================
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          description: Response data (varies by endpoint)
+        count:
+          type: integer
+          description: Total count (for list endpoints)
+          example: 42
+      required:
+        - success
+        - data
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Validation error: name: Required"
+      required:
+        - success
+        - error
+
+  # ========================================
+  # Reusable Responses
+  # ========================================
+
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid input or validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Validation error: name: String must contain at least 1 character(s)"
+
+    Unauthorized:
+      description: Unauthorized - Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "You must be authenticated to create a build"
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "You don't have permission to modify this build"
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "Build not found"
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "An unexpected error occurred"
+
+  # ========================================
+  # Security Schemes
+  # ========================================
+
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: |
+        NextAuth session authentication using cookies.
+
+        The session token is automatically managed by the web browser when using the web interface.
+
+        For API clients:
+        1. Authenticate via Discord OAuth: POST /api/auth/signin/discord
+        2. Extract the session token from the response cookies
+        3. Include it in subsequent requests as a cookie: `next-auth.session-token=<token>`
+
+        Example:
+        ```
+        curl -X GET https://api.example.com/api/v1/builds/123 \
+          -H "Cookie: next-auth.session-token=eyJhbGciOiJkaXQiLCJlbmMiOiJBMjU2R0NNIn0.."
+        ```

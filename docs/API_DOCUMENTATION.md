@@ -336,6 +336,223 @@ curl -X PUT "http://localhost:3000/api/v1/builds/1/daevanion" \
 
 ---
 
+### 8. List Classes
+
+**GET** `/api/v1/classes`
+
+List all available classes with basic information.
+
+#### Query Parameters
+None
+
+#### Example Request
+```bash
+curl "http://localhost:3000/api/v1/classes"
+```
+
+#### Example Response
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Templar",
+      "description": "A tank class...",
+      "iconUrl": "/classes/templar-icon.png",
+      "bannerUrl": "/classes/templar-banner.png",
+      "characterUrl": "/classes/templar-character.png"
+    },
+    {
+      "id": 2,
+      "name": "Chanter",
+      "description": "A support class...",
+      "iconUrl": "/classes/chanter-icon.png",
+      "bannerUrl": "/classes/chanter-banner.png",
+      "characterUrl": "/classes/chanter-character.png"
+    }
+  ]
+}
+```
+
+---
+
+### 9. Get Class by Name
+
+**GET** `/api/v1/classes/:name`
+
+Get detailed information about a specific class including abilities, passives, and stigmas.
+
+#### Path Parameters
+- `name` (string): Class name (e.g., 'templar', 'chanter', 'gladiator')
+
+#### Example Request
+```bash
+curl "http://localhost:3000/api/v1/classes/templar"
+```
+
+#### Example Response
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Templar",
+    "description": "A tank class...",
+    "iconUrl": "/classes/templar-icon.png",
+    "bannerUrl": "/classes/templar-banner.png",
+    "characterUrl": "/classes/templar-character.png",
+    "tags": [
+      {
+        "id": 1,
+        "name": "Tank"
+      }
+    ],
+    "abilities": [
+      {
+        "id": 1,
+        "name": "Provoking Roar",
+        "description": "...",
+        "classId": 1,
+        "iconUrl": "...",
+        ...
+      }
+    ],
+    "passives": [ ... ],
+    "stigmas": [ ... ]
+  }
+}
+```
+
+---
+
+### 10. Get User's Builds
+
+**GET** `/api/v1/users/me/builds`
+
+Get all builds for the currently authenticated user. Requires authentication.
+
+#### Query Parameters
+None
+
+#### Authentication
+Required (valid NextAuth session)
+
+#### Example Request
+```bash
+curl "http://localhost:3000/api/v1/users/me/builds" \
+  --cookie-jar cookies.txt \
+  --cookie cookies.txt
+```
+
+#### Example Response
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "My Tank Build",
+      "classId": 1,
+      "userId": "user_123",
+      "private": true,
+      "baseSP": 231,
+      "extraSP": 0,
+      "baseSTP": 40,
+      "extraSTP": 0,
+      "class": { ... },
+      "abilities": [ ... ],
+      "passives": [ ... ],
+      "stigmas": [ ... ]
+    }
+  ],
+  "count": 5
+}
+```
+
+---
+
+### 11. Create Build for Current User
+
+**POST** `/api/v1/users/me/builds`
+
+Create a new build for the currently authenticated user. Requires authentication.
+
+#### Request Body
+Same as Create Build endpoint (see endpoint #2)
+
+#### Authentication
+Required (valid NextAuth session)
+
+#### Example Request
+```bash
+curl -X POST "http://localhost:3000/api/v1/users/me/builds" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My New Build",
+    "classId": 1,
+    "private": true
+  }' \
+  --cookie-jar cookies.txt \
+  --cookie cookies.txt
+```
+
+#### Example Response
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "name": "My New Build",
+    "classId": 1,
+    "userId": "user_123",
+    "private": true,
+    ...
+  }
+}
+```
+
+---
+
+### 12. Get User's Liked Builds
+
+**GET** `/api/v1/users/me/liked`
+
+Get all builds liked by the currently authenticated user. Requires authentication.
+
+#### Query Parameters
+None
+
+#### Authentication
+Required (valid NextAuth session)
+
+#### Example Request
+```bash
+curl "http://localhost:3000/api/v1/users/me/liked" \
+  --cookie-jar cookies.txt \
+  --cookie cookies.txt
+```
+
+#### Example Response
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 45,
+      "name": "Community DPS Build",
+      "classId": 3,
+      "userId": "user_456",
+      "private": false,
+      ...
+    }
+  ],
+  "count": 12
+}
+```
+
+---
+
 ## Error Codes
 
 - `200`: Success
@@ -376,17 +593,33 @@ curl "http://localhost:3000/api/v1/builds/1"
 1. **API Types & Schemas**: `src/types/api.schema.ts`
    - Zod validation schemas
    - TypeScript types for API requests/responses
+   - Class schemas (ClassBasicSchema, ClassDetailSchema)
 
 2. **API Utilities**: `src/lib/api-utils.ts`
    - Response helpers (`apiSuccess`, `apiError`, `handleApiError`)
    - Validation utilities (`validateRequest`)
    - Auth utilities (`requireAuth`, `requireBuildOwnership`)
 
-3. **API Endpoints**:
+3. **Auth Utilities**: `src/lib/auth-utils.ts`
+   - `requireAuth()` - Require authentication for API routes
+   - `getCurrentUserId()` - Get current user ID from session
+   - `AuthError` class for authentication errors
+
+4. **API Endpoints**:
+
+   **Builds**:
    - `src/app/api/v1/builds/route.ts` (GET, POST)
    - `src/app/api/v1/builds/[id]/route.ts` (GET, PUT, DELETE)
    - `src/app/api/v1/builds/[id]/like/route.ts` (POST)
    - `src/app/api/v1/builds/[id]/daevanion/route.ts` (PUT)
+
+   **Classes**:
+   - `src/app/api/v1/classes/route.ts` (GET - list all classes)
+   - `src/app/api/v1/classes/[name]/route.ts` (GET - get class by name)
+
+   **Users**:
+   - `src/app/api/v1/users/me/builds/route.ts` (GET, POST)
+   - `src/app/api/v1/users/me/liked/route.ts` (GET)
 
 ## Key Features
 
