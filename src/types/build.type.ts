@@ -198,6 +198,9 @@ export type BuildType = BuildTypeBase & {
   stigmas?: BuildStigmaType[];
   daevanion?: BuildDaevanionType | null;
   likes?: LikeType[];
+  _count?: {
+    likes?: number;
+  };
   shortcuts?: Record<string, {
     type: "ability" | "stigma";
     abilityId?: number;

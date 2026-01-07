@@ -181,6 +181,9 @@ model Ability {
   parentAbilities            ChainSkill[]      @relation("AbilityParentSkills")
   specialtyChoices           SpecialtyChoice[]
   spellTag                   SpellTag[]        @relation("AbilityToSpellTag")
+
+  @@index([classId])
+  @@index([name])
 }
 
 /// Relation de Chain Skill entre deux Abilities
@@ -223,98 +226,105 @@ model SpecialtyChoice {
   stigmaId    Int?
   ability     Ability? @relation(fields: [abilityId], references: [id])
   stigma      Stigma?  @relation(fields: [stigmaId], references: [id])
+
+  @@index([abilityId])
+  @@index([stigmaId])
+  @@index([unlockLevel])
 }
 
 /// Compétence passive
 /// Améliore les statistiques de base du personnage de manière permanente
 /// Structure similaire à Ability mais sans coût de mana ni temps de recharge
 model Passive {
-  id                         Int            @id @default(autoincrement())
-  name                       String
-  description                String?
-  maxLevel                   Int            @default(10)
-  classId                    Int
-  iconUrl                    String?
-  area                       Int?           @default(4)
-  attack                     Int?
-  attackModifier             Int?
-  baseCost                   Int            @default(1)
-  baseCostModifier           Int            @default(2)
-  castingDuration            String?        @default("Instant Cast")
-  cooldown                   String?        @default("Instant Cast")
-  criticalHitResist          Int?
-  criticalHitResistModifier  Int?
-  criticalHit                Int?
-  criticalHitModifier        Int?
-  damageBoost                Int?
-  damageMax                  Int?
-  damageMaxModifier          Int?
-  damageMin                  Int?
-  damageMinModifier          Int?
-  damageTolerance            Int?
-  defense                    Int?
-  defenseModifier            Int?
-  healBoost                  Int?
-  healBoostModifier          Int?
-  healMax                    Int?
-  healMaxModifier            Int?
-  healMin                    Int?
-  healMinModifier            Int?
-  impactTypeResist           Int?
-  impactTypeResistModifier   Int?
-  impactTypeChance           Int?
-  impactTypeChanceModifier   Int?
-  incomingHeal               Int?
-  incomingHealModifier       Int?
-  manaCost                   Int?
-  manaRegen                  Int?
-  maxHP                      Int?
-  maxHPModifier              Int?
-  maxMP                      Int?
-  maxMPModifier              Int?
-  perfect                    Float?
-  perfectModifier            Float?
-  smite                      Float?
-  smiteModifier              Float?
-  range                      Int?           @default(20)
-  staggerDamage              Int?
-  statusEffectResist         Int?
-  statusEffectResistModifier Int?
-  target                     String?        @default("Single Target")
-  damageMaxModifiers         Json?
-  damageMinModifiers         Json?
-  healBoostModifiers         Int?
-  healMaxModifiers           Json?
-  healMinModifiers           Json?
-  incomingHealModifiers      Int?
-  maxHPModifiers             Json?
-  maxMPModifiers             Json?
-  damageBoostModifier        Int?
-  damageBoostModifiers       Json?
-  damageToleranceModifier    Int?
-  damageToleranceModifiers   Json?
-  minHP                      Int?
-  minHPModifier              Int?
-  minHPModifiers             Json?
-  minMP                      Int?
-  minMPModifier              Int?
-  minMPModifiers             Json?
-  blockDamage                Int?
-  blockDamageModifier        Int?
-  blockDamageModifiers       Json?
-  damagePerSecond            Int?
-  damagePerSecondModifier    Int?
-  damagePerSecondModifiers   Json?
-  chargeLevels               String?
-  effectCondition            String?
-  defenseModifiers           Json?
+  id                          Int            @id @default(autoincrement())
+  name                        String
+  description                 String?
+  maxLevel                    Int            @default(10)
+  classId                     Int
+  iconUrl                     String?
+  area                        Int?           @default(4)
+  attack                      Int?
+  attackModifier              Int?
+  baseCost                    Int            @default(1)
+  baseCostModifier            Int            @default(2)
+  castingDuration             String?        @default("Instant Cast")
+  cooldown                    String?        @default("Instant Cast")
+  criticalHitResist           Int?
+  criticalHitResistModifier   Int?
+  criticalHit                 Int?
+  criticalHitModifier         Int?
+  damageBoost                 Int?
+  damageMax                   Int?
+  damageMaxModifier           Int?
+  damageMin                   Int?
+  damageMinModifier           Int?
+  damageTolerance             Int?
+  defense                     Int?
+  defenseModifier             Int?
+  healBoost                   Int?
+  healBoostModifier           Int?
+  healMax                     Int?
+  healMaxModifier             Int?
+  healMin                     Int?
+  healMinModifier             Int?
+  impactTypeResist            Int?
+  impactTypeResistModifier    Int?
+  impactTypeChance            Int?
+  impactTypeChanceModifier    Int?
+  incomingHeal                Int?
+  incomingHealModifier        Int?
+  manaCost                    Int?
+  manaRegen                   Int?
+  maxHP                       Int?
+  maxHPModifier               Int?
+  maxMP                       Int?
+  maxMPModifier               Int?
+  perfect                     Float?
+  perfectModifier             Float?
+  smite                       Float?
+  smiteModifier               Float?
+  range                       Int?           @default(20)
+  staggerDamage               Int?
+  statusEffectResist          Int?
+  statusEffectResistModifier  Int?
+  target                      String?        @default("Single Target")
+  damageMaxModifiers          Json?
+  damageMinModifiers          Json?
+  healBoostModifiers          Int?
+  healMaxModifiers            Json?
+  healMinModifiers            Json?
+  incomingHealModifiers       Int?
+  maxHPModifiers              Json?
+  maxMPModifiers              Json?
+  damageBoostModifier         Int?
+  damageBoostModifiers        Json?
+  damageToleranceModifier     Int?
+  damageToleranceModifiers    Json?
+  minHP                       Int?
+  minHPModifier               Int?
+  minHPModifiers              Json?
+  minMP                       Int?
+  minMPModifier               Int?
+  minMPModifiers              Json?
+  blockDamage                 Int?
+  blockDamageModifier         Int?
+  blockDamageModifiers        Json?
+  damagePerSecond             Int?
+  damagePerSecondModifier     Int?
+  damagePerSecondModifiers    Json?
+  chargeLevels                String?
+  effectCondition             String?
+  defenseModifiers            Json?
   statusEffectResistModifiers Json?
   impactTypeResistModifiers   Json?
   impactTypeChanceModifiers   Json?
   smiteModifiers              Json?
-  buildPassives              BuildPassive[]
-  class                      Class          @relation(fields: [classId], references: [id])
-  spellTag                   SpellTag[]     @relation("PassiveToSpellTag")
+  buildPassives               BuildPassive[]
+  class                       Class          @relation(fields: [classId], references: [id])
+  spellTag                    SpellTag[]     @relation("PassiveToSpellTag")
+
+  @@index([classId])
+  @@index([name])
 }
 
 /// Stigma (compétence avancée équipable)
@@ -395,7 +405,7 @@ model Stigma {
   damagePerSecondModifiers   Json?
   chargeLevels               String
   effectCondition            String?
-  defenseModifiers            Json?
+  defenseModifiers           Json?
   enmity                     Int?
   enmityModifier             Int?
   enmityModifiers            Json?
@@ -404,36 +414,42 @@ model Stigma {
   durationModifiers          Json?
   protectiveShield           Int?
   protectiveShieldModifier   Int?
-  protectiveShieldModifiers Json?
+  protectiveShieldModifiers  Json?
   buildStigmas               BuildStigma[]
   chainSkills                ChainSkillStigma[] @relation("StigmaChainSkills")
   parentStigmas              ChainSkillStigma[] @relation("StigmaParentSkills")
   specialtyChoices           SpecialtyChoice[]
   classes                    Class[]            @relation("ClassToStigma")
   spellTag                   SpellTag[]         @relation("SpellTagToStigma")
+
+  @@index([name])
 }
 
 /// Build personnalisé créé par un utilisateur
 /// Représente une configuration complète de compétences pour une classe
 /// Peut être un "starter build" (sans propriétaire) ou un build utilisateur
 model Build {
-  id        Int            @id @default(autoincrement())
+  id        Int             @id @default(autoincrement())
   name      String
   classId   Int
-  baseSP    Int            @default(231)
-  extraSP   Int            @default(0)
-  baseSTP   Int            @default(40)
-  extraSTP  Int            @default(0)
+  baseSP    Int             @default(231)
+  extraSP   Int             @default(0)
+  baseSTP   Int             @default(40)
+  extraSTP  Int             @default(0)
   shortcuts Json?
   userId    String?
-  private   Boolean        @default(true)
-  class     Class          @relation(fields: [classId], references: [id])
-  user      User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  private   Boolean         @default(true)
+  class     Class           @relation(fields: [classId], references: [id])
+  user      User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   abilities BuildAbility[]
   passives  BuildPassive[]
   stigmas   BuildStigma[]
   likes     Like[]
   daevanion BuildDaevanion?
+
+  @@index([classId])
+  @@index([userId])
+  @@index([private])
 }
 
 /// Like d'un build par un utilisateur
@@ -464,6 +480,10 @@ model BuildAbility {
   selectedChainSkillIds    Int[]   @default([])
   ability                  Ability @relation(fields: [abilityId], references: [id])
   build                    Build   @relation(fields: [buildId], references: [id])
+
+  @@unique([buildId, abilityId])
+  @@index([buildId])
+  @@index([abilityId])
 }
 
 /// Configuration d'un passif dans un build
@@ -476,6 +496,10 @@ model BuildPassive {
   maxLevel  Int     @default(20)
   build     Build   @relation(fields: [buildId], references: [id])
   passive   Passive @relation(fields: [passiveId], references: [id])
+
+  @@unique([buildId, passiveId])
+  @@index([buildId])
+  @@index([passiveId])
 }
 
 /// Configuration d'un stigma équipé dans un build
@@ -492,23 +516,27 @@ model BuildStigma {
   selectedChainSkillIds    Int[]  @default([])
   build                    Build  @relation(fields: [buildId], references: [id])
   stigma                   Stigma @relation(fields: [stigmaId], references: [id])
+
+  @@unique([buildId, stigmaId])
+  @@index([buildId])
+  @@index([stigmaId])
 }
 
 /// Rune Daevanion
 /// Stocke les informations d'une rune Daevanion (position, rareté, stats, prérequis)
 model DaevanionRune {
-  id            Int                @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   slotId        Int
-  path          String             // "nezekan", "zikel", etc.
-  rarity        String             // "common", "rare", "legend", "unique"
+  path          String // "nezekan", "zikel", etc.
+  rarity        String // "common", "rare", "legend", "unique"
   name          String
   description   String?
   positionX     Int
   positionY     Int
-  prerequisites Int[]              @default([]) // Array de slotIds requis
+  prerequisites Int[]   @default([]) // Array de slotIds requis
   // Stats stockées en JSON pour flexibilité
   stats         Json?
-  
+
   @@unique([path, slotId])
   @@index([path])
 }
@@ -516,13 +544,13 @@ model DaevanionRune {
 /// Configuration Daevanion pour un build
 /// Stocke les runes activées pour chaque chemin Daevanion
 model BuildDaevanion {
-  id        Int   @id @default(autoincrement())
-  buildId   Int   @unique
-  nezekan   Int[] @default([]) // Array de slotIds activés
-  zikel     Int[] @default([])
-  vaizel    Int[] @default([])
-  triniel   Int[] @default([])
-  ariel     Int[] @default([])
-  azphel    Int[] @default([])
-  build     Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  id      Int   @id @default(autoincrement())
+  buildId Int   @unique
+  nezekan Int[] @default([]) // Array de slotIds activés
+  zikel   Int[] @default([])
+  vaizel  Int[] @default([])
+  triniel Int[] @default([])
+  ariel   Int[] @default([])
+  azphel  Int[] @default([])
+  build   Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
 }

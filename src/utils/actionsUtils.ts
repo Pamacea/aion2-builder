@@ -123,3 +123,54 @@ export const fullBuildInclude = {
     },
   },
 };
+
+// ======================================
+// OPTIMIZED BUILD INCLUDES
+// ======================================
+// Lightweight include for build listings (cards, tables)
+// Only fetches essential fields for display
+export const buildListingInclude = {
+  class: {
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+    },
+  },
+  user: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+    },
+  },
+  daevanion: true,
+  _count: {
+    select: {
+      likes: true,
+    },
+  },
+};
+
+// Medium-weight include for build detail pages
+// Fetches full skill data but not all users who liked
+export const buildDetailInclude = {
+  class: classInclude,
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+    },
+  },
+  abilities: buildAbilityInclude,
+  passives: buildPassiveInclude,
+  stigmas: buildStigmaInclude,
+  daevanion: true,
+  _count: {
+    select: {
+      likes: true,
+    },
+  },
+};

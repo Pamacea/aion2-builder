@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { BuildSchema, BuildType } from "@/types/schema";
-import { fullBuildInclude } from "@/utils/actionsUtils";
+import { buildDetailInclude, buildListingInclude, fullBuildInclude } from "@/utils/actionsUtils";
 import { isAdmin, isStarterBuild } from "@/utils/buildUtils";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
@@ -78,7 +78,7 @@ const getBuildByIdCached = unstable_cache(
   async (id: number): Promise<BuildType | null> => {
     const build = await prisma.build.findUnique({
       where: { id },
-      include: fullBuildInclude,
+      include: buildDetailInclude,
     });
 
     if (!build) return null;
@@ -1368,7 +1368,7 @@ const getAllBuildsCached = unstable_cache(
       where: {
         private: false, // Afficher uniquement les builds publics
       },
-      include: fullBuildInclude,
+      include: buildListingInclude,
       orderBy: {
         id: "desc",
       },
@@ -1395,7 +1395,7 @@ export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
     where: {
       userId: userId,
     },
-    include: fullBuildInclude,
+    include: buildListingInclude,
     orderBy: {
       id: "desc",
     },
@@ -1408,21 +1408,46 @@ export async function getBuildsByUserId(userId: string): Promise<BuildType[]> {
 // GET LIKED BUILDS BY USER ID
 // ======================================
 export async function getLikedBuildsByUserId(userId: string): Promise<BuildType[]> {
+  // Step 1: Get likes with minimal data (just buildId)
   const likes = await prisma.like.findMany({
     where: {
       userId: userId,
     },
-    include: {
-      build: {
-        include: fullBuildInclude,
-      },
+    select: {
+      buildId: true,
+      createdAt: true,
     },
     orderBy: {
       createdAt: "desc",
     },
   });
 
-  return likes.map((like) => BuildSchema.parse(like.build));
+  // Step 2: Extract buildIds
+  const buildIds = likes.map((like) => like.buildId);
+
+  // Step 3: Batch load builds with optimized include
+  if (buildIds.length === 0) {
+    return [];
+  }
+
+  const builds = await prisma.build.findMany({
+    where: {
+      id: {
+        in: buildIds,
+      },
+    },
+    include: buildListingInclude,
+  });
+
+  // Step 4: Create a map for O(1) lookup
+  const buildMap = new Map(builds.map((build) => [build.id, build]));
+
+  // Step 5: Map builds back to like order
+  const orderedBuilds = likes
+    .map((like) => buildMap.get(like.buildId))
+    .filter((build): build is NonNullable<typeof build> => build !== undefined);
+
+  return orderedBuilds.map((build) => BuildSchema.parse(build));
 }
 
 // ======================================

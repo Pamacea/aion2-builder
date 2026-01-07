@@ -5,6 +5,7 @@ import { Cinzel, Roboto } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "./providers";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -112,12 +113,14 @@ export default function RootLayout({
         className={`${roboto.className} ${cinzel.variable} dark antialiased bg-background`}
       >
         <Analytics />
-        <Providers>
-          <Layout>
-            {children}
-            <Toaster />
-          </Layout>
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            <Layout>
+              {children}
+              <Toaster />
+            </Layout>
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );
