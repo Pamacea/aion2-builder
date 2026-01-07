@@ -1,0 +1,12 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "files.exclude": {
+    "**/node_modules": true
+  },
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, yarn.lock, tsconfig.base.json, vercel.json, pnpm-workspace.yaml, eslint.config.js, .gitignore, next.config.ts, postcss.config.mjs, prisma.config.ts, eslint.config.mjs, env.d.ts, .env, .env.local, tsconfig.json, tsconfig.tsbuildinfo, components.json",
+    "tsconfig.json": "tsconfig.*.json"
+  }
+  
+}

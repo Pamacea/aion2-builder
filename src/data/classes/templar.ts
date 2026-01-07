@@ -14,7 +14,7 @@ export const templarData: ClassData = {
   abilities: [
     {
       name: "Ferocious Strike",
-      iconUrl: "FerociousStrike.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_001.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 4m and increases Enmity. Restores 100MP.",
       condition: ["Mobile", "Nontarget Skill"],
       damageMin: 53,
@@ -62,7 +62,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Pummel",
-      iconUrl: "Pummel.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_006.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 4m and increases Enmity.",
       condition: ["Mobile", "Nontarget Skill"],
       damageMin: 90,
@@ -111,7 +111,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Poach",
-      iconUrl: "Poach.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_013.png",
       description: "Deals {{DMG_MIN}} damage to a target within 20m and pulls them in front of the caster, with a 75% chance to inflict Root for 2s. 100% chance to land Root on NPC targets/",
       condition: [],
       damageMin: 57,
@@ -159,7 +159,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Shield Smite",
-      iconUrl: "ShieldSmite.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_010.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 4m. 60% chance to inflict Stun on target for 3s. 100% chance to land Stun on NPC targets.",
       condition: [],
       damageMin: 159,
@@ -207,7 +207,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Judgment",
-      iconUrl: "Judgment.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_004.png",
       description: "Deals {{DMG_MIN}} damage to a target afflicted with Stun or Knockdown within 4m.",
       condition: [],
       damageMin: 199,
@@ -254,7 +254,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Flash Rampage",
-      iconUrl: "FlashRampage.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_027.png",
       description: "Deals {{DMG_MIN}} damage to a Stagger target within 4m and increases Enmity.",
       condition: [],
       damageMin: 160,
@@ -301,7 +301,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Debilitating Smash",
-      iconUrl: "DebilitatingSmash.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_025.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 4m and inflics Debilitate for 5s on Block.",
       condition: [],
       effectCondition: "[Debilitate]: -25% Defense",
@@ -349,7 +349,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Warding Strike",
-      iconUrl: "WardingStrike.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_035.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 5m of the caster. Immediately restores {{HEAL_MIN}} - {{HEAL_MAX}} HP and grants Wareding to the caster for 10s.",
       condition: ["Nontarget Skill"],
       effectCondition: "[Warding]: Increases Damage Tolerance by 20%",
@@ -406,7 +406,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Shield Rush",
-      iconUrl: "ShieldRush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_015.png",
       description: "After using [Dodge], rushes to a target within 10m and deals {{DMG_MIN}} damage. 50% chance to inflict Stun for 3s. 100% chance to land Stun on NPC targets.",
       condition: [],
       damageMin: 268,
@@ -453,7 +453,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Annihilate",
-      iconUrl: "Annihilate.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_028.png",
       description: "Deals {{DMG_MIN}} damage to a Stun or Knockdown target within 4m with a 30% chance to inflict Knockdown for 3s. 100% chance to land Knockdown on NPC targets.",
       condition: [],
       damageMin: 537,
@@ -501,7 +501,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Punishment",
-      iconUrl: "Punishment.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_009.png",
       description: "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 5m of the caster. Immediately restores {{HEAL_MIN}} - {{HEAL_MAX}} HP and grants Wareding to the caster for 10s.",
       condition: ["Charge Skill", "Nontarget Skill"],
       effectCondition: "Max 3 Charge Levels",
@@ -555,7 +555,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Defiance",
-      iconUrl: "Defiance.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
       description: "Removes Stun,  Knockdown, and Airborne from the caster and receive Tenacity for 5s. Tenacity: +100% Stun, Knockdown, Airborne Status Effect Resist.",
       condition: [],
       damageMin: undefined,
@@ -710,7 +710,7 @@ export const templarData: ClassData = {
   passives: [
     {
       name: "Enhance Health",
-      iconUrl: "EnhanceHealth.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_001.png",
       description: "Increases Max HP by {{MAX_HP_PERCENTAGE}}% and Incoming Heal by {{INCOMING_HEAL_PERCENTAGE}}%.",
       incomingHeal: 6,
       incomingHealModifier: undefined,
@@ -729,7 +729,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Warding Shield",
-      iconUrl: "WardingShield.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_002.png",
       description: "Increases Block by 200 and restores {{HEAL_MIN}} - {{HEAL_MAX}} HP on Block.",
       effectCondition: "Cooldown: 5s",
       healMin: 53,
@@ -752,7 +752,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Punishing Benediction",
-      iconUrl: "PunishingBenediction.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_003.png",
       description: "Receive Punishing Benediction for 10s when landin an attack. Punishing Benediction: Has a 50% chance to deal {{DMG_MIN}} extra damage to the target when landing an attack.",
       effectCondition: "Cooldown: 1s",
       damageMin: 61,
@@ -772,7 +772,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Ironclad Defense",
-      iconUrl: "IroncladDefense.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_004.png",
       description: "Increses Defense by {{DEFENSE_PERCENTAGE}}%",
       defense: 7,
       defenseModifier: undefined,
@@ -788,7 +788,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Guarding Seal",
-      iconUrl: "GuardingSeal.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_005.png",
       description: "When HP is 50% or less, receive Guarding Seal, wich blocks {{BLOCK_DAMAGE}} damage for 30s.",
       effectCondition: "Cooldown: 1min",
       blockDamage: 847,
@@ -805,7 +805,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Impact Hit",
-      iconUrl: "ImpactHit.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_006.png",
       description: "Increases Impact-type Chance(s) by {{IMPACT_TYPE_CHANCE_PERCENTAGE}}% and Smite by {{SMITE_PERCENTAGE}}%",
       impactTypeChance: 0.3,
       impactTypeChanceModifier: undefined,
@@ -827,7 +827,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Insulting Roar",
-      iconUrl: "InsultingRoar.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_007.png",
       description: "Increases the caster's Enmity Boost by 100% and on Block, deals {{DMG_MIN}} damage to the target and increases Enmity by a large amount.",
       effectCondition: "Cooldown: 5s",
       damageMin: 170,
@@ -847,7 +847,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Fury",
-      iconUrl: "Fury.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_008.png",
       description: "Increases the caster and party member's Damage Boost by {{DAMAGE_BOOST_PERCENTAGE}}% for 10s on Block.",
       damageBoost: 11,
       damageBoostModifier: undefined,
@@ -863,7 +863,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Survival Willpower",
-      iconUrl: "SurvivalWillpower.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png",
       description: "Increases the caster's Status Effect Resist by {{STATUS_EFFECT_RESIST}}% and when the caster is afllicted with an Impact-type Status, increases Impact-type Resist and Damage Tolerance by {{IMPACT_TYPE_RESIST}}% and {{DAMAGE_TOLERANCE}}% for 5s.",
       effectCondition: "Cooldon: 2min",
       damageTolerance: 12,
@@ -886,7 +886,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Block Pain",
-      iconUrl: "BlockPain.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_Passive_010.png",
       description: "Receive Block Pain for 3s when struck by an enemy. Remove Block Pain at 10 stacks and receive Resilience. Resilience: Increases Damage Tolerance by 11% for 10s.",
       damageTolerance: 11,
       damageToleranceModifier: undefined,
@@ -908,7 +908,7 @@ export const templarData: ClassData = {
   stigmas: [
     {
       name: "Empyrean Lord's Punishment",
-      iconUrl: "EmpyreanLordsPunishment.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_029.png",
       description: "Select a target within 20m and deal {{DMG_MIN}} damage to up to 4 enemies within 4m",
       condition: [],
       damageMin: 954,
@@ -952,7 +952,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Nezekan's Shield",
-      iconUrl: "NezekansShield.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_030.png",
       description: "Forms a Protective Shield that blocks {{BLOCK_DAMAGE}} damage for 5s to the caster and nearby party members within 40m.",
       condition: [],
       blockDamage: 3151,
@@ -989,7 +989,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Shield of Protection",
-      iconUrl: "ShieldOfProtection.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_011.png",
       description: "Temporarily increases Block Damage reduction to front attacks by 100% and guarantees Shield Block. Restores {{MP}} MP and Stamina once on Block.",
       condition: ["Sustained Skill"],
       defense: 110,
@@ -1026,7 +1026,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Taunt",
-      iconUrl: "Taunt.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_012.png",
       description: "Deals {{DMG_MIN}} damage to a target within 20m and increases Enmity by {{ENMITY}}. Has a 50% chance to inflict Taunt for 3s on PC targets. Inflicts Shrink for 15s on NPC targets.\n\nShrink: Reduces Accuracy by 200 and Attack by 10%.",
       condition: ["Mobile"],
       damageMin: 903,
@@ -1070,7 +1070,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Armor of Balance",
-      iconUrl: "ArmorOfBalance.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_013.png",
       description: "Impact-type Resist increases by 50% for {{DURATION}}s.",
       condition: ["Mobile"],
       duration: 10,
@@ -1110,7 +1110,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Second Skin",
-      iconUrl: "SecondSkin.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_018.png",
       description: "Increases Damage Tolerance by 30 for {{DURATION}}s.",
       condition: ["Mobile"],
       duration: 10,
@@ -1150,7 +1150,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Doom Shield",
-      iconUrl: "DoomShield.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_007.png",
       description: "Rushes to a target within 4m to deal {{DMG_MIN}} damage to up to 4 enemies. Continuously pushes back enemies with a 50% chance to inflict Knockdown for 3s on the final hit. Grants a {{PROTECTIVE_SHIELD}} Protective Shield to the caster for 5s. 100% chance to land Knockdown on NPC targets.",
       condition: [],
       blockDamage: 1027,
@@ -1198,7 +1198,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Noble Armor",
-      iconUrl: "NobleArmor.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_022.png",
       description: "Increases Max HP by {{MAX_HP}} for 5min and instantly restores {{HEAL_MIN}} HP.",
       condition: ["Mobile"],
       maxHP: 1313,
@@ -1238,7 +1238,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Executing Blade",
-      iconUrl: "ExecutingBlade.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_041.png",
       description: "Deals {{DMG_MIN}} damage to up to 4 enemies within 4m. Increases damage by 20% to Impact-type Status targets.",
       condition: [],
       damageMin: 1358,
@@ -1279,7 +1279,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Comrade in Arms",
-      iconUrl: "ComradeInArms.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_024.png",
       description: "Increases the caster's Damage Tolerance by 20% for 10s and redirects damage taken by a party member within 40m each time they are attacked, sharing damage to the caster and party member.",
       condition: [],
       damageTolerance: 20,
@@ -1316,7 +1316,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Grapple",
-      iconUrl: "Grapple.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_TE_SKILL_021.png",
       description: "Select a target within 20m and deal {{DMG_MIN}} damage to up to 4 enemies within 7m of the target and pull them in front of the caster. Enemies are inflicted with Root for 3s.",
       condition: [],
       damageMin: 1063,
@@ -1357,7 +1357,7 @@ export const templarData: ClassData = {
     },
     {
       name: "Assault Fury",
-      iconUrl: "AssaultFury.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
       description: "Select a target within 20m and deal {{DMG_MIN}} damage with a 50% chance to inflict Stun for 3s to up to 4 enemies within 4m. 100% chance to land Stun on NPC targets.\n\nIncreases Defense by max 20% proportional to hit targets.",
       condition: ["Avaible only while gliding"],
       damageMin: 967,

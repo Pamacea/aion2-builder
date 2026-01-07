@@ -15,7 +15,7 @@ export const chanterData: ClassData = {
     // ABILITY 1(auto-attack)
     {
       name: "Onslaught",
-      iconUrl: "Onslaught.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_001.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m and restores 100MP. Absorbs 7% of damage as HP and reduces [Spinning Strike] cooldown by 1s on hit.",
       condition: ["Mobile", "Nontarget Skill"],
@@ -72,7 +72,7 @@ export const chanterData: ClassData = {
     // ABILITY 2
     {
       name: "Incandescent Blow",
-      iconUrl: "IncandescentBlow.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_004.png",
       description: "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m.",
       condition: ["Mobile", "Nontarget"],
 
@@ -128,7 +128,7 @@ export const chanterData: ClassData = {
     // ABILITY 3
     {
       name: "Rushing Smash",
-      iconUrl: "RushingSmash.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_009.png",
       description:
         "Rushes at a target within 20m to deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies with 50% chance to activate [Heat Wave Blow].",
       condition: [],
@@ -183,7 +183,7 @@ export const chanterData: ClassData = {
     // ABILITY 4
     {
       name: "Impactful Crush",
-      iconUrl: "ImpactfulCrush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_006.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m of the target with a 60% chance to inflict Stun on the target for 3s. 100% chance to inflict Stun on NPC targets.",
       condition: [],
@@ -240,7 +240,7 @@ export const chanterData: ClassData = {
     // ABILITY 5
     {
       name: "Dark Crush",
-      iconUrl: "DarkCrush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_010.png",
       description:
         "Select a target afflicted Stun, Knockdown, or Airborne within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies around it.",
       condition: [],
@@ -295,7 +295,7 @@ export const chanterData: ClassData = {
     // ABILITY 6
     {
       name: "Gust Rampage",
-      iconUrl: "GustRampage.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_030.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to a target afflicted with Stagger within 4m and absorbs 10% of damage as HP.",
       condition: [],
@@ -349,7 +349,7 @@ export const chanterData: ClassData = {
     // ABILITY 7
     {
       name: "Heat Wave Blow",
-      iconUrl: "HeatWaveBlow.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_015.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m with a 60% chance to inflict Seal for 3s on sucessful Block. 100% chance to inflict Seal on NPC targets.",
       condition: ["Nontarget"],
@@ -404,7 +404,7 @@ export const chanterData: ClassData = {
     // ABILITY 8
     {
       name: "Recuperation",
-      iconUrl: "Recuperation.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_013.png",
       description:
         "Immediately restores {{HEAL_MIN}} - {{HEAL_MAX}} HP and regenerates {{HEAL_MIN_PER_TICK}} HP every 2s for 8s for the caster and party members within 25m.",
       condition: ["Nontarget"],
@@ -465,7 +465,7 @@ export const chanterData: ClassData = {
     // ABILITY 9
     {
       name: "Tremor Crush",
-      iconUrl: "TremorCrush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_021.png",
       description:
         "Moves to a target within 10m and deal {{DMG_MIN}} - {{DMG_MAX}} damage with a 50% chance to inflict Stun for 3s after using [Dodge]. Restores 300 Stamina on hit. 100% chance to inflict Stun on NPC targets.",
       condition: [],
@@ -521,7 +521,7 @@ export const chanterData: ClassData = {
     // ABILITY 10
     {
       name: "Wave Blow",
-      iconUrl: "WaveBlow.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_008.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to a target afflicted with Stun within 4m and inflicts Knockdown for 3s. Lands as a Guaranteed Multi-Hit.",
       condition: [],
@@ -575,7 +575,7 @@ export const chanterData: ClassData = {
     // ABILITY 11
     {
       name: "Spinning Strike",
-      iconUrl: "SpinningStrike.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_029.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within a 4m radius, centered 2m in front of the caster with a 40% chance to inflict Seal for 3s. Increase Skill Speed by 30%. 100% chance to land Seal on NPC targets.",
       condition: [],
@@ -630,7 +630,7 @@ export const chanterData: ClassData = {
     // ABILITY 12
     {
       name: "Defiance",
-      iconUrl: "Defiance.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
       description:
         "Removes STUN, KNOCKDOWN and AIRBORNE from the caster and grants Tenacity for 5s. Tenacity : +100% Stun, Knockdown, Airborne Resist.",
       condition: ["Nontarget"],
@@ -685,7 +685,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 1 (Onslaught - Resonance Crush)
     {
       name: "Resonance Crush",
-      iconUrl: "Onslaught.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_001.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m and restores 100MP. Absorbs 7% of damage as HP and reduces [Spinning Strike] cooldown by 1s on hit.",
       condition: ["Mobile", "Nontarget Skill"],
@@ -711,7 +711,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 2 (Onslaught - Bolt Crush)
     {
       name: "Bolt Crush",
-      iconUrl: "Onslaught.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_001.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m and restores 120MP. Absorbs 7% of damage as HP and reduces [Spinning Strike] cooldown by 1s on hit.",
       condition: ["Mobile", "Nontarget Skill"],
@@ -737,7 +737,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 3 (Incandescent Blow - Bursting Blow)
     {
       name: "Bursting Blow",
-      iconUrl: "IncandescentBlow.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_004.png",
       description: "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m.",
       condition: ["Mobile", "Nontarget"],
 
@@ -762,7 +762,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 4 (Impactful Crush - Crushing Blow)
     {
       name: "Crushing Blow",
-      iconUrl: "ImpactfulCrush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_006.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m of the target with a 60% chance to inflict Stun on the target for 3s. 100% chance to inflict Stun on NPC targets.",
       condition: [],
@@ -788,7 +788,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 5 (Defiance - Crushing Strike)
     {
       name: "Crushing Strike",
-      iconUrl: "Defiance.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
       description: "Select a target within 4m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies and inflict Stun for 3s.",
       condition: [],
 
@@ -812,7 +812,7 @@ export const chanterData: ClassData = {
     // CHAIN SKILL 6 (Tremor Crush - Surging Strike)
     {
       name: "Surging Strike",
-      iconUrl: "TremorCrush.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_021.png",
       description:
         "Moves to a target within 4m and deal {{DMG_MIN}} - {{DMG_MAX}} damage with a 50% chance to inflict Stun for 3s.",
       condition: [],
@@ -843,7 +843,7 @@ export const chanterData: ClassData = {
     // PASSIVE 1
     {
       name: "Blessing of Life",
-      iconUrl: "BlessingOfLife.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_012.png",
       description:
         "Increases the caster's Max HP by {{MAX_HP_PERCENTAGE}}% and Heal Boost by {{HEAL_BOOST_PERCENTAGE}}%",
 
@@ -864,7 +864,7 @@ export const chanterData: ClassData = {
     // PASSIVE 2
     {
       name: "Crossguard",
-      iconUrl: "Crossguard.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_002.png",
       description:
         "Increases the caster's Block by 200 and restores {{HEAL_MIN}} - {{HEAL_MAX}} HP on a sucessful Block.",
 
@@ -887,7 +887,7 @@ export const chanterData: ClassData = {
     // PASSIVE 3
     {
       name: "Protection Circle",
-      iconUrl: "ProtectionCircle.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_001.png",
       description:
         "Receives a Protection Circle that lasts for 5s upon landing an attack. Removes the Protection Circle at 20 stacks and imbues the caster and party members with Divine Barrier, within 500 damage for 10s.",
 
@@ -907,7 +907,7 @@ export const chanterData: ClassData = {
     // PASSIVE 4
     {
       name: "Inspiring Spell",
-      iconUrl: "InspiringSpell.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_011.png",
       description:
         "Increases the caster's Critical Hit by 150 and Perfect by {{PERFECT_PERCENTAGE}}%",
 
@@ -927,7 +927,7 @@ export const chanterData: ClassData = {
     // PASSIVE 5
     {
       name: "Attack Preparation",
-      iconUrl: "AttackPreparation.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_005.png",
       description:
         "Increases the caster's Attack by {{ATTACK_PERCENTAGE}}% and Defense by {{DEFENSE_PERCENTAGE}}%.",
 
@@ -948,7 +948,7 @@ export const chanterData: ClassData = {
     // PASSIVE 6
     {
       name: "Impact Hit",
-      iconUrl: "ImpactHit.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_006.png",
       description:
         "Increases the caster's Impact-type Chance by {{IMPACT_TYPE_CHANCE_PERCENTAGE}}% and Smite by {{SMITE_PERCENTAGE}}%.",
 
@@ -969,7 +969,7 @@ export const chanterData: ClassData = {
     // PASSIVE 7
     {
       name: "Raging Spell",
-      iconUrl: "RagingSpell.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_007.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} extra damage to targets afflicted with Stagger or an impact-type status.",
 
@@ -989,7 +989,7 @@ export const chanterData: ClassData = {
     // PASSIVE 8
     {
       name: "Earth's Promise",
-      iconUrl: "EarthsPromise.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_010.png",
       description:
         "Reduces the target's Defense by {{DEFENSE_PERCENTAGE}}% for 10s on a sucessful Block.",
 
@@ -1008,7 +1008,7 @@ export const chanterData: ClassData = {
     // PASSIVE 9
     {
       name: "Survival Willpower",
-      iconUrl: "SurvivalWillpower.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png",
       description:
         "Increases the caster's Status Effect Resist by {{STATUS_EFFECT_RESIST}}%. Increases Impact-type Resist and Damage Tolerance by {{IMPACT_TYPE_RESIST}}% and {{DAMAGE_TOLERANCE}}% for 5s when afflicted with an Impact-type status.",
 
@@ -1031,7 +1031,7 @@ export const chanterData: ClassData = {
     // PASSIVE 10
     {
       name: "Wind's Promise",
-      iconUrl: "WindsPromise.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_Passive_008.png",
       description:
         "Has a 25% chance to deal {{DMG_MIN}} - {{DMG_MAX}} extra damage to the target on landing a Critical Hit.",
 
@@ -1057,7 +1057,7 @@ export const chanterData: ClassData = {
     // STIGMA 1
     {
       name: "Obliterate",
-      iconUrl: "Obliterate.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_022.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m of the target with a 50% chance to inflict Knockdown. 100% chance to inflict Knockdown on NPC targets.",
 
@@ -1106,7 +1106,7 @@ export const chanterData: ClassData = {
     // STIGMA 2
     {
       name: "Undefeated Mantra",
-      iconUrl: "UndefeatedMantra.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_019.png",
       description:
         "Increases the caster and nearby party members' Attack by {{ATTACK_PERCENTAGE}}%, Defense by {{DEFENSE_PERCENTAGE}}% and Critical Hit by {{CRITICAL_HIT}}.",
 
@@ -1154,7 +1154,7 @@ export const chanterData: ClassData = {
     // STIGMA 3
     {
       name: "Focused Defense",
-      iconUrl: "FocusedDefense.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_014.png",
       description:
         "Temporarily Increases Block damage reduction to front attacks by 100% and guarantees Parry. Restores {{MP}} MP and Stamina once on a sucessful Block.",
 
@@ -1198,7 +1198,7 @@ export const chanterData: ClassData = {
     // STIGMA 4
     {
       name: "Sprint Mantra",
-      iconUrl: "SprintMantra.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_016.png",
       description:
         "Increases Move Speed by 13%. Incoming Heal by {{INCOMING_HEAL_PERCENTAGE}}% and has a 15% chance to restore {{HEAL_MIN}} - {{HEAL_MAX}} HP when the caster or nearby party members lands an attack.",
 
@@ -1248,7 +1248,7 @@ export const chanterData: ClassData = {
     // STIGMA 5
     {
       name: "Fracturing Blow",
-      iconUrl: "FracturingBlow.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_043.png",
       description:
         "Rushes to a target within 20m and deals {{DMG_MIN}} - {{DMG_MAX}} damage to a target. Increases damage by 20% to targets afflicted with an Impact-type status.",
 
@@ -1296,7 +1296,7 @@ export const chanterData: ClassData = {
     // STIGMA 6
     {
       name: "Marchutan's Wrath",
-      iconUrl: "MarchutansWrath.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_033.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m of the target.",
 
@@ -1345,7 +1345,7 @@ export const chanterData: ClassData = {
     // STIGMA 7
     {
       name: "Impeding Authority",
-      iconUrl: "ImpedingAuthority.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_024.png",
       description:
         "Grants a Protective Shield for 20s to the caster and nearby party members within 40m. The Protective Shield blocks up to {{PROTECTIVE_SHIELD}} damage per hit and remains until it has taken a total of {{TOTAL_DAMAGE}} damage.",
 
@@ -1394,7 +1394,7 @@ export const chanterData: ClassData = {
     // STIGMA 8
     {
       name: "Ensnaring Mark",
-      iconUrl: "EnsnaringMark.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_023.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m with a 50% chance to inflict Seal for 5s. 100% chance to inflict Seal on NPC targets.",
 
@@ -1443,7 +1443,7 @@ export const chanterData: ClassData = {
     // STIGMA 9
     {
       name: "Healing Touch",
-      iconUrl: "HealingTouch.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_017.png",
       description:
         "Restores {{HEAL_MIN}} - {{HEAL_MAX}} HP to the caster and party members within 25m.",
 
@@ -1492,7 +1492,7 @@ export const chanterData: ClassData = {
     // STIGMA 10
     {
       name: "Power of the Storm",
-      iconUrl: "PowerOfTheStorm.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_025.png",
       description:
         "Increases Combat Speed by 20% for the caster and party member within 40m for {{DURATION}}s.",
 
@@ -1536,7 +1536,7 @@ export const chanterData: ClassData = {
     // STIGMA 11
     {
       name: "Guardian Blessing",
-      iconUrl: "GuardianBlessing.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CH_SKILL_042.png",
       description:
         "Increases the caster's Max HP by {{MAX_HP}} for 5min and instantly restores {{HEAL_MIN}} HP.",
 
@@ -1584,7 +1584,7 @@ export const chanterData: ClassData = {
     // STIGMA 12
     {
       name: "Assault Shock",
-      iconUrl: "AssaultShock.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} damage to up to 4 enemies within 4m of the target with a 30% chance to inflict Stun for 3s. 100% chance to inflict Stun on NPC targets. Increases Defense by max 20% proportional to hit targets.",
 

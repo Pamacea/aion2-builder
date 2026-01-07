@@ -48,3 +48,8 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# Claude Toolkit
+.claude/.rag/
+.rag-*.json
+.claude-memory.json

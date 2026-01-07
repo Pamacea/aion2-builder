@@ -1,0 +1,94 @@
+{
+  "permissions": {
+    "allow": [],
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/session-start.js",
+            "timeout": 180000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/session-end.js",
+            "timeout": 15000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/read-guard.js",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/smart-files.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/auto-fix.js",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/error-learner.js",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/error-learner.js",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/auto-truncate.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "node .claude/toolkit/hooks/budget-tracker.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

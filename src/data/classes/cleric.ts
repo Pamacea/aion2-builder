@@ -16,7 +16,7 @@ export const clericData: ClassData = {
     // ABILITY 1(auto-attack)
     {
       name: "Earth's Retribution",
-      iconUrl: "EarthsRetribution.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_001.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m and restores 110MP.",
       condition: ["Mobile"],
@@ -70,7 +70,7 @@ export const clericData: ClassData = {
     // ABILITY 2
     {
       name: "Judgement Thunder",
-      iconUrl: "JudgementThunder.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_004.png",
       description:
         "Deals {{DMG_MIN}} Wind damage to up to 4 ennemies within 4m of the target.",
       condition: ["Mobile"],
@@ -130,7 +130,7 @@ export const clericData: ClassData = {
     // ABILITY 3
     {
       name: "Debilitating Mark",
-      iconUrl: "DebilitatingMark.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_008.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} Wind damage to up to 4 ennemies within 4m of the target. Reduces ennemies' Wind Tolerance by 10% and deals {{DAMAGE_PER_SECOND}} Damage over Time every 1s for 10s",
       condition: [],
@@ -191,7 +191,7 @@ export const clericData: ClassData = {
     // ABILITY 4
     {
       name: "Divine Aura",
-      iconUrl: "DivineAura.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_015.png",
       description:
         "Summons a Divine Aura near the caster. The Aura is stationary and periodically deals {{DMG_MIN}} Earth Damage to a selected target within 20m. The aura remains for 10s and consumes its own HP upon landing an attack.",
       condition: [],
@@ -245,7 +245,7 @@ export const clericData: ClassData = {
     // ABILITY 5
     {
       name: "Chain of Torment",
-      iconUrl: "ChainOfTorment.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_007.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} Earth damage top up to 4 ennemies within 4m of the target. Reduces ennemies Earth Tolerance by 10% and deals {{DAMAGE_PER_SECOND}} Damage over Time every 1s for 10s.",
       condition: ["Mobile"],
@@ -306,7 +306,7 @@ export const clericData: ClassData = {
     // ABILITY 6
     {
       name: "Lighting Strike Scattershot",
-      iconUrl: "LightingStrikeScattershot.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_037.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} damage to a target afflicted with Stagger within 20m.",
       condition: [],
@@ -363,7 +363,7 @@ export const clericData: ClassData = {
     // ABILITY 7
     {
       name: "Light of Regeneration",
-      iconUrl: "LightOfRegeneration.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_009.png",
       description:
         "Restores {{HEAL_MIN}} - {{HEAL_MAX}} HP every 2s for 10s to the caster and party members within 25m.",
       condition: ["Nontarget Skill", "Mobile"],
@@ -423,7 +423,7 @@ export const clericData: ClassData = {
     // ABILITY 8
     {
       name: "Condemnation",
-      iconUrl: "Condemnation.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_035.png",
       description:
         "Select a target within 20m afflicted with Chain of Torment and deal {{DMG_MIN}} - {{DMG_MAX}} Earth damage to up to 4 ennemies within 4m of the target.",
       condition: [],
@@ -478,7 +478,7 @@ export const clericData: ClassData = {
     // ABILITY 9
     {
       name: "Healing Light",
-      iconUrl: "HealingLight.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_010.png",
       description:
         "Restores {{HEAL_MIN}} - {{HEAL_MAX}} HP to the caster and the party member within 25m with the lowest HP. Can be used while Light Of Regeneration is in effect.",
       condition: ["Nontarget Skill", "Mobile"],
@@ -536,7 +536,7 @@ export const clericData: ClassData = {
     // ABILITY 10
     {
       name: "Radiant Recovery",
-      iconUrl: "RadiantRecovery.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_012.png",
       description:
         "Restores {{HEAL_MIN}} - {{HEAL_MAX}} HP to the caster and party members within 25m. Restores {{HEAL_MIN_FULLY_CHARGED}} - {{HEAL_MAX_FULLY_CHARGED}} when fully charged.",
       condition: ["Nontarget Skill", "Charge Skill"],
@@ -601,7 +601,7 @@ export const clericData: ClassData = {
     // ABILITY 11
     {
       name: "Bolt",
-      iconUrl: "Bolt.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_006.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} - {{DMG_MAX}} Wind damage to up to 4 ennemies within 4m of the target.",
       condition: ["Charge Skill"],
@@ -660,7 +660,7 @@ export const clericData: ClassData = {
     // ABILITY 12
     {
       name: "Defiance",
-      iconUrl: "Defiance.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png",
       description:
         "Removes STUN, KNOCKDOWN and AIRBORNE from the caster and grants Tenacity for 5s. Tenacity : +100% Stun, Knockdown, Airborne Resist.",
       condition: ["Nontarget Skill"],
@@ -822,7 +822,7 @@ export const clericData: ClassData = {
     // PASSIVE 1
     {
       name: "Warm Benediction",
-      iconUrl: "WarmBenediction.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_001.png",
       description:
         "Increase the caster's max HP by {{MAX_HP_PERCENTAGE}}% and MAX MP by {{MAX_MP_FLAT}}.",
 
@@ -843,7 +843,7 @@ export const clericData: ClassData = {
     // PASSIVE 2
     {
       name: "Empyrean Lords",
-      iconUrl: "EmpyreanLords.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_002.png",
       description:
         "Restores caster's block by 200 and restores {{HEAL_MIN}} - {{HEAL_MAX}} HP on a sucessful Block.",
 
@@ -867,7 +867,7 @@ export const clericData: ClassData = {
     // PASSIVE 3
     {
       name: "Empyrean Lord's Grace",
-      iconUrl: "EmpyreanLordsGrace.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_012.png",
       description:
         "Has a 50% chance to deal {{DMG_MIN}} - {{DMG_MAX}} extra damage on langing an attack on a target taking Damage over Time.",
 
@@ -888,7 +888,7 @@ export const clericData: ClassData = {
     // PASSIVE 4
     {
       name: "Healing Enhancement",
-      iconUrl: "HealingEnhancement.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_003.png",
       description:
         "Increases the caster's Heal Boost by {{HEAL_BOOST_PERCENTAGE}}%.",
 
@@ -909,7 +909,7 @@ export const clericData: ClassData = {
     // PASSIVE 5
     {
       name: "Immortal Veil",
-      iconUrl: "ImmortalVeil.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_011.png",
       description:
         "Increases the caster's Defense by {{DEFENSE_PERCENTAGE}}% and Critical hit Resist by {{CRITICAL_HIT_RESIST}}.",
 
@@ -932,7 +932,7 @@ export const clericData: ClassData = {
     // PASSIVE 6
     {
       name: "Heal Block",
-      iconUrl: "HealBlock.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_005.png",
       description:
         "Has a 7% chance to reduce the target's Incoming Heal by {{INCOMING_HEAL_PERCENTAGE}}% for 5s on landing an attack",
 
@@ -953,7 +953,7 @@ export const clericData: ClassData = {
     // PASSIVE 7
     {
       name: "Prayer of Concentration",
-      iconUrl: "PrayerOfConcentration.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_006.png",
       description:
         "Forms a protective Shield with blocks {{BLOCK_DAMAGE}} damage and increases the caster's Heal boost by {{HEAL_BOOST_PERCENTAGE}}% for 30s when HP is 50% or less.",
 
@@ -978,7 +978,7 @@ export const clericData: ClassData = {
     // PASSIVE 8
     {
       name: "Earth's Grace",
-      iconUrl: "EarthsGrace.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_008.png",
       description:
         "Increases Damage Boost of the caster and party members within 40m by {{DAMAGE_BOOST_PERCENTAGE}}% for 5s on landing an attack while HP is 75% or more.",
 
@@ -998,7 +998,7 @@ export const clericData: ClassData = {
     // PASSIVE 9
     {
       name: "Survival Willpower",
-      iconUrl: "SurvivalWillpower.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_GL_SKILL_Passive_009.png",
       description:
         "Increases the caster's Status Effect Resist by {{STATUS_EFFECT_RESIST}}%. Increases Impact-Type Resist and Damage Tolerance by {{IMPACT_TYPE_RESIST}}% and {{DAMAGE_TOLERANCE}}% for 5s when afflicted with an Impact-type status.",
 
@@ -1024,7 +1024,7 @@ export const clericData: ClassData = {
     // PASSIVE 10
     {
       name: "Radiant Benediction",
-      iconUrl: "RadiantBenediction.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_Passive_007.png",
       description:
         "Has a 7% chance to resto {{HEAL_MIN}} - {{HEAL_MAX}} HP to the caster and party members within 40m on landing an attack.",
 
@@ -1054,7 +1054,7 @@ export const clericData: ClassData = {
     // STIGMA 1
     {
       name: "Power Burst",
-      iconUrl: "PowerBurst.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_027.png",
       description:
         "Deals {{DMG_MIN}} - {{DMG_MAX}} Earth Damage to a target within 20m.",
 
@@ -1105,7 +1105,7 @@ export const clericData: ClassData = {
     // STIGMA 2
     {
       name: "Absolution",
-      iconUrl: "Absolution.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_028.png",
       description:
         "Removes up to 2 debuffs from the caster and party members within 25m and restores {{HEAL_MIN}} - {{HEAL_MAX}} HP.",
       condition: ["Nontarget Skill"],
@@ -1157,7 +1157,7 @@ export const clericData: ClassData = {
     // STIGMA 3
     {
       name: "Healing Aura",
-      iconUrl: "HealingAura.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_016.png",
       description:
         "Summons a Healing Aura that lasts for 15 seconds near the caster. The Aura is stationary and periodically heals the caster and party members within 7m by {{HEAL_MIN}} - {{HEAL_MAX}}.",
       condition: ["Nontarget Skill"],
@@ -1207,7 +1207,7 @@ export const clericData: ClassData = {
     // STIGMA 4
     {
       name: "Prayer of Amplification",
-      iconUrl: "PowerBurst.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_044.png",
       description: "Increases Attack by {{ATTACK_PERCENTAGE}}% for 10s.",
       condition: ["Nontarget Skill", "Mobile"],
 
@@ -1252,7 +1252,7 @@ export const clericData: ClassData = {
     // STIGMA 5
     {
       name: "Summon Ressurection",
-      iconUrl: "SummonRessurection.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_039.png",
       description: "Ressurect a fallen party member within 40m near the caster",
       condition: ["Nontarget Skill"],
 
@@ -1290,7 +1290,7 @@ export const clericData: ClassData = {
     // STIGMA 6
     {
       name: "Earth Punishment",
-      iconUrl: "EarthPunishment.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_040.png",
       description:
         "Dels {{DMG_MIN}} Earth Damage to a target within 20m and {{DAMAGE_PER_SECOND}} damage every 1s for 10s.",
       condition: ["Nontarget Skill", "Mobile"],
@@ -1342,7 +1342,7 @@ export const clericData: ClassData = {
     // STIGMA 7
     {
       name: "Salvation",
-      iconUrl: "Salvation.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_026.png",
       description:
         "Nullifies all damage and resists new status effects for 5s. Some powerful attacks cannont be blocked.",
       condition: ["Nontarget Skill"],
@@ -1382,7 +1382,7 @@ export const clericData: ClassData = {
     // STIGMA 8
     {
       name: "Root",
-      iconUrl: "Root.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_019.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} Earth damage to up to 4 ennemies within 4m of the target with a 75% chance to inflict Root for 10s. 100% chance to inflict Root on NPC.",
 
@@ -1430,7 +1430,7 @@ export const clericData: ClassData = {
     // STIGMA 9
     {
       name: "Light of Protection",
-      iconUrl: "LightOfProtection.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_041.png",
       description:
         "Increases Max Hp by x for 5 min and immediately restores {{HEAL_MIN}} HP for the caster and the party within 40m.",
       condition: ["Nontarget Skill"],
@@ -1475,7 +1475,7 @@ export const clericData: ClassData = {
     // STIGMA 10
     {
       name: "Yustiel's Power",
-      iconUrl: "YustielsPower.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_042.png",
       description:
         "Increases Damage Tolerance by {{DAMAGE_TOLERANCE}}% for 10s for the caster and party members within 40m.",
       condition: ["Nontarget Skill"],
@@ -1522,7 +1522,7 @@ export const clericData: ClassData = {
     // STIGMA 11
     {
       name: "Voice of Doom",
-      iconUrl: "VoiceOfDoom.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CL_SKILL_029.png",
       description:
         "Select a target within 20m an deal {{MIN_DMG}} Earth Damagee to up 4 ennemies within 4m of the target. Deals {{DAMAGE_PER_SECOND}} damage every 1s for 10S and reduces ennemy incoming Heal by 60%.",
 
@@ -1574,7 +1574,7 @@ export const clericData: ClassData = {
     // STIGMA 12
     {
       name: "Assault Mark",
-      iconUrl: "PowerBurst.webp",
+      iconUrl: "https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png",
       description:
         "Select a target within 20m and deal {{DMG_MIN}} damage to up 4 ennemies within 4m of the target with a 30% chance to inflict Root. 100% chance to inflict Root on NPC. Increases Defense by {{DEFENSE_PERCENTAGE}}%, max 20% proportional to hit targets.",
       condition: ["Avaible only while gliding"],
