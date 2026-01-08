@@ -105,6 +105,7 @@ model Ability {
   id                         Int               @id @default(autoincrement())
   name                       String
   description                String?
+  descriptionData            Json?
   damageMin                  Int?
   damageMax                  Int?
   castingDuration            String?           @default("Instant Cast")
@@ -240,6 +241,7 @@ model Passive {
   id                          Int            @id @default(autoincrement())
   name                        String
   description                 String?
+  descriptionData             Json?
   maxLevel                    Int            @default(10)
   classId                     Int
   iconUrl                     String?
@@ -336,6 +338,7 @@ model Stigma {
   id                         Int                @id @default(autoincrement())
   name                       String
   description                String?
+  descriptionData            Json?
   baseCost                   Int                @default(1)
   iconUrl                    String?
   maxLevel                   Int                @default(20)

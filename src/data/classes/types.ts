@@ -17,6 +17,7 @@ export interface AbilityData {
   name: string;
   iconUrl: string;
   description: string;
+  descriptionData?: any; // Questlog descriptionData with placeholders
   id?: string;
   condition?: string[];
   damageMin?: number;
@@ -102,6 +103,7 @@ export interface PassiveData {
   name: string;
   iconUrl: string;
   description: string;
+  descriptionData?: any; // Questlog descriptionData with placeholders
   id?: string;
   damageMin?: number;
   damageMinModifier?: number;
@@ -190,6 +192,7 @@ export interface StigmaData {
   name: string;
   iconUrl: string;
   description: string;
+  descriptionData?: any; // Questlog descriptionData with placeholders
   id?: string;
   condition?: string[];
   damageMin?: number;

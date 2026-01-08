@@ -104,6 +104,7 @@ async function main() {
         const abilityDataBase = {
           iconUrl: ability.iconUrl ?? undefined,
           description: ability.description ?? undefined,
+          descriptionData: "descriptionData" in ability ? ability.descriptionData : undefined,
           baseCost: "baseCost" in ability ? ability.baseCost : 1,
           baseCostModifier: "baseCostModifier" in ability ? ability.baseCostModifier : 2,
           maxLevel: "maxLevel" in ability ? ability.maxLevel : 10,
@@ -281,6 +282,7 @@ async function main() {
         const stigmaDataBase = {
           iconUrl: stigma.iconUrl ?? undefined,
           description: stigma.description ?? undefined,
+          descriptionData: "descriptionData" in stigma ? stigma.descriptionData : undefined,
           maxLevel: "maxLevel" in stigma ? stigma.maxLevel : 20,
           baseCost: "baseCost" in stigma ? stigma.baseCost : 1,
           baseCostModifier: "baseCostModifier" in stigma ? stigma.baseCostModifier : 2,
@@ -414,6 +416,7 @@ async function main() {
         const passiveDataBase = {
           iconUrl: passive.iconUrl ?? undefined,
           description: passive.description ?? undefined,
+          descriptionData: "descriptionData" in passive ? passive.descriptionData : undefined,
           baseCost: "baseCost" in passive ? passive.baseCost : 1,
           baseCostModifier: "baseCostModifier" in passive ? passive.baseCostModifier : 2,
           maxLevel: "maxLevel" in passive ? passive.maxLevel : 10,
