@@ -5,6 +5,7 @@ type SkillWithDataLevels = AbilityType | PassiveType | StigmaType;
 /**
  * Parse les descriptions Questlog et convertit TOUS les placeholders au format standard
  * Convertit les placeholders Questlog complexes en {{PLACEHOLDER}} simples
+ * Pour les placeholders inconnus, extrait directement la valeur depuis descriptionData.placeholders
  * Retourne une string qui sera ensuite traitée par processDescription
  */
 export function parseQuestlogDescription(
@@ -18,6 +19,41 @@ export function parseQuestlogDescription(
   cleaned = cleaned.replace(/<span[^>]*>/g, '');
   cleaned = cleaned.replace(/<\/span>/g, '');
   cleaned = cleaned.replace(/&quot;/g, '"');
+
+  // Fonction helper pour extraire une valeur depuis descriptionData.placeholders
+  const getQuestlogPlaceholderValue = (placeholderKey: string): string | null => {
+    type SkillWithKeys = AbilityType | PassiveType | StigmaType;
+    const skillRecord = skill as SkillWithKeys & Record<string, unknown>;
+
+    const descriptionData = skillRecord.descriptionData as {
+      placeholders?: Record<string, {
+        base?: { values?: string[] };
+        levels?: Record<string, { values?: string[] }>;
+      }>;
+    } | undefined;
+
+    if (!descriptionData?.placeholders) {
+      return null;
+    }
+
+    const placeholder = descriptionData.placeholders[placeholderKey];
+    if (!placeholder) {
+      return null;
+    }
+
+    let values: string[] | undefined;
+    if (level === 1) {
+      values = placeholder.base?.values;
+    } else if (placeholder.levels) {
+      values = placeholder.levels[level.toString()]?.values;
+    }
+
+    if (!values || values.length === 0) {
+      return null;
+    }
+
+    return values[0];
+  };
 
   // ==================== DÉGÂTS ====================
   // {se_dmg:XXXX:SkillUIMinDmgsum} ou {se_dmg:XXXX:SkillUIMinDmgSum} -> {{DMG_MIN}}
@@ -34,15 +70,20 @@ export function parseQuestlogDescription(
   cleaned = cleaned.replace(/\{se:[^}]+:effect_value02:time\}/gi, '{{DURATION}}');
 
   // ==================== TOUS LES AUTRES PLACEHOLDERS ====================
-  // {se:XXXX:effect_value02} ou {se:XXXX:effect_value05} ou {se_abe:...} ou {abe:...}
-  cleaned = cleaned.replace(/\{se_abe:[^}]+\}/gi, '{{VALUE}}');
-  cleaned = cleaned.replace(/\{se:[^}]+:effect_value\d+\}/gi, '{{VALUE}}');
-  cleaned = cleaned.replace(/\{abe:[^}]+\}/gi, '{{VALUE}}');
-  cleaned = cleaned.replace(/\{sef:[^}]+\}/gi, '{{VALUE}}');
+  // Pour les placeholders inconnus, on extrait directement la valeur depuis descriptionData
+  // Pattern: {se:XXXX:effect_value02} ou {se_abe:XXXX:XXXX:value02} ou {abe:XXXX:value02} etc.
+  cleaned = cleaned.replace(/\{([a-z_]+):[^}]+\}/gi, (match, type) => {
+    // Try to get value from Questlog data
+    const value = getQuestlogPlaceholderValue(match);
 
-  // ==================== TOUT LE RESTE ====================
-  // Tous les autres placeholders Questlog restants
-  cleaned = cleaned.replace(/\{[a-z_]+:[^}]+\}/gi, '{{VALUE}}');
+    if (value !== null) {
+      // Retourner la valeur directement (elle sera affichée en texte normal)
+      return value;
+    }
+
+    // Si pas de valeur trouvée, garder le placeholder tel quel (pour le débogage)
+    return match;
+  });
 
   return cleaned.trim();
 }
