@@ -5,8 +5,8 @@ export const assassinData: ClassData = {
   iconUrl: "IC_Class_Assassin.webp",
   bannerUrl: "BA_Assassin.webp",
   characterURL: "CH_Assassin.webp",
-  description: `Stealthy finisher with explosive burst, mobility, and lethal single-target focus.`,
-  tags: ["melee","dps","burst","mobility"],
+  description: "",
+  tags: [],
   abilities: [
     {
       id: `13010000`,

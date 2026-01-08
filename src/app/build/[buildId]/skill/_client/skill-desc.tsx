@@ -2,7 +2,7 @@
 
 import { AbilityType, PassiveType, StigmaType } from "@/types/schema";
 import { SkillDescProps } from "@/types/skill.type";
-import { calculateStat } from "@/utils/statsUtils";
+import { calculateStat, calculateStatWithQuestlogData } from "@/utils/statsUtils";
 import React from "react";
 
 /**
@@ -63,7 +63,12 @@ function processDescription(
       modifiersValue && Array.isArray(modifiersValue)
         ? (modifiersValue as number[])
         : null;
-    return calculateStat(base, modifier, level, modifiers);
+
+    // Utiliser les données Questlog si disponibles
+    const levels = 'levels' in skillRecord ? (skillRecord.levels as any) : undefined;
+    const valueKey = baseKey.includes('Min') ? 'minValue' as const : 'maxValue' as const;
+
+    return calculateStatWithQuestlogData(base, modifier, level, modifiers, levels, valueKey);
   };
 
   // Regex pour trouver tous les placeholders

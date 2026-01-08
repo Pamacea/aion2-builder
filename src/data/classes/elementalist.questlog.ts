@@ -5,8 +5,8 @@ export const elementalistData: ClassData = {
   iconUrl: "IC_Class_Elementalist.webp",
   bannerUrl: "BA_Elementalist.webp",
   characterURL: "CH_Elementalist.webp",
-  description: `Summons elemental spirits to control space, disrupt foes, and apply pressure.`,
-  tags: ["distance","dps","control","debuff"],
+  description: "",
+  tags: [],
   abilities: [
     {
       id: `16010000`,

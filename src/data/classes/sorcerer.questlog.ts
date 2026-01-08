@@ -5,8 +5,8 @@ export const sorcererData: ClassData = {
   iconUrl: "IC_Class_Sorcerer.webp",
   bannerUrl: "BA_Sorcerer.webp",
   characterURL: "CH_Sorcerer.webp",
-  description: `Master of elemental magic and ranged damage, unleashing devastating magical nukes.`,
-  tags: ["distance","dps","burst","debuff"],
+  description: "",
+  tags: [],
   abilities: [
     {
       id: `15010000`,

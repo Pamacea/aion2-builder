@@ -5,8 +5,8 @@ export const clericData: ClassData = {
   iconUrl: "IC_Class_Cleric.webp",
   bannerUrl: "BA_Cleric.webp",
   characterURL: "CH_Cleric.webp",
-  description: `Primary healer with potent recovery, barriers, and group-saving utility.`,
-  tags: ["distance","heal","buff"],
+  description: "",
+  tags: [],
   abilities: [
     {
       id: `17010000`,

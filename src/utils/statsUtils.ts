@@ -1,5 +1,6 @@
 import { STAT_DISPLAY_ORDER } from "@/constants/daevanion.constant";
 import { DaevanionSkillLevelUp, DaevanionStats } from "@/types/daevanion.type";
+import type { SkillLevel } from "@/data/classes/types";
 
 // Base : la valeur de base au niveau 1
 // Modifier : la valeur qu'on ajoute à la base à chaque niveau (fixe)
@@ -38,6 +39,69 @@ export function calculateStat(
   // Sinon, utiliser le modifier fixe
   const finalModifier = modifier ?? 0;
   return finalBase + finalModifier * (level - 1);
+}
+
+/**
+ * Calcule une stat en utilisant les données de niveaux Questlog si disponibles
+ * @param levels - Données de niveaux depuis Questlog
+ * @param level - Niveau actuel du skill
+ * @param valueKey - Clé à utiliser ('minValue' ou 'maxValue')
+ * @returns La valeur calculée ou null si non disponible
+ */
+export function calculateStatFromLevels(
+  levels: SkillLevel[] | undefined,
+  level: number,
+  valueKey: 'minValue' | 'maxValue'
+): number | null {
+  if (!levels || levels.length === 0) {
+    return null;
+  }
+
+  // Chercher le niveau exact
+  const levelData = levels.find(l => l.level === level);
+  if (!levelData) {
+    return null;
+  }
+
+  const value = levelData[valueKey];
+
+  // Gérer les valeurs spéciales
+  if (value === null || value === undefined || value === 'FALSE') {
+    return null;
+  }
+
+  // Convertir en nombre
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  return isNaN(numValue) ? null : numValue;
+}
+
+/**
+ * Version améliorée de calculateStat qui utilise les données Questlog si disponibles
+ * @param base - Valeur de base (niveau 1)
+ * @param modifier - Modifier fixe par niveau
+ * @param level - Niveau actuel
+ * @param modifiers - Tableau de modifiers (ancien système)
+ * @param questlogLevels - Données de niveaux Questlog
+ * @param valueKey - Clé à utiliser ('minValue' ou 'maxValue')
+ * @returns La valeur calculée
+ */
+export function calculateStatWithQuestlogData(
+  base: number | null | undefined,
+  modifier: number | null | undefined,
+  level: number,
+  modifiers: number[] | null | undefined,
+  questlogLevels: SkillLevel[] | undefined,
+  valueKey: 'minValue' | 'maxValue'
+): number {
+  // Essayer d'abord les données Questlog
+  const questlogValue = calculateStatFromLevels(questlogLevels, level, valueKey);
+  if (questlogValue !== null) {
+    return questlogValue;
+  }
+
+  // Fallback sur l'ancien système
+  return calculateStat(base, modifier, level, modifiers);
 }
 
 // Types pour les groupes de stats

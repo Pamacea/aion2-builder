@@ -1,5 +1,11 @@
 // Type definitions for class data structure
 
+export interface SkillLevel {
+  level: number;
+  minValue?: string | null;
+  maxValue?: string | null;
+}
+
 export interface SpecialtyChoiceData {
   description: string;
   unlockLevel: number;
@@ -11,6 +17,7 @@ export interface AbilityData {
   name: string;
   iconUrl: string;
   description: string;
+  id?: string;
   condition?: string[];
   damageMin?: number;
   damageMinModifier?: number;
@@ -88,12 +95,14 @@ export interface AbilityData {
   baseCost?: number;
   baseCostModifier?: number;
   maxLevel?: number;
+  levels?: SkillLevel[];
 }
 
 export interface PassiveData {
   name: string;
   iconUrl: string;
   description: string;
+  id?: string;
   damageMin?: number;
   damageMinModifier?: number;
   damageMinModifiers?: number[];
@@ -174,12 +183,14 @@ export interface PassiveData {
   baseCost?: number;
   baseCostModifier?: number;
   maxLevel?: number;
+  levels?: SkillLevel[];
 }
 
 export interface StigmaData {
   name: string;
   iconUrl: string;
   description: string;
+  id?: string;
   condition?: string[];
   damageMin?: number;
   damageMinModifier?: number;
@@ -264,6 +275,7 @@ export interface StigmaData {
   baseCost?: number;
   baseCostModifier?: number;
   maxLevel?: number;
+  levels?: SkillLevel[];
 }
 
 export interface ClassData {

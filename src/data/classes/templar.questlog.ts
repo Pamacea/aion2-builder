@@ -5,8 +5,8 @@ export const templarData: ClassData = {
   iconUrl: "IC_Class_Templar.webp",
   bannerUrl: "BA_Templar.webp",
   characterURL: "CH_Templar.webp",
-  description: `Shielded tank specializing in control and protection to anchor your team.`,
-  tags: ["melee","tank","dps","buff"],
+  description: "",
+  tags: [],
   abilities: [
     {
       id: `12010000`,
