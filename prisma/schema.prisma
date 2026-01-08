@@ -181,6 +181,7 @@ model Ability {
   parentAbilities            ChainSkill[]      @relation("AbilityParentSkills")
   specialtyChoices           SpecialtyChoice[]
   spellTag                   SpellTag[]        @relation("AbilityToSpellTag")
+  levels                     Json?
 
   @@index([classId])
   @@index([name])
@@ -322,6 +323,7 @@ model Passive {
   buildPassives               BuildPassive[]
   class                       Class          @relation(fields: [classId], references: [id])
   spellTag                    SpellTag[]     @relation("PassiveToSpellTag")
+  levels                      Json?
 
   @@index([classId])
   @@index([name])
@@ -421,6 +423,7 @@ model Stigma {
   specialtyChoices           SpecialtyChoice[]
   classes                    Class[]            @relation("ClassToStigma")
   spellTag                   SpellTag[]         @relation("SpellTagToStigma")
+  levels                     Json?
 
   @@index([name])
 }

@@ -166,6 +166,7 @@ async function main() {
           condition: "condition" in ability && Array.isArray(ability.condition) ? ability.condition : [],
           effectCondition: "effectCondition" in ability ? ability.effectCondition : undefined,
           chargeLevels: "chargeLevels" in ability ? ability.chargeLevels : undefined,
+          levels: "levels" in ability && ability.levels ? ability.levels : undefined,
           spellTag: {
             [existingAbility ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -342,6 +343,7 @@ async function main() {
           condition: "condition" in stigma && Array.isArray(stigma.condition) ? stigma.condition : [],
           effectCondition: "effectCondition" in stigma ? stigma.effectCondition : undefined,
           chargeLevels: "chargeLevels" in stigma && stigma.chargeLevels ? stigma.chargeLevels : "",
+          levels: "levels" in stigma && stigma.levels ? stigma.levels : undefined,
           spellTag: {
             [existingStigma ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
@@ -460,6 +462,7 @@ async function main() {
           target: passive.target ?? "Single Target",
           effectCondition: "effectCondition" in passive ? passive.effectCondition : undefined,
           chargeLevels: "chargeLevels" in passive ? passive.chargeLevels : undefined,
+          levels: "levels" in passive && passive.levels ? passive.levels : undefined,
           spellTag: {
             [existingPassive ? "set" : "connect"]: existingSpellTags.map((tag) => ({ id: tag.id })),
           },
