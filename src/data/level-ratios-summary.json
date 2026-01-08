@@ -1,0 +1,23 @@
+{
+  "damage": {
+    "count": 2146,
+    "mean": 1.0923,
+    "stdDev": 0.101,
+    "min": 1.0219,
+    "max": 1.7447
+  },
+  "duration": {
+    "count": 174,
+    "mean": 1.0054,
+    "stdDev": 0.0126,
+    "min": 1,
+    "max": 1.0526
+  },
+  "heal": {
+    "count": 290,
+    "mean": 1.0937,
+    "stdDev": 0.1001,
+    "min": 1.025,
+    "max": 1.4768
+  }
+}

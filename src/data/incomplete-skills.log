@@ -1,0 +1,57 @@
+gladiator | 11100000 | Ruinous Blow | {se:1110000711:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11200000 | Ankle Slice | {se:1120000022:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11200000 | Ankle Slice | {se:1120000022:effect_value05:divide100} | Only 1 level(s) of data
+gladiator | 11260000 | Defiance | {se:1820000012:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11290000 | Mocking Blade | {se:1129000042:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11300000 | Aerial Snare | {se:1130000012:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11300000 | Aerial Snare | {se:1130000012:effect_value05:divide100} | Only 1 level(s) of data
+gladiator | 11360000 | Rush Strike | {se:1136000032:effect_value02:time} | Only 1 level(s) of data
+gladiator | 11360000 | Rush Strike | {se:1136000032:effect_value05:divide100} | Only 1 level(s) of data
+templar | 12100000 | Shield Smite | {se:1210000014:effect_value02:time} | Only 1 level(s) of data
+templar | 12100000 | Shield Smite | {se:1210000014:effect_value05:divide100} | Only 1 level(s) of data
+templar | 12130000 | Poach | {se:1213000013:effect_value02:time} | Only 1 level(s) of data
+templar | 12130000 | Poach | {se:1213000013:effect_value05:divide100} | Only 1 level(s) of data
+templar | 12260000 | Defiance | {se:1226000012:effect_value02:time} | Only 1 level(s) of data
+templar | 12270000 | Debilitating Smash | {se:1227000012:effect_value02:time} | Only 1 level(s) of data
+templar | 12300000 | Annihilate | {se:1230000012:effect_value02:time} | Only 1 level(s) of data
+templar | 12300000 | Annihilate | {se:1230000012:effect_value05:divide100} | Only 1 level(s) of data
+templar | 12430000 | Shield Rush | {se:1243000022:effect_value02:time} | Only 1 level(s) of data
+templar | 12430000 | Shield Rush | {se:1243000022:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13050000 | Flash Slice | {se:1305000022:effect_value02:time} | Only 1 level(s) of data
+assassin | 13050000 | Flash Slice | {se:1305000022:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13070000 | Shadowstrike | {se:1307000022:effect_value02:time} | Only 1 level(s) of data
+assassin | 13100000 | Savage Roar | {se:1310000012:effect_value02:time} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000023:effect_value02:time} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000023:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000025:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000027:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000029:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13130000 | Insignia Explosion | {se:1313000031:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13210000 | Whirlwind Slice | {se:1321000012:effect_value02:time} | Only 1 level(s) of data
+assassin | 13210000 | Whirlwind Slice | {se:1321000012:effect_value05:divide100} | Only 1 level(s) of data
+assassin | 13220000 | Shadow Fall | {se:1322000042:effect_value02:time} | Only 1 level(s) of data
+assassin | 13260000 | Defiance | {se:1326000012:effect_value02:time} | Only 1 level(s) of data
+assassin | 13360000 | Infiltrate | {se:1336000022:effect_value02:time} | Only 1 level(s) of data
+assassin | 13360000 | Infiltrate | {se:1336000022:effect_value05:divide100} | Only 1 level(s) of data
+ranger | 14070000 | Suppressing Arrow | {se:1407000012:effect_value02:time} | Only 1 level(s) of data
+ranger | 14070000 | Suppressing Arrow | {se:1407000012:effect_value05:divide100} | Only 1 level(s) of data
+ranger | 14090000 | Marking Shot | {se:1409000022:effect_value02:time} | Only 1 level(s) of data
+ranger | 14130000 | Snare Shot | {se:1413000012:effect_value02:time} | Only 1 level(s) of data
+ranger | 14170000 | Explosion Trap | {se:1417000112:effect_value02:time} | Only 1 level(s) of data
+ranger | 14170000 | Explosion Trap | {se:1417000112:effect_value05:divide100} | Only 1 level(s) of data
+ranger | 14260000 | Defiance | {se:1820000012:effect_value02:time} | Only 1 level(s) of data
+chanter | 18060000 | Impactful Crush | {se:1806000012:effect_value02:time} | Only 1 level(s) of data
+chanter | 18060000 | Impactful Crush | {se:1806000012:effect_value05:divide100} | Only 1 level(s) of data
+chanter | 18080000 | Wave Blow | {se:1808000033:effect_value02:time} | Only 1 level(s) of data
+chanter | 18150000 | Heat Wave Blow | {se:1815000012:effect_value02:time} | Only 1 level(s) of data
+chanter | 18150000 | Heat Wave Blow | {se:1815000012:effect_value05:divide100} | Only 1 level(s) of data
+chanter | 18200000 | Defiance | {se:1820000012:effect_value02:time} | Only 1 level(s) of data
+chanter | 18210000 | Tremor Crush | {se:1821000022:effect_value05:divide100} | Only 1 level(s) of data
+cleric | 17240000 | Defiance | {se:1326000012:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15090000 | Ice Chain | {se:1509000012:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15110000 | Winter's Shackles | {se:1511000012:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15150000 | Frost | {se:1515000012:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15150000 | Frost | {se:1515000012:effect_value05:divide100} | Only 1 level(s) of data
+sorcerer | 15240000 | Defiance | {se:1326000012:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15280000 | Bittercold Wind | {se:1528000312:effect_value02:time} | Only 1 level(s) of data
+sorcerer | 15280000 | Bittercold Wind | {se:1528000312:effect_value05:divide100} | Only 1 level(s) of data

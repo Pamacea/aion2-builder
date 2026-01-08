@@ -1,0 +1,635 @@
+import type { ClassData } from "./types";
+
+export const assassinData: ClassData = {
+  name: "assassin",
+  iconUrl: "IC_Class_Assassin.webp",
+  bannerUrl: "BA_Assassin.webp",
+  characterURL: "CH_Assassin.webp",
+  description: `Stealthy finisher with explosive burst, mobility, and lethal single-target focus.`,
+  tags: ["melee","dps","burst","mobility"],
+  abilities: [
+    {
+      id: `13010000`,
+      name: `Quick Slice`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_001.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1301000011:SkillUIMinDmgsum}-{se_dmg:1301000011:SkillUIMaxDmgsum}</span> damage to up to 4 enemies within 4.5m and restores 100 MP.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      area: 0,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 60,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"47","minValue":"47"},{"level":2,"maxValue":"63","minValue":"63"},{"level":3,"maxValue":"79","minValue":"79"},{"level":4,"maxValue":"96","minValue":"96"},{"level":5,"maxValue":"120","minValue":"120"},{"level":6,"maxValue":"151","minValue":"151"},{"level":7,"maxValue":"188","minValue":"188"},{"level":8,"maxValue":"219","minValue":"219"},{"level":9,"maxValue":"250","minValue":"250"},{"level":10,"maxValue":"281","minValue":"281"},{"level":11,"maxValue":"312","minValue":"312"},{"level":12,"maxValue":"349","minValue":"349"},{"level":13,"maxValue":"380","minValue":"380"},{"level":14,"maxValue":"403","minValue":"403"},{"level":15,"maxValue":"419","minValue":"419"},{"level":16,"maxValue":"442","minValue":"442"},{"level":17,"maxValue":"464","minValue":"464"},{"level":18,"maxValue":"487","minValue":"487"},{"level":19,"maxValue":"510","minValue":"510"},{"level":20,"maxValue":"526","minValue":"526"},{"level":21,"maxValue":"542","minValue":"542"},{"level":22,"maxValue":"559","minValue":"559"},{"level":23,"maxValue":"575","minValue":"575"},{"level":24,"maxValue":"592","minValue":"592"},{"level":25,"maxValue":"608","minValue":"608"},{"level":26,"maxValue":"624","minValue":"624"},{"level":27,"maxValue":"641","minValue":"641"},{"level":28,"maxValue":"657","minValue":"657"},{"level":29,"maxValue":"673","minValue":"673"},{"level":30,"maxValue":"690","minValue":"690"},{"level":1,"maxValue":"47","minValue":"47"},{"level":2,"maxValue":"63","minValue":"63"},{"level":3,"maxValue":"79","minValue":"79"},{"level":4,"maxValue":"96","minValue":"96"},{"level":5,"maxValue":"120","minValue":"120"},{"level":6,"maxValue":"151","minValue":"151"},{"level":7,"maxValue":"188","minValue":"188"},{"level":8,"maxValue":"219","minValue":"219"},{"level":9,"maxValue":"250","minValue":"250"},{"level":10,"maxValue":"281","minValue":"281"},{"level":11,"maxValue":"312","minValue":"312"},{"level":12,"maxValue":"349","minValue":"349"},{"level":13,"maxValue":"380","minValue":"380"},{"level":14,"maxValue":"403","minValue":"403"},{"level":15,"maxValue":"419","minValue":"419"},{"level":16,"maxValue":"442","minValue":"442"},{"level":17,"maxValue":"464","minValue":"464"},{"level":18,"maxValue":"487","minValue":"487"},{"level":19,"maxValue":"510","minValue":"510"},{"level":20,"maxValue":"526","minValue":"526"},{"level":21,"maxValue":"542","minValue":"542"},{"level":22,"maxValue":"559","minValue":"559"},{"level":23,"maxValue":"575","minValue":"575"},{"level":24,"maxValue":"592","minValue":"592"},{"level":25,"maxValue":"608","minValue":"608"},{"level":26,"maxValue":"624","minValue":"624"},{"level":27,"maxValue":"641","minValue":"641"},{"level":28,"maxValue":"657","minValue":"657"},{"level":29,"maxValue":"673","minValue":"673"},{"level":30,"maxValue":"690","minValue":"690"}]
+    },
+    {
+      id: `13050000`,
+      name: `Flash Slice`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_005.png`,
+      description: `Moves behind a target within 4m and deals <span style="color: #FCC78B">{se_dmg:1305000021:SkillUIMinDmgsum}-{se_dmg:1305000021:SkillUIMaxDmgsum}</span> damage to up to 4 enemies, with a {se:1305000022:effect_value05:divide100}% chance to inflict Blind for {se:1305000022:effect_value02:time}.
+100% chance to land Blind on NPC targets.
+
+7 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 7,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 31,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"181","minValue":"181"},{"level":2,"maxValue":"243","minValue":"243"},{"level":3,"maxValue":"322","minValue":"322"},{"level":4,"maxValue":"417","minValue":"417"},{"level":5,"maxValue":"495","minValue":"495"},{"level":6,"maxValue":"574","minValue":"574"},{"level":7,"maxValue":"653","minValue":"653"},{"level":8,"maxValue":"731","minValue":"731"},{"level":9,"maxValue":"826","minValue":"826"},{"level":10,"maxValue":"905","minValue":"905"},{"level":11,"maxValue":"963","minValue":"963"},{"level":12,"maxValue":"1004","minValue":"1004"},{"level":13,"maxValue":"1062","minValue":"1062"},{"level":14,"maxValue":"1120","minValue":"1120"},{"level":15,"maxValue":"1178","minValue":"1178"},{"level":16,"maxValue":"1235","minValue":"1235"},{"level":17,"maxValue":"1277","minValue":"1277"},{"level":18,"maxValue":"1319","minValue":"1319"},{"level":19,"maxValue":"1361","minValue":"1361"},{"level":20,"maxValue":"1402","minValue":"1402"},{"level":21,"maxValue":"1444","minValue":"1444"},{"level":22,"maxValue":"1486","minValue":"1486"},{"level":23,"maxValue":"1527","minValue":"1527"},{"level":24,"maxValue":"1569","minValue":"1569"},{"level":25,"maxValue":"1611","minValue":"1611"},{"level":26,"maxValue":"1653","minValue":"1653"},{"level":27,"maxValue":"1694","minValue":"1694"},{"level":28,"maxValue":"1736","minValue":"1736"},{"level":29,"maxValue":"1778","minValue":"1778"},{"level":30,"maxValue":"1820","minValue":"1820"}]
+    },
+    {
+      id: `13060000`,
+      name: `Ambush`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_006.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1306000011:SkillUIMinDmgsum}-{se_dmg:1306000011:SkillUIMaxDmgsum}</span> damage to a target within 4m. If attacking from behind, damage is increased by 50%.
+
+7 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 7,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"109","minValue":"109"},{"level":2,"maxValue":"156","minValue":"156"},{"level":3,"maxValue":"203","minValue":"203"},{"level":4,"maxValue":"273","minValue":"273"},{"level":5,"maxValue":"361","minValue":"361"},{"level":6,"maxValue":"468","minValue":"468"},{"level":7,"maxValue":"556","minValue":"556"},{"level":8,"maxValue":"644","minValue":"644"},{"level":9,"maxValue":"732","minValue":"732"},{"level":10,"maxValue":"820","minValue":"820"},{"level":11,"maxValue":"927","minValue":"927"},{"level":12,"maxValue":"1015","minValue":"1015"},{"level":13,"maxValue":"1080","minValue":"1080"},{"level":14,"maxValue":"1126","minValue":"1126"},{"level":15,"maxValue":"1191","minValue":"1191"},{"level":16,"maxValue":"1256","minValue":"1256"},{"level":17,"maxValue":"1321","minValue":"1321"},{"level":18,"maxValue":"1386","minValue":"1386"},{"level":19,"maxValue":"1432","minValue":"1432"},{"level":20,"maxValue":"1479","minValue":"1479"},{"level":21,"maxValue":"1526","minValue":"1526"},{"level":22,"maxValue":"1573","minValue":"1573"},{"level":23,"maxValue":"1620","minValue":"1620"},{"level":24,"maxValue":"1666","minValue":"1666"},{"level":25,"maxValue":"1713","minValue":"1713"},{"level":26,"maxValue":"1760","minValue":"1760"},{"level":27,"maxValue":"1807","minValue":"1807"},{"level":28,"maxValue":"1854","minValue":"1854"},{"level":29,"maxValue":"1900","minValue":"1900"},{"level":30,"maxValue":"1947","minValue":"1947"}]
+    },
+    {
+      id: `13070000`,
+      name: `Shadowstrike`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_007.png`,
+      description: `Moves behind a target within 20m and deals <span style="color: #FCC78B">{se_dmg:1307000021:SkillUIMinDmgsum}-{se_dmg:1307000021:SkillUIMaxDmgsum}</span> damage and Rotates and inflicts Stun for {se:1307000022:effect_value02:time}.
+
+10 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 10,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 31,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"150","minValue":"TargetLocation_TargetDirection"},{"level":1,"maxValue":"43","minValue":"43"},{"level":2,"maxValue":"75","minValue":"75"},{"level":3,"maxValue":"107","minValue":"107"},{"level":4,"maxValue":"139","minValue":"139"},{"level":5,"maxValue":"188","minValue":"188"},{"level":6,"maxValue":"248","minValue":"248"},{"level":7,"maxValue":"321","minValue":"321"},{"level":8,"maxValue":"382","minValue":"382"},{"level":9,"maxValue":"443","minValue":"443"},{"level":10,"maxValue":"503","minValue":"503"},{"level":11,"maxValue":"564","minValue":"564"},{"level":12,"maxValue":"637","minValue":"637"},{"level":13,"maxValue":"697","minValue":"697"},{"level":14,"maxValue":"742","minValue":"742"},{"level":15,"maxValue":"774","minValue":"774"},{"level":16,"maxValue":"819","minValue":"819"},{"level":17,"maxValue":"863","minValue":"863"},{"level":18,"maxValue":"908","minValue":"908"},{"level":19,"maxValue":"952","minValue":"952"},{"level":20,"maxValue":"985","minValue":"985"},{"level":21,"maxValue":"1017","minValue":"1017"},{"level":22,"maxValue":"1049","minValue":"1049"},{"level":23,"maxValue":"1081","minValue":"1081"},{"level":24,"maxValue":"1113","minValue":"1113"},{"level":25,"maxValue":"1145","minValue":"1145"},{"level":26,"maxValue":"1178","minValue":"1178"},{"level":27,"maxValue":"1210","minValue":"1210"},{"level":28,"maxValue":"1242","minValue":"1242"},{"level":29,"maxValue":"1274","minValue":"1274"},{"level":30,"maxValue":"1306","minValue":"1306"}]
+    },
+    {
+      id: `13100000`,
+      name: `Savage Roar`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_009.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1310000011:SkillUIMinDmgsum}-{se_dmg:1310000011:SkillUIMaxDmgsum}</span> damage to up to 4 enemies within 4m and engraves 1 Insignia for {se:1310000012:effect_value02:time}.
+
+2 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 2,
+      manaRegen: 0,
+      range: 20,
+      area: 4,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"53","minValue":"53"},{"level":2,"maxValue":"75","minValue":"75"},{"level":3,"maxValue":"96","minValue":"96"},{"level":4,"maxValue":"118","minValue":"118"},{"level":5,"maxValue":"150","minValue":"150"},{"level":6,"maxValue":"190","minValue":"190"},{"level":7,"maxValue":"239","minValue":"239"},{"level":8,"maxValue":"279","minValue":"279"},{"level":9,"maxValue":"320","minValue":"320"},{"level":10,"maxValue":"360","minValue":"360"},{"level":11,"maxValue":"401","minValue":"401"},{"level":12,"maxValue":"449","minValue":"449"},{"level":13,"maxValue":"490","minValue":"490"},{"level":14,"maxValue":"520","minValue":"520"},{"level":15,"maxValue":"541","minValue":"541"},{"level":16,"maxValue":"571","minValue":"571"},{"level":17,"maxValue":"600","minValue":"600"},{"level":18,"maxValue":"630","minValue":"630"},{"level":19,"maxValue":"660","minValue":"660"},{"level":20,"maxValue":"681","minValue":"681"},{"level":21,"maxValue":"703","minValue":"703"},{"level":22,"maxValue":"724","minValue":"724"},{"level":23,"maxValue":"746","minValue":"746"},{"level":24,"maxValue":"767","minValue":"767"},{"level":25,"maxValue":"788","minValue":"788"},{"level":26,"maxValue":"810","minValue":"810"},{"level":27,"maxValue":"831","minValue":"831"},{"level":28,"maxValue":"853","minValue":"853"},{"level":29,"maxValue":"874","minValue":"874"},{"level":30,"maxValue":"896","minValue":"896"}]
+    },
+    {
+      id: `13130000`,
+      name: `Insignia Explosion`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_013.png`,
+      description: `Select a target within 20m to deal <span style="color: #FCC78B">{se_dmg:1313000011:SkillUIMinDmgsum}-{se_dmg:1313000011:SkillUIMaxDmgsum}</span> damage to up to 4 enemies 4m around that target and inflict Stun for {se:1313000023:effect_value02:time}.
+Stun chance is doubled on NPC targets.
+
+Damage and Stun chance increases based on Insignia stacks.
+1 stack: {se_dmg:1313000013:SkillUIMinDmgsum}-{se_dmg:1313000013:SkillUIMaxDmgsum}</span> damage, <span style="color: #FCC78B">{se:1313000023:effect_value05:divide100}% Stun chance
+2 stacks: <span style="color: #FCC78B">{se_dmg:1313000015:SkillUIMinDmgsum}-{se_dmg:1313000015:SkillUIMaxDmgsum}</span> damage, {se:1313000025:effect_value05:divide100}% Stun chance
+3 stacks: <span style="color: #FCC78B">{se_dmg:1313000017:SkillUIMinDmgsum}-{se_dmg:1313000017:SkillUIMaxDmgsum}</span> damage, {se:1313000027:effect_value05:divide100}% Stun chance
+4 stacks: <span style="color: #FCC78B">{se_dmg:1313000019:SkillUIMinDmgsum}-{se_dmg:1313000019:SkillUIMaxDmgsum}</span> damage, {se:1313000029:effect_value05:divide100}% Stun chance
+5 stacks: <span style="color: #FCC78B">{se_dmg:1313000021:SkillUIMinDmgsum}-{se_dmg:1313000021:SkillUIMaxDmgsum}</span> damage, {se:1313000031:effect_value05:divide100}% Stun chance
+
+7 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 7,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"331","minValue":"331"},{"level":2,"maxValue":"429","minValue":"429"},{"level":3,"maxValue":"509","minValue":"509"},{"level":4,"maxValue":"590","minValue":"590"},{"level":5,"maxValue":"671","minValue":"671"},{"level":6,"maxValue":"752","minValue":"752"},{"level":7,"maxValue":"849","minValue":"849"},{"level":8,"maxValue":"930","minValue":"930"},{"level":9,"maxValue":"990","minValue":"990"},{"level":10,"maxValue":"1032","minValue":"1032"},{"level":11,"maxValue":"1092","minValue":"1092"},{"level":12,"maxValue":"1151","minValue":"1151"},{"level":13,"maxValue":"1211","minValue":"1211"},{"level":14,"maxValue":"1270","minValue":"1270"},{"level":15,"maxValue":"1313","minValue":"1313"},{"level":16,"maxValue":"1356","minValue":"1356"},{"level":17,"maxValue":"1399","minValue":"1399"},{"level":18,"maxValue":"1442","minValue":"1442"},{"level":19,"maxValue":"1485","minValue":"1485"},{"level":20,"maxValue":"1527","minValue":"1527"},{"level":21,"maxValue":"1570","minValue":"1570"},{"level":22,"maxValue":"1613","minValue":"1613"},{"level":23,"maxValue":"1656","minValue":"1656"},{"level":24,"maxValue":"1699","minValue":"1699"},{"level":25,"maxValue":"1742","minValue":"1742"},{"level":26,"maxValue":"1785","minValue":"1785"},{"level":27,"maxValue":"1828","minValue":"1828"},{"level":28,"maxValue":"1871","minValue":"1871"},{"level":29,"maxValue":"1914","minValue":"1914"},{"level":30,"maxValue":"1956","minValue":"1956"}]
+    },
+    {
+      id: `13210000`,
+      name: `Whirlwind Slice`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_019.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1321000011:SkillUIMinDmgsum}-{se_dmg:1321000011:SkillUIMaxDmgsum}</span> damage to a target within 4m with a {se:1321000012:effect_value05:divide100}% chance to Rotate and inflict Stun for {se:1321000012:effect_value02:time} on a successful Evasion.
+100% to land Stun on NPC targets.
+
+7 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 7,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"300","minValue":"300"},{"level":2,"maxValue":"403","minValue":"403"},{"level":3,"maxValue":"533","minValue":"533"},{"level":4,"maxValue":"690","minValue":"690"},{"level":5,"maxValue":"820","minValue":"820"},{"level":6,"maxValue":"950","minValue":"950"},{"level":7,"maxValue":"1080","minValue":"1080"},{"level":8,"maxValue":"1210","minValue":"1210"},{"level":9,"maxValue":"1367","minValue":"1367"},{"level":10,"maxValue":"1497","minValue":"1497"},{"level":11,"maxValue":"1593","minValue":"1593"},{"level":12,"maxValue":"1662","minValue":"1662"},{"level":13,"maxValue":"1757","minValue":"1757"},{"level":14,"maxValue":"1853","minValue":"1853"},{"level":15,"maxValue":"1948","minValue":"1948"},{"level":16,"maxValue":"2044","minValue":"2044"},{"level":17,"maxValue":"2113","minValue":"2113"},{"level":18,"maxValue":"2182","minValue":"2182"},{"level":19,"maxValue":"2251","minValue":"2251"},{"level":20,"maxValue":"2320","minValue":"2320"},{"level":21,"maxValue":"2389","minValue":"2389"},{"level":22,"maxValue":"2458","minValue":"2458"},{"level":23,"maxValue":"2527","minValue":"2527"},{"level":24,"maxValue":"2596","minValue":"2596"},{"level":25,"maxValue":"2665","minValue":"2665"},{"level":26,"maxValue":"2734","minValue":"2734"},{"level":27,"maxValue":"2803","minValue":"2803"},{"level":28,"maxValue":"2872","minValue":"2872"},{"level":29,"maxValue":"2941","minValue":"2941"},{"level":30,"maxValue":"3010","minValue":"3010"}]
+    },
+    {
+      id: `13220000`,
+      name: `Shadow Fall`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_020.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1322000041:SkillUIMinDmgsum}-{se_dmg:1322000041:SkillUIMaxDmgsum}</span> damage to a Stun target within 4m and inflicts Knockdown for {se:1322000042:effect_value02:time}.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 33,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"100","minValue":"TargetLocation_CasterToTargetDirection"},{"level":1,"maxValue":"2500","minValue":"2500"},{"level":1,"maxValue":"2100","minValue":"2100"},{"level":1,"maxValue":"465","minValue":"465"},{"level":2,"maxValue":"615","minValue":"615"},{"level":3,"maxValue":"795","minValue":"795"},{"level":4,"maxValue":"945","minValue":"945"},{"level":5,"maxValue":"1095","minValue":"1095"},{"level":6,"maxValue":"1245","minValue":"1245"},{"level":7,"maxValue":"1395","minValue":"1395"},{"level":8,"maxValue":"1575","minValue":"1575"},{"level":9,"maxValue":"1725","minValue":"1725"},{"level":10,"maxValue":"1836","minValue":"1836"},{"level":11,"maxValue":"1915","minValue":"1915"},{"level":12,"maxValue":"2025","minValue":"2025"},{"level":13,"maxValue":"2135","minValue":"2135"},{"level":14,"maxValue":"2246","minValue":"2246"},{"level":15,"maxValue":"2356","minValue":"2356"},{"level":16,"maxValue":"2435","minValue":"2435"},{"level":17,"maxValue":"2515","minValue":"2515"},{"level":18,"maxValue":"2594","minValue":"2594"},{"level":19,"maxValue":"2674","minValue":"2674"},{"level":20,"maxValue":"2754","minValue":"2754"},{"level":21,"maxValue":"2833","minValue":"2833"},{"level":22,"maxValue":"2913","minValue":"2913"},{"level":23,"maxValue":"2992","minValue":"2992"},{"level":24,"maxValue":"3072","minValue":"3072"},{"level":25,"maxValue":"3151","minValue":"3151"},{"level":26,"maxValue":"3231","minValue":"3231"},{"level":27,"maxValue":"3310","minValue":"3310"},{"level":28,"maxValue":"3390","minValue":"3390"},{"level":29,"maxValue":"3470","minValue":"3470"},{"level":30,"maxValue":"3549","minValue":"3549"}]
+    },
+    {
+      id: `13260000`,
+      name: `Defiance`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_002.png`,
+      description: `Removes Stun, Knockdown, and Airborne from the caster and grants Tenacity for {se:1326000012:effect_value02:time}.
+Tenacity: +{abe:1002000011:value02:divide100}% Stun, Knockdown, Airborne Resist`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 1,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"Debuff","minValue":"FALSE"}]
+    },
+    {
+      id: `13340000`,
+      name: `Storm Rampage`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_034.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1334000011:SkillUIMinDmgsum}-{se_dmg:1334000011:SkillUIMaxDmgsum}</span> damage to a Stagger target within 4m.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 120,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"107","minValue":"107"},{"level":2,"maxValue":"139","minValue":"139"},{"level":3,"maxValue":"188","minValue":"188"},{"level":4,"maxValue":"248","minValue":"248"},{"level":5,"maxValue":"321","minValue":"321"},{"level":6,"maxValue":"382","minValue":"382"},{"level":7,"maxValue":"443","minValue":"443"},{"level":8,"maxValue":"503","minValue":"503"},{"level":9,"maxValue":"564","minValue":"564"},{"level":10,"maxValue":"637","minValue":"637"},{"level":11,"maxValue":"697","minValue":"697"},{"level":12,"maxValue":"742","minValue":"742"},{"level":13,"maxValue":"774","minValue":"774"},{"level":14,"maxValue":"819","minValue":"819"},{"level":15,"maxValue":"863","minValue":"863"},{"level":16,"maxValue":"908","minValue":"908"},{"level":17,"maxValue":"952","minValue":"952"},{"level":18,"maxValue":"985","minValue":"985"},{"level":19,"maxValue":"1017","minValue":"1017"},{"level":20,"maxValue":"1049","minValue":"1049"},{"level":21,"maxValue":"1081","minValue":"1081"},{"level":22,"maxValue":"1113","minValue":"1113"},{"level":23,"maxValue":"1145","minValue":"1145"},{"level":24,"maxValue":"1178","minValue":"1178"},{"level":25,"maxValue":"1210","minValue":"1210"},{"level":26,"maxValue":"1242","minValue":"1242"},{"level":27,"maxValue":"1274","minValue":"1274"},{"level":28,"maxValue":"1306","minValue":"1306"},{"level":29,"maxValue":"1338","minValue":"1338"},{"level":30,"maxValue":"1371","minValue":"1371"},{"level":1,"maxValue":"107","minValue":"107"},{"level":2,"maxValue":"139","minValue":"139"},{"level":3,"maxValue":"188","minValue":"188"},{"level":4,"maxValue":"248","minValue":"248"},{"level":5,"maxValue":"321","minValue":"321"},{"level":6,"maxValue":"382","minValue":"382"},{"level":7,"maxValue":"443","minValue":"443"},{"level":8,"maxValue":"503","minValue":"503"},{"level":9,"maxValue":"564","minValue":"564"},{"level":10,"maxValue":"637","minValue":"637"},{"level":11,"maxValue":"697","minValue":"697"},{"level":12,"maxValue":"742","minValue":"742"},{"level":13,"maxValue":"774","minValue":"774"},{"level":14,"maxValue":"819","minValue":"819"},{"level":15,"maxValue":"863","minValue":"863"},{"level":16,"maxValue":"908","minValue":"908"},{"level":17,"maxValue":"952","minValue":"952"},{"level":18,"maxValue":"985","minValue":"985"},{"level":19,"maxValue":"1017","minValue":"1017"},{"level":20,"maxValue":"1049","minValue":"1049"},{"level":21,"maxValue":"1081","minValue":"1081"},{"level":22,"maxValue":"1113","minValue":"1113"},{"level":23,"maxValue":"1145","minValue":"1145"},{"level":24,"maxValue":"1178","minValue":"1178"},{"level":25,"maxValue":"1210","minValue":"1210"},{"level":26,"maxValue":"1242","minValue":"1242"},{"level":27,"maxValue":"1274","minValue":"1274"},{"level":28,"maxValue":"1306","minValue":"1306"},{"level":29,"maxValue":"1338","minValue":"1338"},{"level":30,"maxValue":"1371","minValue":"1371"},{"level":1,"maxValue":"107","minValue":"107"},{"level":2,"maxValue":"139","minValue":"139"},{"level":3,"maxValue":"188","minValue":"188"},{"level":4,"maxValue":"248","minValue":"248"},{"level":5,"maxValue":"321","minValue":"321"},{"level":6,"maxValue":"382","minValue":"382"},{"level":7,"maxValue":"443","minValue":"443"},{"level":8,"maxValue":"503","minValue":"503"},{"level":9,"maxValue":"564","minValue":"564"},{"level":10,"maxValue":"637","minValue":"637"},{"level":11,"maxValue":"697","minValue":"697"},{"level":12,"maxValue":"742","minValue":"742"},{"level":13,"maxValue":"774","minValue":"774"},{"level":14,"maxValue":"819","minValue":"819"},{"level":15,"maxValue":"863","minValue":"863"},{"level":16,"maxValue":"908","minValue":"908"},{"level":17,"maxValue":"952","minValue":"952"},{"level":18,"maxValue":"985","minValue":"985"},{"level":19,"maxValue":"1017","minValue":"1017"},{"level":20,"maxValue":"1049","minValue":"1049"},{"level":21,"maxValue":"1081","minValue":"1081"},{"level":22,"maxValue":"1113","minValue":"1113"},{"level":23,"maxValue":"1145","minValue":"1145"},{"level":24,"maxValue":"1178","minValue":"1178"},{"level":25,"maxValue":"1210","minValue":"1210"},{"level":26,"maxValue":"1242","minValue":"1242"},{"level":27,"maxValue":"1274","minValue":"1274"},{"level":28,"maxValue":"1306","minValue":"1306"},{"level":29,"maxValue":"1338","minValue":"1338"},{"level":30,"maxValue":"1371","minValue":"1371"},{"level":1,"maxValue":"107","minValue":"107"},{"level":2,"maxValue":"139","minValue":"139"},{"level":3,"maxValue":"188","minValue":"188"},{"level":4,"maxValue":"248","minValue":"248"},{"level":5,"maxValue":"321","minValue":"321"},{"level":6,"maxValue":"382","minValue":"382"},{"level":7,"maxValue":"443","minValue":"443"},{"level":8,"maxValue":"503","minValue":"503"},{"level":9,"maxValue":"564","minValue":"564"},{"level":10,"maxValue":"637","minValue":"637"},{"level":11,"maxValue":"697","minValue":"697"},{"level":12,"maxValue":"742","minValue":"742"},{"level":13,"maxValue":"774","minValue":"774"},{"level":14,"maxValue":"819","minValue":"819"},{"level":15,"maxValue":"863","minValue":"863"},{"level":16,"maxValue":"908","minValue":"908"},{"level":17,"maxValue":"952","minValue":"952"},{"level":18,"maxValue":"985","minValue":"985"},{"level":19,"maxValue":"1017","minValue":"1017"},{"level":20,"maxValue":"1049","minValue":"1049"},{"level":21,"maxValue":"1081","minValue":"1081"},{"level":22,"maxValue":"1113","minValue":"1113"},{"level":23,"maxValue":"1145","minValue":"1145"},{"level":24,"maxValue":"1178","minValue":"1178"},{"level":25,"maxValue":"1210","minValue":"1210"},{"level":26,"maxValue":"1242","minValue":"1242"},{"level":27,"maxValue":"1274","minValue":"1274"},{"level":28,"maxValue":"1306","minValue":"1306"},{"level":29,"maxValue":"1338","minValue":"1338"},{"level":30,"maxValue":"1371","minValue":"1371"}]
+    },
+    {
+      id: `13350000`,
+      name: `Heart Gore`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_035.png`,
+      description: `Activates on landing a Critical Hit, dealing <span style="color: #FCC78B">{se_dmg:1335000011:SkillUIMinDmgsum}-{se_dmg:1335000011:SkillUIMaxDmgsum}</span> damage to up to 4 enemies within 4m and restores 100 MP.
+
+5 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 5,
+      manaRegen: 0,
+      range: 20,
+      area: 4,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"93","minValue":"93"},{"level":2,"maxValue":"133","minValue":"133"},{"level":3,"maxValue":"172","minValue":"172"},{"level":4,"maxValue":"232","minValue":"232"},{"level":5,"maxValue":"307","minValue":"307"},{"level":6,"maxValue":"397","minValue":"397"},{"level":7,"maxValue":"472","minValue":"472"},{"level":8,"maxValue":"547","minValue":"547"},{"level":9,"maxValue":"622","minValue":"622"},{"level":10,"maxValue":"697","minValue":"697"},{"level":11,"maxValue":"787","minValue":"787"},{"level":12,"maxValue":"862","minValue":"862"},{"level":13,"maxValue":"918","minValue":"918"},{"level":14,"maxValue":"957","minValue":"957"},{"level":15,"maxValue":"1012","minValue":"1012"},{"level":16,"maxValue":"1067","minValue":"1067"},{"level":17,"maxValue":"1123","minValue":"1123"},{"level":18,"maxValue":"1178","minValue":"1178"},{"level":19,"maxValue":"1217","minValue":"1217"},{"level":20,"maxValue":"1257","minValue":"1257"},{"level":21,"maxValue":"1297","minValue":"1297"},{"level":22,"maxValue":"1337","minValue":"1337"},{"level":23,"maxValue":"1377","minValue":"1377"},{"level":24,"maxValue":"1416","minValue":"1416"},{"level":25,"maxValue":"1456","minValue":"1456"},{"level":26,"maxValue":"1496","minValue":"1496"},{"level":27,"maxValue":"1536","minValue":"1536"},{"level":28,"maxValue":"1575","minValue":"1575"},{"level":29,"maxValue":"1615","minValue":"1615"},{"level":30,"maxValue":"1655","minValue":"1655"}]
+    },
+    {
+      id: `13360000`,
+      name: `Infiltrate`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_036.png`,
+      description: `After using [Dodge], moves to the rear of a target within 10m and deals <span style="color: #FCC78B">{se_dmg:1336000021:SkillUIMinDmgsum}-{se_dmg:1336000021:SkillUIMaxDmgsum}</span> damage with a {se:1336000022:effect_value05:divide100}% chance to inflict Blind for {se:1336000022:effect_value02:time}.
+100% chance to land Blind on NPC targets.
+
+10 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 10,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 61,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"150","minValue":"TargetLocation_TargetDirection"},{"level":1,"maxValue":"239","minValue":"239"},{"level":2,"maxValue":"316","minValue":"316"},{"level":3,"maxValue":"409","minValue":"409"},{"level":4,"maxValue":"486","minValue":"486"},{"level":5,"maxValue":"563","minValue":"563"},{"level":6,"maxValue":"641","minValue":"641"},{"level":7,"maxValue":"718","minValue":"718"},{"level":8,"maxValue":"811","minValue":"811"},{"level":9,"maxValue":"888","minValue":"888"},{"level":10,"maxValue":"945","minValue":"945"},{"level":11,"maxValue":"985","minValue":"985"},{"level":12,"maxValue":"1042","minValue":"1042"},{"level":13,"maxValue":"1099","minValue":"1099"},{"level":14,"maxValue":"1156","minValue":"1156"},{"level":15,"maxValue":"1212","minValue":"1212"},{"level":16,"maxValue":"1253","minValue":"1253"},{"level":17,"maxValue":"1294","minValue":"1294"},{"level":18,"maxValue":"1335","minValue":"1335"},{"level":19,"maxValue":"1376","minValue":"1376"},{"level":20,"maxValue":"1417","minValue":"1417"},{"level":21,"maxValue":"1458","minValue":"1458"},{"level":22,"maxValue":"1499","minValue":"1499"},{"level":23,"maxValue":"1540","minValue":"1540"},{"level":24,"maxValue":"1581","minValue":"1581"},{"level":25,"maxValue":"1622","minValue":"1622"},{"level":26,"maxValue":"1663","minValue":"1663"},{"level":27,"maxValue":"1704","minValue":"1704"},{"level":28,"maxValue":"1745","minValue":"1745"},{"level":29,"maxValue":"1786","minValue":"1786"},{"level":30,"maxValue":"1827","minValue":"1827"},{"level":1,"maxValue":"239","minValue":"239"},{"level":2,"maxValue":"316","minValue":"316"},{"level":3,"maxValue":"409","minValue":"409"},{"level":4,"maxValue":"486","minValue":"486"},{"level":5,"maxValue":"563","minValue":"563"},{"level":6,"maxValue":"641","minValue":"641"},{"level":7,"maxValue":"718","minValue":"718"},{"level":8,"maxValue":"811","minValue":"811"},{"level":9,"maxValue":"888","minValue":"888"},{"level":10,"maxValue":"945","minValue":"945"},{"level":11,"maxValue":"985","minValue":"985"},{"level":12,"maxValue":"1042","minValue":"1042"},{"level":13,"maxValue":"1099","minValue":"1099"},{"level":14,"maxValue":"1156","minValue":"1156"},{"level":15,"maxValue":"1212","minValue":"1212"},{"level":16,"maxValue":"1253","minValue":"1253"},{"level":17,"maxValue":"1294","minValue":"1294"},{"level":18,"maxValue":"1335","minValue":"1335"},{"level":19,"maxValue":"1376","minValue":"1376"},{"level":20,"maxValue":"1417","minValue":"1417"},{"level":21,"maxValue":"1458","minValue":"1458"},{"level":22,"maxValue":"1499","minValue":"1499"},{"level":23,"maxValue":"1540","minValue":"1540"},{"level":24,"maxValue":"1581","minValue":"1581"},{"level":25,"maxValue":"1622","minValue":"1622"},{"level":26,"maxValue":"1663","minValue":"1663"},{"level":27,"maxValue":"1704","minValue":"1704"},{"level":28,"maxValue":"1745","minValue":"1745"},{"level":29,"maxValue":"1786","minValue":"1786"},{"level":30,"maxValue":"1827","minValue":"1827"}]
+    }
+  ],
+  passives: [
+    {
+      id: `13710000`,
+      name: `Heightened Sixth Sense`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_001.png`,
+      description: `Increases the caster's Evasion by {abe:1371000011:value02}, Max HP by <span style="color: #FCC78B">{abe:1371000013:value02:divide100}%</span>, and restores <span style="color: #FCC78B">{se_dmg:1371000711:SkillUIHPHealMin:total}-{se_dmg:1371000711:SkillUIHPHealMax:total}</span> HP on a successful Evasion.
+
+Cooldown: {abe:1371000015:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137100001"},{"level":2,"minValue":"137100001"},{"level":3,"minValue":"137100001"},{"level":4,"minValue":"137100001"},{"level":5,"minValue":"137100001"},{"level":6,"minValue":"137100001"},{"level":7,"minValue":"137100001"},{"level":8,"minValue":"137100001"},{"level":9,"minValue":"137100001"},{"level":10,"minValue":"137100001"},{"level":11,"minValue":"137100001"},{"level":12,"minValue":"137100001"},{"level":13,"minValue":"137100001"},{"level":14,"minValue":"137100001"},{"level":15,"minValue":"137100001"},{"level":16,"minValue":"137100001"},{"level":17,"minValue":"137100001"},{"level":18,"minValue":"137100001"},{"level":19,"minValue":"137100001"},{"level":20,"minValue":"137100001"},{"level":21,"minValue":"137100001"},{"level":22,"minValue":"137100001"},{"level":23,"minValue":"137100001"},{"level":24,"minValue":"137100001"},{"level":25,"minValue":"137100001"},{"level":26,"minValue":"137100001"},{"level":27,"minValue":"137100001"},{"level":28,"minValue":"137100001"},{"level":29,"minValue":"137100001"},{"level":30,"minValue":"137100001"}]
+    },
+    {
+      id: `13720000`,
+      name: `Exploit Weakness`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_002.png`,
+      description: `Increases caster's Critical Hit by <span style="color: #FCC78B">{abe:1372000011:value02}</span>. Has a <span style="color: #FCC78B">{abe:1372000012:value02:divide100}%</span> chance to summon up to 5 Doppelgangers on landing a Critical Hit. Each Doppelganger deals <span style="color: #FCC78B">{se_dmg:1372000711:SkillUIMinDmgsum}-{se_dmg:1372000711:SkillUIMaxDmgsum}</span> damage and inflicts Insignia that last for {se:1372000713:effect_value02:time}. (Max 5 stacks)
+
+Cooldown: {abe:1372000013:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137200001"},{"level":2,"minValue":"137200001"},{"level":3,"minValue":"137200001"},{"level":4,"minValue":"137200001"},{"level":5,"minValue":"137200001"},{"level":6,"minValue":"137200001"},{"level":7,"minValue":"137200001"},{"level":8,"minValue":"137200001"},{"level":9,"minValue":"137200001"},{"level":10,"minValue":"137200001"},{"level":11,"minValue":"137200001"},{"level":12,"minValue":"137200001"},{"level":13,"minValue":"137200001"},{"level":14,"minValue":"137200001"},{"level":15,"minValue":"137200001"},{"level":16,"minValue":"137200001"},{"level":17,"minValue":"137200001"},{"level":18,"minValue":"137200001"},{"level":19,"minValue":"137200001"},{"level":20,"minValue":"137200001"},{"level":21,"minValue":"137200001"},{"level":22,"minValue":"137200001"},{"level":23,"minValue":"137200001"},{"level":24,"minValue":"137200001"},{"level":25,"minValue":"137200001"},{"level":26,"minValue":"137200001"},{"level":27,"minValue":"137200001"},{"level":28,"minValue":"137200001"},{"level":29,"minValue":"137200001"},{"level":30,"minValue":"137200001"}]
+    },
+    {
+      id: `13730000`,
+      name: `Apply Poison`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_003.png`,
+      description: `Has a {abe:1373000011:value02:divide100}% chance to reduce the target's Incoming Heal by {abe:1373000713:value02:divide100abs}% and inflict Poison for {se:1373000711:effect_value02:time} on landing an attack. Poison deals <span style="color: #FCC78B">{se_abe_dmg:1373000711:1373000712:SkillUIDotMinDmg:tick}-{se_abe_dmg:1373000711:1373000712:SkillUIDotMaxDmg:tick}</span> Damage over Time every 1s.
+
+Cooldown: {abe:1373000011:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137300001"},{"level":2,"minValue":"137300001"},{"level":3,"minValue":"137300001"},{"level":4,"minValue":"137300001"},{"level":5,"minValue":"137300001"},{"level":6,"minValue":"137300001"},{"level":7,"minValue":"137300001"},{"level":8,"minValue":"137300001"},{"level":9,"minValue":"137300001"},{"level":10,"minValue":"137300001"},{"level":11,"minValue":"137300001"},{"level":12,"minValue":"137300001"},{"level":13,"minValue":"137300001"},{"level":14,"minValue":"137300001"},{"level":15,"minValue":"137300001"},{"level":16,"minValue":"137300001"},{"level":17,"minValue":"137300001"},{"level":18,"minValue":"137300001"},{"level":19,"minValue":"137300001"},{"level":20,"minValue":"137300001"},{"level":21,"minValue":"137300001"},{"level":22,"minValue":"137300001"},{"level":23,"minValue":"137300001"},{"level":24,"minValue":"137300001"},{"level":25,"minValue":"137300001"},{"level":26,"minValue":"137300001"},{"level":27,"minValue":"137300001"},{"level":28,"minValue":"137300001"},{"level":29,"minValue":"137300001"},{"level":30,"minValue":"137300001"}]
+    },
+    {
+      id: `13740000`,
+      name: `Rear Smite`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_004.png`,
+      description: `Increases caster's Back Attack Damage Boost by <span style="color: #4AC315">{abe:1374000011:value02:divide100}%</span>.`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137400001"},{"level":2,"minValue":"137400001"},{"level":3,"minValue":"137400001"},{"level":4,"minValue":"137400001"},{"level":5,"minValue":"137400001"},{"level":6,"minValue":"137400001"},{"level":7,"minValue":"137400001"},{"level":8,"minValue":"137400001"},{"level":9,"minValue":"137400001"},{"level":10,"minValue":"137400001"},{"level":11,"minValue":"137400001"},{"level":12,"minValue":"137400001"},{"level":13,"minValue":"137400001"},{"level":14,"minValue":"137400001"},{"level":15,"minValue":"137400001"},{"level":16,"minValue":"137400001"},{"level":17,"minValue":"137400001"},{"level":18,"minValue":"137400001"},{"level":19,"minValue":"137400001"},{"level":20,"minValue":"137400001"},{"level":21,"minValue":"137400001"},{"level":22,"minValue":"137400001"},{"level":23,"minValue":"137400001"},{"level":24,"minValue":"137400001"},{"level":25,"minValue":"137400001"},{"level":26,"minValue":"137400001"},{"level":27,"minValue":"137400001"},{"level":28,"minValue":"137400001"},{"level":29,"minValue":"137400001"},{"level":30,"minValue":"137400001"}]
+    },
+    {
+      id: `13750000`,
+      name: `Assault Stance`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_006.png`,
+      description: `Increases caster's Critical Damage Boost by <span style="color: #4AC315">{abe:1375000011:value02:divide100}%</span>.`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137500001"},{"level":2,"minValue":"137500001"},{"level":3,"minValue":"137500001"},{"level":4,"minValue":"137500001"},{"level":5,"minValue":"137500001"},{"level":6,"minValue":"137500001"},{"level":7,"minValue":"137500001"},{"level":8,"minValue":"137500001"},{"level":9,"minValue":"137500001"},{"level":10,"minValue":"137500001"},{"level":11,"minValue":"137500001"},{"level":12,"minValue":"137500001"},{"level":13,"minValue":"137500001"},{"level":14,"minValue":"137500001"},{"level":15,"minValue":"137500001"},{"level":16,"minValue":"137500001"},{"level":17,"minValue":"137500001"},{"level":18,"minValue":"137500001"},{"level":19,"minValue":"137500001"},{"level":20,"minValue":"137500001"},{"level":21,"minValue":"137500001"},{"level":22,"minValue":"137500001"},{"level":23,"minValue":"137500001"},{"level":24,"minValue":"137500001"},{"level":25,"minValue":"137500001"},{"level":26,"minValue":"137500001"},{"level":27,"minValue":"137500001"},{"level":28,"minValue":"137500001"},{"level":29,"minValue":"137500001"},{"level":30,"minValue":"137500001"}]
+    },
+    {
+      id: `13760000`,
+      name: `Impact Hit`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_011.png`,
+      description: `Increases Impact-type Chance by <span style="color: #FCC78B">{abe:1376000011:value02:divide100}%</span> and Smite by <span style="color: #FCC78B">{abe:1376000012:value02:divide100}%</span>.`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137600001"},{"level":2,"minValue":"137600001"},{"level":3,"minValue":"137600001"},{"level":4,"minValue":"137600001"},{"level":5,"minValue":"137600001"},{"level":6,"minValue":"137600001"},{"level":7,"minValue":"137600001"},{"level":8,"minValue":"137600001"},{"level":9,"minValue":"137600001"},{"level":10,"minValue":"137600001"},{"level":11,"minValue":"137600001"},{"level":12,"minValue":"137600001"},{"level":13,"minValue":"137600001"},{"level":14,"minValue":"137600001"},{"level":15,"minValue":"137600001"},{"level":16,"minValue":"137600001"},{"level":17,"minValue":"137600001"},{"level":18,"minValue":"137600001"},{"level":19,"minValue":"137600001"},{"level":20,"minValue":"137600001"},{"level":21,"minValue":"137600001"},{"level":22,"minValue":"137600001"},{"level":23,"minValue":"137600001"},{"level":24,"minValue":"137600001"},{"level":25,"minValue":"137600001"},{"level":26,"minValue":"137600001"},{"level":27,"minValue":"137600001"},{"level":28,"minValue":"137600001"},{"level":29,"minValue":"137600001"},{"level":30,"minValue":"137600001"}]
+    },
+    {
+      id: `13770000`,
+      name: `Ambush Stance`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_007.png`,
+      description: `Has a {abe:1377000011:value02:divide100}% chance to deal <span style="color: #FCC78B">{se_dmg:1377000711:SkillUIMinDmgsum}-{se_dmg:1377000711:SkillUIMaxDmgsum}</span> extra damage when landing an attack on a target afflicted with Stun or Blind.
+
+Cooldown: {abe:1377000011:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137700001"},{"level":2,"minValue":"137700001"},{"level":3,"minValue":"137700001"},{"level":4,"minValue":"137700001"},{"level":5,"minValue":"137700001"},{"level":6,"minValue":"137700001"},{"level":7,"minValue":"137700001"},{"level":8,"minValue":"137700001"},{"level":9,"minValue":"137700001"},{"level":10,"minValue":"137700001"},{"level":11,"minValue":"137700001"},{"level":12,"minValue":"137700001"},{"level":13,"minValue":"137700001"},{"level":14,"minValue":"137700001"},{"level":15,"minValue":"137700001"},{"level":16,"minValue":"137700001"},{"level":17,"minValue":"137700001"},{"level":18,"minValue":"137700001"},{"level":19,"minValue":"137700001"},{"level":20,"minValue":"137700001"},{"level":21,"minValue":"137700001"},{"level":22,"minValue":"137700001"},{"level":23,"minValue":"137700001"},{"level":24,"minValue":"137700001"},{"level":25,"minValue":"137700001"},{"level":26,"minValue":"137700001"},{"level":27,"minValue":"137700001"},{"level":28,"minValue":"137700001"},{"level":29,"minValue":"137700001"},{"level":30,"minValue":"137700001"}]
+    },
+    {
+      id: `13780000`,
+      name: `Defense Break`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_008.png`,
+      description: `Reduces target Defense by <span style="color: #FCC78B">{abe:1378000711:value02:divide100abs}%</span> for {se:1378000711:effect_value02:time} when landing an attack on a target afflicted with Stagger or an Impact-type status.
+
+Cooldown: {abe:1378000011:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137800001"},{"level":2,"minValue":"137800001"},{"level":3,"minValue":"137800001"},{"level":4,"minValue":"137800001"},{"level":5,"minValue":"137800001"},{"level":6,"minValue":"137800001"},{"level":7,"minValue":"137800001"},{"level":8,"minValue":"137800001"},{"level":9,"minValue":"137800001"},{"level":10,"minValue":"137800001"},{"level":11,"minValue":"137800001"},{"level":12,"minValue":"137800001"},{"level":13,"minValue":"137800001"},{"level":14,"minValue":"137800001"},{"level":15,"minValue":"137800001"},{"level":16,"minValue":"137800001"},{"level":17,"minValue":"137800001"},{"level":18,"minValue":"137800001"},{"level":19,"minValue":"137800001"},{"level":20,"minValue":"137800001"},{"level":21,"minValue":"137800001"},{"level":22,"minValue":"137800001"},{"level":23,"minValue":"137800001"},{"level":24,"minValue":"137800001"},{"level":25,"minValue":"137800001"},{"level":26,"minValue":"137800001"},{"level":27,"minValue":"137800001"},{"level":28,"minValue":"137800001"},{"level":29,"minValue":"137800001"},{"level":30,"minValue":"137800001"}]
+    },
+    {
+      id: `13790000`,
+      name: `Revitalization Contract`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_009.png`,
+      description: `Increases the caster's Status Effect Resist by <span style="color: #FCC78B">{abe:1379000012:value02:divide100}%</span> and immediately restores <span style="color: #FCC78B">{se_dmg:1379000711:SkillUIHPHealMin:total}-{se_dmg:1379000711:SkillUIHPHealMax:total}</span> HP when the caster's HP is 10% or less.
+
+Cooldown: {abe:1379000011:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"137900001"},{"level":2,"minValue":"137900001"},{"level":3,"minValue":"137900001"},{"level":4,"minValue":"137900001"},{"level":5,"minValue":"137900001"},{"level":6,"minValue":"137900001"},{"level":7,"minValue":"137900001"},{"level":8,"minValue":"137900001"},{"level":9,"minValue":"137900001"},{"level":10,"minValue":"137900001"},{"level":11,"minValue":"137900001"},{"level":12,"minValue":"137900001"},{"level":13,"minValue":"137900001"},{"level":14,"minValue":"137900001"},{"level":15,"minValue":"137900001"},{"level":16,"minValue":"137900001"},{"level":17,"minValue":"137900001"},{"level":18,"minValue":"137900001"},{"level":19,"minValue":"137900001"},{"level":20,"minValue":"137900001"},{"level":21,"minValue":"137900001"},{"level":22,"minValue":"137900001"},{"level":23,"minValue":"137900001"},{"level":24,"minValue":"137900001"},{"level":25,"minValue":"137900001"},{"level":26,"minValue":"137900001"},{"level":27,"minValue":"137900001"},{"level":28,"minValue":"137900001"},{"level":29,"minValue":"137900001"},{"level":30,"minValue":"137900001"}]
+    },
+    {
+      id: `13800000`,
+      name: `Determination`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_Passive_010.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1380000711:SkillUIMinDmgsum}-{se_dmg:1380000711:SkillUIMaxDmgsum}</span> damage when landing an attack on a target with <span style="color: #FCC78B">{abe:1380000011:value11:divide100}%</span> HP or less.
+
+Cooldown: {abe:1380000011:value03:time}`,
+      spellTag: ["Passive"],
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"minValue":"138000001"},{"level":2,"minValue":"138000001"},{"level":3,"minValue":"138000001"},{"level":4,"minValue":"138000001"},{"level":5,"minValue":"138000001"},{"level":6,"minValue":"138000001"},{"level":7,"minValue":"138000001"},{"level":8,"minValue":"138000001"},{"level":9,"minValue":"138000001"},{"level":10,"minValue":"138000001"},{"level":11,"minValue":"138000001"},{"level":12,"minValue":"138000001"},{"level":13,"minValue":"138000001"},{"level":14,"minValue":"138000001"},{"level":15,"minValue":"138000001"},{"level":16,"minValue":"138000001"},{"level":17,"minValue":"138000001"},{"level":18,"minValue":"138000001"},{"level":19,"minValue":"138000001"},{"level":20,"minValue":"138000001"},{"level":21,"minValue":"138000001"},{"level":22,"minValue":"138000001"},{"level":23,"minValue":"138000001"},{"level":24,"minValue":"138000001"},{"level":25,"minValue":"138000001"},{"level":26,"minValue":"138000001"},{"level":27,"minValue":"138000001"},{"level":28,"minValue":"138000001"},{"level":29,"minValue":"138000001"},{"level":30,"minValue":"138000001"}]
+    }
+  ],
+  stigmas: [
+    {
+      id: `13020000`,
+      name: `Throw Shadowblade`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_031.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1302000011:SkillUIMinDmgsum}-{se_dmg:1302000011:SkillUIMaxDmgsum}</span> damage to a target within 20m and inflicts Slowed which reduces Move Speed by {abe:1000000412:value02:divide100abs}% for {se:1302000012:effect_value02:time}.
+
+15 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 15,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      duration: 5,
+      levels: [{"level":1,"maxValue":"966","minValue":"966"},{"level":2,"maxValue":"1098","minValue":"1098"},{"level":3,"maxValue":"1231","minValue":"1231"},{"level":4,"maxValue":"1390","minValue":"1390"},{"level":5,"maxValue":"1522","minValue":"1522"},{"level":6,"maxValue":"1620","minValue":"1620"},{"level":7,"maxValue":"1690","minValue":"1690"},{"level":8,"maxValue":"1787","minValue":"1787"},{"level":9,"maxValue":"1884","minValue":"1884"},{"level":10,"maxValue":"1981","minValue":"1981"},{"level":11,"maxValue":"2079","minValue":"2079"},{"level":12,"maxValue":"2149","minValue":"2149"},{"level":13,"maxValue":"2219","minValue":"2219"},{"level":14,"maxValue":"2289","minValue":"2289"},{"level":15,"maxValue":"2359","minValue":"2359"},{"level":16,"maxValue":"2430","minValue":"2430"},{"level":17,"maxValue":"2500","minValue":"2500"},{"level":18,"maxValue":"2570","minValue":"2570"},{"level":19,"maxValue":"2640","minValue":"2640"},{"level":20,"maxValue":"2710","minValue":"2710"},{"level":21,"maxValue":"2781","minValue":"2781"},{"level":22,"maxValue":"2851","minValue":"2851"},{"level":23,"maxValue":"2921","minValue":"2921"},{"level":24,"maxValue":"2991","minValue":"2991"},{"level":25,"maxValue":"3061","minValue":"3061"},{"level":26,"maxValue":"3132","minValue":"3132"},{"level":27,"maxValue":"3202","minValue":"3202"},{"level":28,"maxValue":"3272","minValue":"3272"},{"level":29,"maxValue":"3342","minValue":"3342"},{"level":30,"maxValue":"3412","minValue":"3412"}]
+    },
+    {
+      id: `13080000`,
+      name: `Evasion Stance`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_024.png`,
+      description: `Guaranteed to evade all damage temporarily. Restores <span style="color: #FCC78B">{se:1308000811:effect_value01}</span> MP and Stamina once on a successful Evasion.`,
+      condition: [],
+      manaCost: 0,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"2000","minValue":"2000"},{"level":2,"maxValue":"2000","minValue":"2000"},{"level":3,"maxValue":"2000","minValue":"2000"},{"level":4,"maxValue":"2000","minValue":"2000"},{"level":5,"maxValue":"2000","minValue":"2000"},{"level":6,"maxValue":"2000","minValue":"2000"},{"level":7,"maxValue":"2000","minValue":"2000"},{"level":8,"maxValue":"2000","minValue":"2000"},{"level":9,"maxValue":"2000","minValue":"2000"},{"level":10,"maxValue":"2000","minValue":"2000"},{"level":11,"maxValue":"2000","minValue":"2000"},{"level":12,"maxValue":"2000","minValue":"2000"},{"level":13,"maxValue":"2000","minValue":"2000"},{"level":14,"maxValue":"2000","minValue":"2000"},{"level":15,"maxValue":"2000","minValue":"2000"},{"level":16,"maxValue":"2000","minValue":"2000"},{"level":17,"maxValue":"2000","minValue":"2000"},{"level":18,"maxValue":"2000","minValue":"2000"},{"level":19,"maxValue":"2000","minValue":"2000"},{"level":20,"maxValue":"2000","minValue":"2000"},{"level":21,"maxValue":"2000","minValue":"2000"},{"level":22,"maxValue":"2000","minValue":"2000"},{"level":23,"maxValue":"2000","minValue":"2000"},{"level":24,"maxValue":"2000","minValue":"2000"},{"level":25,"maxValue":"2000","minValue":"2000"},{"level":26,"maxValue":"2000","minValue":"2000"},{"level":27,"maxValue":"2000","minValue":"2000"},{"level":28,"maxValue":"2000","minValue":"2000"},{"level":29,"maxValue":"2000","minValue":"2000"},{"level":30,"maxValue":"2000","minValue":"2000"}]
+    },
+    {
+      id: `13180000`,
+      name: `Shadow Walk`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_016.png`,
+      description: `Enter Stealth for {se:1318000011:effect_value02:time}.
+Stealth is usable out of combat and removed upon entering combat.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 1,
+      classId: 3,
+      duration: 20,
+      levels: [{"level":1,"maxValue":"20000","minValue":"20000"}]
+    },
+    {
+      id: `13230000`,
+      name: `Aerial Restraint`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_026.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1323000021:SkillUIMinDmgsum}-{se_dmg:1323000021:SkillUIMaxDmgsum}</span> damage to a target within 4m with a {se:1323000022:effect_value02:time}% chance to inflict Airborne for {se:1323000022:effect_value05:divide100}. To targets with 5 stacks of Insignia, has a {se:1323000024:effect_value05:divide100}% chance to inflict Airborne for {se:1323000024:effect_value02:time}.
+100% chance to land Airborne on NPC targets.
+
+20 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 20,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 91,
+      classId: 3,
+      duration: 50,
+      levels: [{"level":1,"maxValue":"100","minValue":"TargetLocation_CasterToTargetDirection"},{"level":1,"maxValue":"644","minValue":"644"},{"level":2,"maxValue":"732","minValue":"732"},{"level":3,"maxValue":"820","minValue":"820"},{"level":4,"maxValue":"927","minValue":"927"},{"level":5,"maxValue":"1015","minValue":"1015"},{"level":6,"maxValue":"1080","minValue":"1080"},{"level":7,"maxValue":"1126","minValue":"1126"},{"level":8,"maxValue":"1191","minValue":"1191"},{"level":9,"maxValue":"1256","minValue":"1256"},{"level":10,"maxValue":"1321","minValue":"1321"},{"level":11,"maxValue":"1386","minValue":"1386"},{"level":12,"maxValue":"1432","minValue":"1432"},{"level":13,"maxValue":"1479","minValue":"1479"},{"level":14,"maxValue":"1526","minValue":"1526"},{"level":15,"maxValue":"1573","minValue":"1573"},{"level":16,"maxValue":"1620","minValue":"1620"},{"level":17,"maxValue":"1666","minValue":"1666"},{"level":18,"maxValue":"1713","minValue":"1713"},{"level":19,"maxValue":"1760","minValue":"1760"},{"level":20,"maxValue":"1807","minValue":"1807"},{"level":21,"maxValue":"1854","minValue":"1854"},{"level":22,"maxValue":"1900","minValue":"1900"},{"level":23,"maxValue":"1947","minValue":"1947"},{"level":24,"maxValue":"1994","minValue":"1994"},{"level":25,"maxValue":"2041","minValue":"2041"},{"level":26,"maxValue":"2088","minValue":"2088"},{"level":27,"maxValue":"2134","minValue":"2134"},{"level":28,"maxValue":"2181","minValue":"2181"},{"level":29,"maxValue":"2228","minValue":"2228"},{"level":30,"maxValue":"2275","minValue":"2275"},{"level":1,"maxValue":"644","minValue":"644"},{"level":2,"maxValue":"732","minValue":"732"},{"level":3,"maxValue":"820","minValue":"820"},{"level":4,"maxValue":"927","minValue":"927"},{"level":5,"maxValue":"1015","minValue":"1015"},{"level":6,"maxValue":"1080","minValue":"1080"},{"level":7,"maxValue":"1126","minValue":"1126"},{"level":8,"maxValue":"1191","minValue":"1191"},{"level":9,"maxValue":"1256","minValue":"1256"},{"level":10,"maxValue":"1321","minValue":"1321"},{"level":11,"maxValue":"1386","minValue":"1386"},{"level":12,"maxValue":"1432","minValue":"1432"},{"level":13,"maxValue":"1479","minValue":"1479"},{"level":14,"maxValue":"1526","minValue":"1526"},{"level":15,"maxValue":"1573","minValue":"1573"},{"level":16,"maxValue":"1620","minValue":"1620"},{"level":17,"maxValue":"1666","minValue":"1666"},{"level":18,"maxValue":"1713","minValue":"1713"},{"level":19,"maxValue":"1760","minValue":"1760"},{"level":20,"maxValue":"1807","minValue":"1807"},{"level":21,"maxValue":"1854","minValue":"1854"},{"level":22,"maxValue":"1900","minValue":"1900"},{"level":23,"maxValue":"1947","minValue":"1947"},{"level":24,"maxValue":"1994","minValue":"1994"},{"level":25,"maxValue":"2041","minValue":"2041"},{"level":26,"maxValue":"2088","minValue":"2088"},{"level":27,"maxValue":"2134","minValue":"2134"},{"level":28,"maxValue":"2181","minValue":"2181"},{"level":29,"maxValue":"2228","minValue":"2228"},{"level":30,"maxValue":"2275","minValue":"2275"},{"level":1,"maxValue":"644","minValue":"644"},{"level":2,"maxValue":"732","minValue":"732"},{"level":3,"maxValue":"820","minValue":"820"},{"level":4,"maxValue":"927","minValue":"927"},{"level":5,"maxValue":"1015","minValue":"1015"},{"level":6,"maxValue":"1080","minValue":"1080"},{"level":7,"maxValue":"1126","minValue":"1126"},{"level":8,"maxValue":"1191","minValue":"1191"},{"level":9,"maxValue":"1256","minValue":"1256"},{"level":10,"maxValue":"1321","minValue":"1321"},{"level":11,"maxValue":"1386","minValue":"1386"},{"level":12,"maxValue":"1432","minValue":"1432"},{"level":13,"maxValue":"1479","minValue":"1479"},{"level":14,"maxValue":"1526","minValue":"1526"},{"level":15,"maxValue":"1573","minValue":"1573"},{"level":16,"maxValue":"1620","minValue":"1620"},{"level":17,"maxValue":"1666","minValue":"1666"},{"level":18,"maxValue":"1713","minValue":"1713"},{"level":19,"maxValue":"1760","minValue":"1760"},{"level":20,"maxValue":"1807","minValue":"1807"},{"level":21,"maxValue":"1854","minValue":"1854"},{"level":22,"maxValue":"1900","minValue":"1900"},{"level":23,"maxValue":"1947","minValue":"1947"},{"level":24,"maxValue":"1994","minValue":"1994"},{"level":25,"maxValue":"2041","minValue":"2041"},{"level":26,"maxValue":"2088","minValue":"2088"},{"level":27,"maxValue":"2134","minValue":"2134"},{"level":28,"maxValue":"2181","minValue":"2181"},{"level":29,"maxValue":"2228","minValue":"2228"},{"level":30,"maxValue":"2275","minValue":"2275"}]
+    },
+    {
+      id: `13250000`,
+      name: `Smoke Bomb`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_023.png`,
+      description: `Detonate a Smoke Bomb that lasts for 7s. The caster and party members are not hit by Projectile within the smoke.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 1,
+      classId: 3,
+      duration: 7,
+      levels: [{"level":1,"maxValue":"IgnoreOtherActor","minValue":"0"}]
+    },
+    {
+      id: `13270000`,
+      name: `Savage Fang`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_025.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1327000011:SkillUIMinDmgsum}-{se_dmg:1327000011:SkillUIMaxDmgsum}</span> damage to up to 4 enemies within 4m and engraves 5 Insignias for {se:1327000012:effect_value02:time}.
+
+50 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 50,
+      manaRegen: 0,
+      range: 20,
+      area: 4,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 90,
+      classId: 3,
+      duration: 10,
+      levels: [{"level":1,"maxValue":"1074","minValue":"1074"},{"level":2,"maxValue":"1221","minValue":"1221"},{"level":3,"maxValue":"1368","minValue":"1368"},{"level":4,"maxValue":"1545","minValue":"1545"},{"level":5,"maxValue":"1692","minValue":"1692"},{"level":6,"maxValue":"1800","minValue":"1800"},{"level":7,"maxValue":"1878","minValue":"1878"},{"level":8,"maxValue":"1986","minValue":"1986"},{"level":9,"maxValue":"2094","minValue":"2094"},{"level":10,"maxValue":"2202","minValue":"2202"},{"level":11,"maxValue":"2310","minValue":"2310"},{"level":12,"maxValue":"2388","minValue":"2388"},{"level":13,"maxValue":"2466","minValue":"2466"},{"level":14,"maxValue":"2544","minValue":"2544"},{"level":15,"maxValue":"2622","minValue":"2622"},{"level":16,"maxValue":"2700","minValue":"2700"},{"level":17,"maxValue":"2778","minValue":"2778"},{"level":18,"maxValue":"2856","minValue":"2856"},{"level":19,"maxValue":"2934","minValue":"2934"},{"level":20,"maxValue":"3012","minValue":"3012"},{"level":21,"maxValue":"3090","minValue":"3090"},{"level":22,"maxValue":"3168","minValue":"3168"},{"level":23,"maxValue":"3246","minValue":"3246"},{"level":24,"maxValue":"3324","minValue":"3324"},{"level":25,"maxValue":"3402","minValue":"3402"},{"level":26,"maxValue":"3480","minValue":"3480"},{"level":27,"maxValue":"3558","minValue":"3558"},{"level":28,"maxValue":"3636","minValue":"3636"},{"level":29,"maxValue":"3714","minValue":"3714"},{"level":30,"maxValue":"3792","minValue":"3792"},{"level":1,"maxValue":"1074","minValue":"1074"},{"level":2,"maxValue":"1221","minValue":"1221"},{"level":3,"maxValue":"1368","minValue":"1368"},{"level":4,"maxValue":"1545","minValue":"1545"},{"level":5,"maxValue":"1692","minValue":"1692"},{"level":6,"maxValue":"1800","minValue":"1800"},{"level":7,"maxValue":"1878","minValue":"1878"},{"level":8,"maxValue":"1986","minValue":"1986"},{"level":9,"maxValue":"2094","minValue":"2094"},{"level":10,"maxValue":"2202","minValue":"2202"},{"level":11,"maxValue":"2310","minValue":"2310"},{"level":12,"maxValue":"2388","minValue":"2388"},{"level":13,"maxValue":"2466","minValue":"2466"},{"level":14,"maxValue":"2544","minValue":"2544"},{"level":15,"maxValue":"2622","minValue":"2622"},{"level":16,"maxValue":"2700","minValue":"2700"},{"level":17,"maxValue":"2778","minValue":"2778"},{"level":18,"maxValue":"2856","minValue":"2856"},{"level":19,"maxValue":"2934","minValue":"2934"},{"level":20,"maxValue":"3012","minValue":"3012"},{"level":21,"maxValue":"3090","minValue":"3090"},{"level":22,"maxValue":"3168","minValue":"3168"},{"level":23,"maxValue":"3246","minValue":"3246"},{"level":24,"maxValue":"3324","minValue":"3324"},{"level":25,"maxValue":"3402","minValue":"3402"},{"level":26,"maxValue":"3480","minValue":"3480"},{"level":27,"maxValue":"3558","minValue":"3558"},{"level":28,"maxValue":"3636","minValue":"3636"},{"level":29,"maxValue":"3714","minValue":"3714"},{"level":30,"maxValue":"3792","minValue":"3792"},{"level":1,"maxValue":"1074","minValue":"1074"},{"level":2,"maxValue":"1221","minValue":"1221"},{"level":3,"maxValue":"1368","minValue":"1368"},{"level":4,"maxValue":"1545","minValue":"1545"},{"level":5,"maxValue":"1692","minValue":"1692"},{"level":6,"maxValue":"1800","minValue":"1800"},{"level":7,"maxValue":"1878","minValue":"1878"},{"level":8,"maxValue":"1986","minValue":"1986"},{"level":9,"maxValue":"2094","minValue":"2094"},{"level":10,"maxValue":"2202","minValue":"2202"},{"level":11,"maxValue":"2310","minValue":"2310"},{"level":12,"maxValue":"2388","minValue":"2388"},{"level":13,"maxValue":"2466","minValue":"2466"},{"level":14,"maxValue":"2544","minValue":"2544"},{"level":15,"maxValue":"2622","minValue":"2622"},{"level":16,"maxValue":"2700","minValue":"2700"},{"level":17,"maxValue":"2778","minValue":"2778"},{"level":18,"maxValue":"2856","minValue":"2856"},{"level":19,"maxValue":"2934","minValue":"2934"},{"level":20,"maxValue":"3012","minValue":"3012"},{"level":21,"maxValue":"3090","minValue":"3090"},{"level":22,"maxValue":"3168","minValue":"3168"},{"level":23,"maxValue":"3246","minValue":"3246"},{"level":24,"maxValue":"3324","minValue":"3324"},{"level":25,"maxValue":"3402","minValue":"3402"},{"level":26,"maxValue":"3480","minValue":"3480"},{"level":27,"maxValue":"3558","minValue":"3558"},{"level":28,"maxValue":"3636","minValue":"3636"},{"level":29,"maxValue":"3714","minValue":"3714"},{"level":30,"maxValue":"3792","minValue":"3792"}]
+    },
+    {
+      id: `13280000`,
+      name: `Spiral Slice`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_022.png`,
+      description: `Rushes at a target within 20m and deals <span style="color: #FCC78B">{se_dmg:1328000021:SkillUIMinDmgsum}-{se_dmg:1328000021:SkillUIMaxDmgsum}</span> damage to up to 4 enemies within 4m of the target with a {se:1328000022:effect_value05:divide100}% chance to Rotate and inflict Stun for {se:1328000022:effect_value02:time}.
+100% chance to land Stun on NPC targets.
+
+20 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 20,
+      manaRegen: 0,
+      range: 20,
+      area: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 31,
+      classId: 3,
+      duration: 3,
+      levels: [{"level":1,"maxValue":"100","minValue":"TargetLocation_CasterToTargetDirection"},{"level":1,"maxValue":"1342","minValue":"1342"},{"level":2,"maxValue":"1526","minValue":"1526"},{"level":3,"maxValue":"1710","minValue":"1710"},{"level":4,"maxValue":"1931","minValue":"1931"},{"level":5,"maxValue":"2115","minValue":"2115"},{"level":6,"maxValue":"2250","minValue":"2250"},{"level":7,"maxValue":"2347","minValue":"2347"},{"level":8,"maxValue":"2482","minValue":"2482"},{"level":9,"maxValue":"2617","minValue":"2617"},{"level":10,"maxValue":"2752","minValue":"2752"},{"level":11,"maxValue":"2887","minValue":"2887"},{"level":12,"maxValue":"2985","minValue":"2985"},{"level":13,"maxValue":"3082","minValue":"3082"},{"level":14,"maxValue":"3180","minValue":"3180"},{"level":15,"maxValue":"3277","minValue":"3277"},{"level":16,"maxValue":"3375","minValue":"3375"},{"level":17,"maxValue":"3472","minValue":"3472"},{"level":18,"maxValue":"3570","minValue":"3570"},{"level":19,"maxValue":"3667","minValue":"3667"},{"level":20,"maxValue":"3765","minValue":"3765"},{"level":21,"maxValue":"3862","minValue":"3862"},{"level":22,"maxValue":"3960","minValue":"3960"},{"level":23,"maxValue":"4057","minValue":"4057"},{"level":24,"maxValue":"4155","minValue":"4155"},{"level":25,"maxValue":"4252","minValue":"4252"},{"level":26,"maxValue":"4350","minValue":"4350"},{"level":27,"maxValue":"4447","minValue":"4447"},{"level":28,"maxValue":"4545","minValue":"4545"},{"level":29,"maxValue":"4642","minValue":"4642"},{"level":30,"maxValue":"4740","minValue":"4740"}]
+    },
+    {
+      id: `13300000`,
+      name: `Triniel's Dagger`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_028.png`,
+      description: `Deals <span style="color: #FCC78B">{se_dmg:1330000011:SkillUIMinDmgsum}-{se_dmg:1330000011:SkillUIMaxDmgsum}</span> damage to a target within 4m and increases their skill cooldowns by {se:1330000013:effect_value02:divide100}%. If attacking from behind, damage is increased by 50%.
+
+20 Stagger Gauge Damage`,
+      condition: [],
+      staggerDamage: 20,
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"1192","minValue":"1192"},{"level":2,"maxValue":"1355","minValue":"1355"},{"level":3,"maxValue":"1518","minValue":"1518"},{"level":4,"maxValue":"1714","minValue":"1714"},{"level":5,"maxValue":"1878","minValue":"1878"},{"level":6,"maxValue":"1998","minValue":"1998"},{"level":7,"maxValue":"2084","minValue":"2084"},{"level":8,"maxValue":"2204","minValue":"2204"},{"level":9,"maxValue":"2324","minValue":"2324"},{"level":10,"maxValue":"2444","minValue":"2444"},{"level":11,"maxValue":"2564","minValue":"2564"},{"level":12,"maxValue":"2650","minValue":"2650"},{"level":13,"maxValue":"2737","minValue":"2737"},{"level":14,"maxValue":"2823","minValue":"2823"},{"level":15,"maxValue":"2910","minValue":"2910"},{"level":16,"maxValue":"2997","minValue":"2997"},{"level":17,"maxValue":"3083","minValue":"3083"},{"level":18,"maxValue":"3170","minValue":"3170"},{"level":19,"maxValue":"3256","minValue":"3256"},{"level":20,"maxValue":"3343","minValue":"3343"},{"level":21,"maxValue":"3429","minValue":"3429"},{"level":22,"maxValue":"3516","minValue":"3516"},{"level":23,"maxValue":"3603","minValue":"3603"},{"level":24,"maxValue":"3689","minValue":"3689"},{"level":25,"maxValue":"3776","minValue":"3776"},{"level":26,"maxValue":"3862","minValue":"3862"},{"level":27,"maxValue":"3949","minValue":"3949"},{"level":28,"maxValue":"4035","minValue":"4035"},{"level":29,"maxValue":"4122","minValue":"4122"},{"level":30,"maxValue":"4209","minValue":"4209"}]
+    },
+    {
+      id: `13310000`,
+      name: `Illusive Clone`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_029.png`,
+      description: `Deal {abe:1331000011:value01:divide100}% extra damage with all attacks for <span style="color: #FCC78B">{se:1331000011:effect_value02:time}</span>.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      duration: 10,
+      levels: [{"level":1,"maxValue":"10000","minValue":"10000"},{"level":2,"maxValue":"10500","minValue":"10500"},{"level":3,"maxValue":"11000","minValue":"11000"},{"level":4,"maxValue":"11500","minValue":"11500"},{"level":5,"maxValue":"12000","minValue":"12000"},{"level":6,"maxValue":"12500","minValue":"12500"},{"level":7,"maxValue":"13000","minValue":"13000"},{"level":8,"maxValue":"13500","minValue":"13500"},{"level":9,"maxValue":"14000","minValue":"14000"},{"level":10,"maxValue":"14500","minValue":"14500"},{"level":11,"maxValue":"15000","minValue":"15000"},{"level":12,"maxValue":"15500","minValue":"15500"},{"level":13,"maxValue":"16000","minValue":"16000"},{"level":14,"maxValue":"16500","minValue":"16500"},{"level":15,"maxValue":"17000","minValue":"17000"},{"level":16,"maxValue":"17500","minValue":"17500"},{"level":17,"maxValue":"18000","minValue":"18000"},{"level":18,"maxValue":"18500","minValue":"18500"},{"level":19,"maxValue":"19000","minValue":"19000"},{"level":20,"maxValue":"20000","minValue":"20000"},{"level":21,"maxValue":"20500","minValue":"20500"},{"level":22,"maxValue":"21000","minValue":"21000"},{"level":23,"maxValue":"21500","minValue":"21500"},{"level":24,"maxValue":"22000","minValue":"22000"},{"level":25,"maxValue":"22500","minValue":"22500"},{"level":26,"maxValue":"23000","minValue":"23000"},{"level":27,"maxValue":"23500","minValue":"23500"},{"level":28,"maxValue":"24000","minValue":"24000"},{"level":29,"maxValue":"24500","minValue":"24500"},{"level":30,"maxValue":"25000","minValue":"25000"}]
+    },
+    {
+      id: `13370000`,
+      name: `Evasion Contract`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_039.png`,
+      description: `Removes Slowed or Root from the caster and increases the caster's Evasion by {abe:1337000011:value02} for <span style="color: #FCC78B">{se:1337000011:effect_value02:time}</span>.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      duration: 10,
+      levels: [{"level":1,"maxValue":"10000","minValue":"10000"},{"level":2,"maxValue":"10500","minValue":"10500"},{"level":3,"maxValue":"11000","minValue":"11000"},{"level":4,"maxValue":"11500","minValue":"11500"},{"level":5,"maxValue":"12000","minValue":"12000"},{"level":6,"maxValue":"12500","minValue":"12500"},{"level":7,"maxValue":"13000","minValue":"13000"},{"level":8,"maxValue":"13500","minValue":"13500"},{"level":9,"maxValue":"14000","minValue":"14000"},{"level":10,"maxValue":"14500","minValue":"14500"},{"level":11,"maxValue":"15000","minValue":"15000"},{"level":12,"maxValue":"15500","minValue":"15500"},{"level":13,"maxValue":"16000","minValue":"16000"},{"level":14,"maxValue":"16500","minValue":"16500"},{"level":15,"maxValue":"17000","minValue":"17000"},{"level":16,"maxValue":"17500","minValue":"17500"},{"level":17,"maxValue":"18000","minValue":"18000"},{"level":18,"maxValue":"18500","minValue":"18500"},{"level":19,"maxValue":"19000","minValue":"19000"},{"level":20,"maxValue":"20000","minValue":"20000"},{"level":21,"maxValue":"20500","minValue":"20500"},{"level":22,"maxValue":"21000","minValue":"21000"},{"level":23,"maxValue":"21500","minValue":"21500"},{"level":24,"maxValue":"22000","minValue":"22000"},{"level":25,"maxValue":"22500","minValue":"22500"},{"level":26,"maxValue":"23000","minValue":"23000"},{"level":27,"maxValue":"23500","minValue":"23500"},{"level":28,"maxValue":"24000","minValue":"24000"},{"level":29,"maxValue":"24500","minValue":"24500"},{"level":30,"maxValue":"25000","minValue":"25000"}]
+    },
+    {
+      id: `13390000`,
+      name: `Swift Contract`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_AS_SKILL_037.png`,
+      description: `Increases the caster's Combat Speed by {abe:1339000011:value02:divide100}% for <span style="color: #FCC78B">{se:1339000011:effect_value02:time}</span>.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Single Target`,
+      spellTag: ["Magic","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 30,
+      classId: 3,
+      duration: 10,
+      levels: [{"level":1,"maxValue":"10000","minValue":"10000"},{"level":2,"maxValue":"10500","minValue":"10500"},{"level":3,"maxValue":"11000","minValue":"11000"},{"level":4,"maxValue":"11500","minValue":"11500"},{"level":5,"maxValue":"12000","minValue":"12000"},{"level":6,"maxValue":"12500","minValue":"12500"},{"level":7,"maxValue":"13000","minValue":"13000"},{"level":8,"maxValue":"13500","minValue":"13500"},{"level":9,"maxValue":"14000","minValue":"14000"},{"level":10,"maxValue":"14500","minValue":"14500"},{"level":11,"maxValue":"15000","minValue":"15000"},{"level":12,"maxValue":"15500","minValue":"15500"},{"level":13,"maxValue":"16000","minValue":"16000"},{"level":14,"maxValue":"16500","minValue":"16500"},{"level":15,"maxValue":"17000","minValue":"17000"},{"level":16,"maxValue":"17500","minValue":"17500"},{"level":17,"maxValue":"18000","minValue":"18000"},{"level":18,"maxValue":"18500","minValue":"18500"},{"level":19,"maxValue":"19000","minValue":"19000"},{"level":20,"maxValue":"20000","minValue":"20000"},{"level":21,"maxValue":"20500","minValue":"20500"},{"level":22,"maxValue":"21000","minValue":"21000"},{"level":23,"maxValue":"21500","minValue":"21500"},{"level":24,"maxValue":"22000","minValue":"22000"},{"level":25,"maxValue":"22500","minValue":"22500"},{"level":26,"maxValue":"23000","minValue":"23000"},{"level":27,"maxValue":"23500","minValue":"23500"},{"level":28,"maxValue":"24000","minValue":"24000"},{"level":29,"maxValue":"24500","minValue":"24500"},{"level":30,"maxValue":"25000","minValue":"25000"}]
+    },
+    {
+      id: `13700000`,
+      name: `Assault Ambush`,
+      iconUrl: `https://assets.playnccdn.com/static-aion2-gamedata/resources/ICON_CO_SKILL_003.png`,
+      description: `Select a target within 20m and deal <span style="color: #FCC78B">{se_dmg:1370000021:SkillUIMinDmgsum}-{se_dmg:1370000021:SkillUIMaxDmgsum}</span> damage with a {se:1370000025:effect_value05:divide100}% chance to inflict Blind to up to 4 enemies within 4m.
+100% chance to land Blind on NPC targets.
+
+Increases Defense by max 20% proportional to hit targets.`,
+      condition: [],
+      manaRegen: 0,
+      range: 20,
+      area: 20,
+      castingDuration: `Instant Cast`,
+      cooldown: `Instant Cast`,
+      target: `Area`,
+      spellTag: ["Physical","Attack"],
+      baseCost: 1,
+      baseCostModifier: 1,
+      maxLevel: 31,
+      classId: 3,
+      levels: [{"level":1,"maxValue":"50","minValue":"TargetLocation_CasterToTargetDirection"},{"level":1,"maxValue":"977","minValue":"977"},{"level":2,"maxValue":"1111","minValue":"1111"},{"level":3,"maxValue":"1244","minValue":"1244"},{"level":4,"maxValue":"1405","minValue":"1405"},{"level":5,"maxValue":"1539","minValue":"1539"},{"level":6,"maxValue":"1638","minValue":"1638"},{"level":7,"maxValue":"1708","minValue":"1708"},{"level":8,"maxValue":"1807","minValue":"1807"},{"level":9,"maxValue":"1905","minValue":"1905"},{"level":10,"maxValue":"2003","minValue":"2003"},{"level":11,"maxValue":"2102","minValue":"2102"},{"level":12,"maxValue":"2173","minValue":"2173"},{"level":13,"maxValue":"2244","minValue":"2244"},{"level":14,"maxValue":"2315","minValue":"2315"},{"level":15,"maxValue":"2386","minValue":"2386"},{"level":16,"maxValue":"2457","minValue":"2457"},{"level":17,"maxValue":"2527","minValue":"2527"},{"level":18,"maxValue":"2598","minValue":"2598"},{"level":19,"maxValue":"2669","minValue":"2669"},{"level":20,"maxValue":"2740","minValue":"2740"},{"level":21,"maxValue":"2811","minValue":"2811"},{"level":22,"maxValue":"2882","minValue":"2882"},{"level":23,"maxValue":"2953","minValue":"2953"},{"level":24,"maxValue":"3024","minValue":"3024"},{"level":25,"maxValue":"3095","minValue":"3095"},{"level":26,"maxValue":"3166","minValue":"3166"},{"level":27,"maxValue":"3237","minValue":"3237"},{"level":28,"maxValue":"3308","minValue":"3308"},{"level":29,"maxValue":"3379","minValue":"3379"},{"level":30,"maxValue":"3450","minValue":"3450"}]
+    }
+  ]
+};

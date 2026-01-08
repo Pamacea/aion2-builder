@@ -1,0 +1,2149 @@
+/**
+ * Auto-generated skill lookup tables
+ *
+ * Generated from: src/data/level-ratios-analysis.csv
+ * Generation date: 2026-01-08T16:31:02.394Z
+ *
+ * Usage:
+ *   import { getSkillValue, getSkillProgression } from './skill-lookup-tables';
+ *
+ *   const damage = getSkillValue('11010000', 10, 'damage'); // 502
+ *   const progression = getSkillProgression('11010000', 'damage');
+ */
+
+export type PlaceholderType = 'damage' | 'heal' | 'duration';
+
+export interface SkillProgression {
+  skillId: string;
+  name: string;
+  class: string;
+  values: (number | null)[];
+  baseValue: number | null;
+  maxLevel: number;
+}
+
+export interface SkillLookupTables {
+  damage: Record<string, SkillProgression>;
+  heal: Record<string, SkillProgression>;
+  duration: Record<string, SkillProgression>;
+}
+
+/**
+ * Complete lookup tables for all skills
+ */
+export const LOOKUP_TABLES: SkillLookupTables = {
+  "damage": {
+    "11010000": {
+      "skillId": "11010000",
+      "name": "Rending Blow",
+      "class": "gladiator",
+      "values": [
+        67,
+        98,
+        129,
+        160,
+        207,
+        264,
+        331,
+        388,
+        445,
+        502,
+        559,
+        626,
+        683,
+        724,
+        755,
+        797,
+        838,
+        879,
+        921,
+        952,
+        983,
+        1014,
+        1045,
+        1076,
+        1107,
+        1138,
+        1169,
+        1200,
+        1231,
+        1262
+      ],
+      "baseValue": 67,
+      "maxLevel": 30
+    },
+    "13010000": {
+      "skillId": "13010000",
+      "name": "Quick Slice",
+      "class": "assassin",
+      "values": [
+        47,
+        63,
+        79,
+        96,
+        120,
+        151,
+        188,
+        219,
+        250,
+        281,
+        312,
+        349,
+        380,
+        403,
+        419,
+        442,
+        464,
+        487,
+        510,
+        526,
+        542,
+        559,
+        575,
+        592,
+        608,
+        624,
+        641,
+        657,
+        673,
+        690
+      ],
+      "baseValue": 47,
+      "maxLevel": 30
+    },
+    "13050000": {
+      "skillId": "13050000",
+      "name": "Flash Slice",
+      "class": "assassin",
+      "values": [
+        181,
+        243,
+        322,
+        417,
+        495,
+        574,
+        653,
+        731,
+        826,
+        905,
+        963,
+        1004,
+        1062,
+        1120,
+        1178,
+        1235,
+        1277,
+        1319,
+        1361,
+        1402,
+        1444,
+        1486,
+        1527,
+        1569,
+        1611,
+        1653,
+        1694,
+        1736,
+        1778,
+        1820
+      ],
+      "baseValue": 181,
+      "maxLevel": 30
+    },
+    "13060000": {
+      "skillId": "13060000",
+      "name": "Ambush",
+      "class": "assassin",
+      "values": [
+        109,
+        156,
+        203,
+        273,
+        361,
+        468,
+        556,
+        644,
+        732,
+        820,
+        927,
+        1015,
+        1080,
+        1126,
+        1191,
+        1256,
+        1321,
+        1386,
+        1432,
+        1479,
+        1526,
+        1573,
+        1620,
+        1666,
+        1713,
+        1760,
+        1807,
+        1854,
+        1900,
+        1947
+      ],
+      "baseValue": 109,
+      "maxLevel": 30
+    },
+    "13070000": {
+      "skillId": "13070000",
+      "name": "Shadowstrike",
+      "class": "assassin",
+      "values": [
+        43,
+        75,
+        107,
+        139,
+        188,
+        248,
+        321,
+        382,
+        443,
+        503,
+        564,
+        637,
+        697,
+        742,
+        774,
+        819,
+        863,
+        908,
+        952,
+        985,
+        1017,
+        1049,
+        1081,
+        1113,
+        1145,
+        1178,
+        1210,
+        1242,
+        1274,
+        1306
+      ],
+      "baseValue": 43,
+      "maxLevel": 30
+    },
+    "13100000": {
+      "skillId": "13100000",
+      "name": "Savage Roar",
+      "class": "assassin",
+      "values": [
+        53,
+        75,
+        96,
+        118,
+        150,
+        190,
+        239,
+        279,
+        320,
+        360,
+        401,
+        449,
+        490,
+        520,
+        541,
+        571,
+        600,
+        630,
+        660,
+        681,
+        703,
+        724,
+        746,
+        767,
+        788,
+        810,
+        831,
+        853,
+        874,
+        896
+      ],
+      "baseValue": 53,
+      "maxLevel": 30
+    },
+    "13130000": {
+      "skillId": "13130000",
+      "name": "Insignia Explosion",
+      "class": "assassin",
+      "values": [
+        530,
+        686,
+        815,
+        945,
+        1074,
+        1203,
+        1359,
+        1488,
+        1584,
+        1652,
+        1747,
+        1842,
+        1937,
+        2032,
+        2101,
+        2170,
+        2238,
+        2307,
+        2376,
+        2444,
+        2513,
+        2581,
+        2650,
+        2719,
+        2787,
+        2856,
+        2925,
+        2993,
+        3062,
+        3131
+      ],
+      "baseValue": 530,
+      "maxLevel": 30
+    },
+    "13210000": {
+      "skillId": "13210000",
+      "name": "Whirlwind Slice",
+      "class": "assassin",
+      "values": [
+        300,
+        403,
+        533,
+        690,
+        820,
+        950,
+        1080,
+        1210,
+        1367,
+        1497,
+        1593,
+        1662,
+        1757,
+        1853,
+        1948,
+        2044,
+        2113,
+        2182,
+        2251,
+        2320,
+        2389,
+        2458,
+        2527,
+        2596,
+        2665,
+        2734,
+        2803,
+        2872,
+        2941,
+        3010
+      ],
+      "baseValue": 300,
+      "maxLevel": 30
+    },
+    "13220000": {
+      "skillId": "13220000",
+      "name": "Shadow Fall",
+      "class": "assassin",
+      "values": [
+        465,
+        615,
+        795,
+        945,
+        1095,
+        1245,
+        1395,
+        1575,
+        1725,
+        1836,
+        1915,
+        2025,
+        2135,
+        2246,
+        2356,
+        2435,
+        2515,
+        2594,
+        2674,
+        2754,
+        2833,
+        2913,
+        2992,
+        3072,
+        3151,
+        3231,
+        3310,
+        3390,
+        3470,
+        3549
+      ],
+      "baseValue": 465,
+      "maxLevel": 30
+    },
+    "13340000": {
+      "skillId": "13340000",
+      "name": "Storm Rampage",
+      "class": "assassin",
+      "values": [
+        107,
+        139,
+        188,
+        248,
+        321,
+        382,
+        443,
+        503,
+        564,
+        637,
+        697,
+        742,
+        774,
+        819,
+        863,
+        908,
+        952,
+        985,
+        1017,
+        1049,
+        1081,
+        1113,
+        1145,
+        1178,
+        1210,
+        1242,
+        1274,
+        1306,
+        1338,
+        1371
+      ],
+      "baseValue": 107,
+      "maxLevel": 30
+    },
+    "13350000": {
+      "skillId": "13350000",
+      "name": "Heart Gore",
+      "class": "assassin",
+      "values": [
+        93,
+        133,
+        172,
+        232,
+        307,
+        397,
+        472,
+        547,
+        622,
+        697,
+        787,
+        862,
+        918,
+        957,
+        1012,
+        1067,
+        1123,
+        1178,
+        1217,
+        1257,
+        1297,
+        1337,
+        1377,
+        1416,
+        1456,
+        1496,
+        1536,
+        1575,
+        1615,
+        1655
+      ],
+      "baseValue": 93,
+      "maxLevel": 30
+    },
+    "13360000": {
+      "skillId": "13360000",
+      "name": "Infiltrate",
+      "class": "assassin",
+      "values": [
+        239,
+        316,
+        409,
+        486,
+        563,
+        641,
+        718,
+        811,
+        888,
+        945,
+        985,
+        1042,
+        1099,
+        1156,
+        1212,
+        1253,
+        1294,
+        1335,
+        1376,
+        1417,
+        1458,
+        1499,
+        1540,
+        1581,
+        1622,
+        1663,
+        1704,
+        1745,
+        1786,
+        1827
+      ],
+      "baseValue": 239,
+      "maxLevel": 30
+    },
+    "14010000": {
+      "skillId": "14010000",
+      "name": "Deadshot",
+      "class": "ranger",
+      "values": [
+        815,
+        1050,
+        1247,
+        1443,
+        1640,
+        1837,
+        2072,
+        2269,
+        2413,
+        2519,
+        2663,
+        2807,
+        2951,
+        3095,
+        3200,
+        3306,
+        3411,
+        3517,
+        3623,
+        3728,
+        3834,
+        3939,
+        4045,
+        4151,
+        4256,
+        4362,
+        4467,
+        4573,
+        4679,
+        4784
+      ],
+      "baseValue": 815,
+      "maxLevel": 30
+    },
+    "14020000": {
+      "skillId": "14020000",
+      "name": "Snipe",
+      "class": "ranger",
+      "values": [
+        43,
+        58,
+        72,
+        86,
+        107,
+        133,
+        164,
+        190,
+        216,
+        242,
+        269,
+        300,
+        326,
+        345,
+        359,
+        378,
+        397,
+        416,
+        436,
+        450,
+        464,
+        478,
+        492,
+        506,
+        520,
+        534,
+        548,
+        562,
+        576,
+        590
+      ],
+      "baseValue": 43,
+      "maxLevel": 30
+    },
+    "14050000": {
+      "skillId": "14050000",
+      "name": "Drill Dart",
+      "class": "ranger",
+      "values": [
+        78,
+        112,
+        145,
+        195,
+        257,
+        332,
+        394,
+        456,
+        519,
+        581,
+        655,
+        718,
+        763,
+        797,
+        842,
+        888,
+        933,
+        979,
+        1012,
+        1046,
+        1079,
+        1112,
+        1146,
+        1179,
+        1213,
+        1246,
+        1280,
+        1313,
+        1346,
+        1380
+      ],
+      "baseValue": 78,
+      "maxLevel": 30
+    },
+    "14070000": {
+      "skillId": "14070000",
+      "name": "Suppressing Arrow",
+      "class": "ranger",
+      "values": [
+        333,
+        439,
+        566,
+        672,
+        778,
+        884,
+        990,
+        1117,
+        1223,
+        1300,
+        1357,
+        1435,
+        1513,
+        1590,
+        1668,
+        1725,
+        1782,
+        1839,
+        1896,
+        1953,
+        2009,
+        2066,
+        2123,
+        2180,
+        2237,
+        2294,
+        2351,
+        2408,
+        2465,
+        2522
+      ],
+      "baseValue": 333,
+      "maxLevel": 30
+    },
+    "14080000": {
+      "skillId": "14080000",
+      "name": "Burst Arrow",
+      "class": "ranger",
+      "values": [
+        340,
+        448,
+        578,
+        686,
+        795,
+        903,
+        1012,
+        1141,
+        1249,
+        1329,
+        1387,
+        1466,
+        1546,
+        1625,
+        1704,
+        1762,
+        1821,
+        1879,
+        1937,
+        1995,
+        2053,
+        2111,
+        2169,
+        2228,
+        2286,
+        2344,
+        2402,
+        2460,
+        2518,
+        2577
+      ],
+      "baseValue": 340,
+      "maxLevel": 30
+    },
+    "14090000": {
+      "skillId": "14090000",
+      "name": "Marking Shot",
+      "class": "ranger",
+      "values": [
+        106,
+        152,
+        197,
+        265,
+        350,
+        451,
+        535,
+        620,
+        704,
+        789,
+        890,
+        975,
+        1037,
+        1082,
+        1144,
+        1206,
+        1268,
+        1329,
+        1375,
+        1420,
+        1466,
+        1511,
+        1556,
+        1602,
+        1647,
+        1692,
+        1738,
+        1783,
+        1829,
+        1874
+      ],
+      "baseValue": 106,
+      "maxLevel": 30
+    },
+    "14110000": {
+      "skillId": "14110000",
+      "name": "Gale Arrow",
+      "class": "ranger",
+      "values": [
+        431,
+        579,
+        764,
+        984,
+        1169,
+        1353,
+        1538,
+        1722,
+        1943,
+        2127,
+        2262,
+        2361,
+        2496,
+        2631,
+        2766,
+        2901,
+        3000,
+        3099,
+        3198,
+        3297,
+        3396,
+        3495,
+        3594,
+        3693,
+        3792,
+        3891,
+        3990,
+        4089,
+        4188,
+        4287
+      ],
+      "baseValue": 431,
+      "maxLevel": 30
+    },
+    "14130000": {
+      "skillId": "14130000",
+      "name": "Snare Shot",
+      "class": "ranger",
+      "values": [
+        50,
+        87,
+        124,
+        161,
+        217,
+        286,
+        369,
+        438,
+        507,
+        576,
+        645,
+        728,
+        797,
+        848,
+        885,
+        936,
+        986,
+        1037,
+        1088,
+        1125,
+        1162,
+        1199,
+        1236,
+        1273,
+        1310,
+        1347,
+        1385,
+        1422,
+        1459,
+        1496
+      ],
+      "baseValue": 50,
+      "maxLevel": 30
+    },
+    "14170000": {
+      "skillId": "14170000",
+      "name": "Explosion Trap",
+      "class": "ranger",
+      "values": [
+        287,
+        386,
+        509,
+        656,
+        779,
+        902,
+        1025,
+        1148,
+        1295,
+        1418,
+        1508,
+        1574,
+        1664,
+        1754,
+        1844,
+        1934,
+        2000,
+        2066,
+        2132,
+        2198,
+        2264,
+        2330,
+        2396,
+        2462,
+        2528,
+        2594,
+        2660,
+        2726,
+        2792,
+        2858
+      ],
+      "baseValue": 287,
+      "maxLevel": 30
+    },
+    "14330000": {
+      "skillId": "14330000",
+      "name": "Arrow Scattershot",
+      "class": "ranger",
+      "values": [
+        96,
+        125,
+        169,
+        222,
+        287,
+        340,
+        394,
+        448,
+        502,
+        566,
+        620,
+        659,
+        688,
+        728,
+        767,
+        806,
+        846,
+        875,
+        904,
+        932,
+        961,
+        990,
+        1019,
+        1048,
+        1077,
+        1106,
+        1135,
+        1163,
+        1192,
+        1221
+      ],
+      "baseValue": 96,
+      "maxLevel": 30
+    },
+    "14340000": {
+      "skillId": "14340000",
+      "name": "Tempest Shot",
+      "class": "ranger",
+      "values": [
+        52,
+        72,
+        92,
+        113,
+        143,
+        181,
+        226,
+        263,
+        301,
+        339,
+        376,
+        421,
+        459,
+        486,
+        507,
+        534,
+        562,
+        589,
+        617,
+        637,
+        657,
+        678,
+        698,
+        718,
+        738,
+        758,
+        779,
+        799,
+        819,
+        839
+      ],
+      "baseValue": 52,
+      "maxLevel": 30
+    },
+    "15010000": {
+      "skillId": "15010000",
+      "name": "Flame Scattershot",
+      "class": "sorcerer",
+      "values": [
+        120,
+        156,
+        210,
+        276,
+        355,
+        421,
+        487,
+        553,
+        619,
+        698,
+        764,
+        813,
+        848,
+        897,
+        945,
+        993,
+        1041,
+        1077,
+        1113,
+        1149,
+        1185,
+        1221,
+        1257,
+        1293,
+        1329,
+        1364,
+        1400,
+        1436,
+        1472,
+        1508
+      ],
+      "baseValue": 120,
+      "maxLevel": 30
+    },
+    "15040000": {
+      "skillId": "15040000",
+      "name": "Firestorm",
+      "class": "sorcerer",
+      "values": [
+        94,
+        164,
+        234,
+        303,
+        408,
+        536,
+        688,
+        817,
+        945,
+        1074,
+        1202,
+        1354,
+        1483,
+        1576,
+        1646,
+        1740,
+        1833,
+        1927,
+        2020,
+        2090,
+        2160,
+        2229,
+        2299,
+        2368,
+        2438,
+        2508,
+        2577,
+        2647,
+        2716,
+        2786
+      ],
+      "baseValue": 94,
+      "maxLevel": 30
+    },
+    "15050000": {
+      "skillId": "15050000",
+      "name": "Blaze",
+      "class": "sorcerer",
+      "values": [
+        140,
+        200,
+        259,
+        349,
+        459,
+        589,
+        699,
+        809,
+        919,
+        1029,
+        1160,
+        1269,
+        1350,
+        1409,
+        1489,
+        1570,
+        1650,
+        1730,
+        1789,
+        1849,
+        1909,
+        1968,
+        2028,
+        2087,
+        2147,
+        2207,
+        2266,
+        2326,
+        2385,
+        2445
+      ],
+      "baseValue": 140,
+      "maxLevel": 30
+    },
+    "15060000": {
+      "skillId": "15060000",
+      "name": "Hellfire",
+      "class": "sorcerer",
+      "values": [
+        1072,
+        1377,
+        1634,
+        1891,
+        2148,
+        2404,
+        2709,
+        2966,
+        3153,
+        3292,
+        3480,
+        3667,
+        3854,
+        4041,
+        4180,
+        4320,
+        4459,
+        4598,
+        4737,
+        4876,
+        5016,
+        5155,
+        5294,
+        5433,
+        5572,
+        5712,
+        5851,
+        5990,
+        6129,
+        6268
+      ],
+      "baseValue": 1072,
+      "maxLevel": 30
+    },
+    "15090000": {
+      "skillId": "15090000",
+      "name": "Ice Chain",
+      "class": "sorcerer",
+      "values": [
+        77,
+        115,
+        153,
+        191,
+        249,
+        320,
+        403,
+        474,
+        545,
+        615,
+        686,
+        770,
+        840,
+        892,
+        930,
+        982,
+        1033,
+        1084,
+        1136,
+        1174,
+        1213,
+        1251,
+        1289,
+        1327,
+        1366,
+        1404,
+        1442,
+        1480,
+        1519,
+        1557
+      ],
+      "baseValue": 77,
+      "maxLevel": 30
+    },
+    "15110000": {
+      "skillId": "15110000",
+      "name": "Winter's Shackles",
+      "class": "sorcerer",
+      "values": [
+        275,
+        369,
+        486,
+        624,
+        740,
+        856,
+        973,
+        1089,
+        1227,
+        1344,
+        1428,
+        1492,
+        1576,
+        1661,
+        1746,
+        1831,
+        1894,
+        1957,
+        2020,
+        2083,
+        2146,
+        2209,
+        2272,
+        2335,
+        2399,
+        2462,
+        2525,
+        2588,
+        2651,
+        2714
+      ],
+      "baseValue": 275,
+      "maxLevel": 30
+    },
+    "15210000": {
+      "skillId": "15210000",
+      "name": "Flame Arrow",
+      "class": "sorcerer",
+      "values": [
+        60,
+        86,
+        112,
+        138,
+        178,
+        226,
+        283,
+        331,
+        379,
+        427,
+        475,
+        533,
+        581,
+        616,
+        642,
+        677,
+        712,
+        747,
+        782,
+        808,
+        835,
+        861,
+        887,
+        913,
+        939,
+        965,
+        991,
+        1017,
+        1043,
+        1069
+      ],
+      "baseValue": 60,
+      "maxLevel": 30
+    },
+    "15220000": {
+      "skillId": "15220000",
+      "name": "Frost Burst",
+      "class": "sorcerer",
+      "values": [
+        395,
+        519,
+        667,
+        791,
+        916,
+        1040,
+        1164,
+        1312,
+        1436,
+        1527,
+        1594,
+        1685,
+        1776,
+        1866,
+        1957,
+        2025,
+        2092,
+        2159,
+        2227,
+        2294,
+        2362,
+        2429,
+        2497,
+        2564,
+        2631,
+        2699,
+        2766,
+        2834,
+        2901,
+        2969
+      ],
+      "baseValue": 395,
+      "maxLevel": 30
+    },
+    "15280000": {
+      "skillId": "15280000",
+      "name": "Bittercold Wind",
+      "class": "sorcerer",
+      "values": [
+        197,
+        281,
+        365,
+        490,
+        645,
+        828,
+        983,
+        1137,
+        1292,
+        1446,
+        1629,
+        1784,
+        1897,
+        1980,
+        2093,
+        2206,
+        2318,
+        2431,
+        2515,
+        2598,
+        2682,
+        2766,
+        2849,
+        2933,
+        3017,
+        3101,
+        3184,
+        3268,
+        3352,
+        3436
+      ],
+      "baseValue": 197,
+      "maxLevel": 30
+    }
+  },
+  "heal": {
+    "12350000": {
+      "skillId": "12350000",
+      "name": "Warding Strike",
+      "class": "templar",
+      "values": [
+        180,
+        235,
+        296,
+        437,
+        510,
+        625,
+        739,
+        809,
+        946,
+        1015,
+        1130,
+        1268,
+        1344,
+        1465,
+        1541,
+        1673,
+        1732,
+        1791,
+        1851,
+        1911,
+        1971,
+        2031,
+        2092,
+        2153,
+        2214,
+        2275,
+        2337,
+        2398,
+        2461,
+        2523
+      ],
+      "baseValue": 180,
+      "maxLevel": 30
+    },
+    "17100000": {
+      "skillId": "17100000",
+      "name": "Healing Light",
+      "class": "cleric",
+      "values": [
+        120,
+        151,
+        223,
+        260,
+        319,
+        378,
+        413,
+        483,
+        519,
+        565,
+        601,
+        673,
+        735,
+        774,
+        844,
+        874,
+        905,
+        935,
+        966,
+        996,
+        1027,
+        1058,
+        1089,
+        1120,
+        1151,
+        1183,
+        1214,
+        1246,
+        1278,
+        1310
+      ],
+      "baseValue": 120,
+      "maxLevel": 30
+    },
+    "17120000": {
+      "skillId": "17120000",
+      "name": "Radiant Recovery",
+      "class": "cleric",
+      "values": [
+        315,
+        397,
+        585,
+        683,
+        837,
+        990,
+        1083,
+        1266,
+        1360,
+        1483,
+        1577,
+        1766,
+        1928,
+        2030,
+        2214,
+        2293,
+        2372,
+        2452,
+        2532,
+        2612,
+        2693,
+        2774,
+        2856,
+        2937,
+        3020,
+        3102,
+        3185,
+        3268,
+        3351,
+        3435
+      ],
+      "baseValue": 315,
+      "maxLevel": 30
+    },
+    "18120000": {
+      "skillId": "18120000",
+      "name": "Recuperation",
+      "class": "chanter",
+      "values": [
+        161,
+        210,
+        265,
+        390,
+        455,
+        558,
+        660,
+        722,
+        844,
+        907,
+        1009,
+        1132,
+        1200,
+        1308,
+        1376,
+        1494,
+        1546,
+        1599,
+        1653,
+        1706,
+        1760,
+        1814,
+        1868,
+        1922,
+        1977,
+        2031,
+        2086,
+        2142,
+        2197,
+        2253
+      ],
+      "baseValue": 161,
+      "maxLevel": 30
+    }
+  },
+  "duration": {
+    "12350000": {
+      "skillId": "12350000",
+      "name": "Warding Strike",
+      "class": "templar",
+      "values": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "baseValue": 10000,
+      "maxLevel": 30
+    },
+    "14050000": {
+      "skillId": "14050000",
+      "name": "Drill Dart",
+      "class": "ranger",
+      "values": [
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000,
+        6000
+      ],
+      "baseValue": 6000,
+      "maxLevel": 30
+    },
+    "15310000": {
+      "skillId": "15310000",
+      "name": "Wish of Concentration",
+      "class": "sorcerer",
+      "values": [
+        10000,
+        10500,
+        11000,
+        11500,
+        12000,
+        12500,
+        13000,
+        13500,
+        14000,
+        14500,
+        15000,
+        15500,
+        16000,
+        16500,
+        17000,
+        17500,
+        18000,
+        18500,
+        19000,
+        20000,
+        20500,
+        21000,
+        21500,
+        22000,
+        22500,
+        23000,
+        23500,
+        24000,
+        24500,
+        25000
+      ],
+      "baseValue": 10000,
+      "maxLevel": 30
+    },
+    "17070000": {
+      "skillId": "17070000",
+      "name": "Chain of Torment",
+      "class": "cleric",
+      "values": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "baseValue": 10000,
+      "maxLevel": 30
+    },
+    "17080000": {
+      "skillId": "17080000",
+      "name": "Debilitating Mark",
+      "class": "cleric",
+      "values": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "baseValue": 10000,
+      "maxLevel": 30
+    },
+    "17090000": {
+      "skillId": "17090000",
+      "name": "Light of Regeneration",
+      "class": "cleric",
+      "values": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "baseValue": 10000,
+      "maxLevel": 30
+    }
+  }
+} as any;
+
+/**
+ * Get skill value at specific level
+ *
+ * @param skillId - Skill ID (e.g., '11010000')
+ * @param level - Target level (1-30)
+ * @param type - Placeholder type ('damage' | 'heal' | 'duration')
+ * @returns Skill value at level, or null if not available
+ *
+ * @example
+ * getSkillValue('11010000', 10, 'damage') // 502 (Rending Blow)
+ */
+export function getSkillValue(
+  skillId: string,
+  level: number,
+  type: PlaceholderType
+): number | null {
+  if (level < 1 || level > 30) {
+    throw new Error('Level must be between 1 and 30');
+  }
+
+  const skill = LOOKUP_TABLES[type][skillId];
+  if (!skill) return null;
+
+  return skill.values[level - 1] || null;
+}
+
+/**
+ * Get full progression for a skill
+ *
+ * @param skillId - Skill ID
+ * @param type - Placeholder type
+ * @returns Full skill progression object or null
+ */
+export function getSkillProgression(
+  skillId: string,
+  type: PlaceholderType
+): SkillProgression | null {
+  return LOOKUP_TABLES[type][skillId] || null;
+}
+
+/**
+ * Check if skill has data for a specific level
+ *
+ * @param skillId - Skill ID
+ * @param level - Target level
+ * @param type - Placeholder type
+ * @returns True if data exists
+ */
+export function hasSkillData(
+  skillId: string,
+  level: number,
+  type: PlaceholderType
+): boolean {
+  const value = getSkillValue(skillId, level, type);
+  return value !== null;
+}
+
+/**
+ * Get all skills for a class
+ *
+ * @param className - Class name (e.g., 'gladiator')
+ * @param type - Placeholder type
+ * @returns Array of skill progressions
+ */
+export function getSkillsByClass(
+  className: string,
+  type: PlaceholderType
+): SkillProgression[] {
+  return Object.values(LOOKUP_TABLES[type])
+    .filter(skill => skill.class === className);
+}
+
+/**
+ * Search skills by name
+ *
+ * @param query - Search query (partial match)
+ * @param type - Placeholder type
+ * @returns Array of matching skills
+ */
+export function searchSkillsByName(
+  query: string,
+  type: PlaceholderType
+): SkillProgression[] {
+  const lowerQuery = query.toLowerCase();
+  return Object.values(LOOKUP_TABLES[type])
+    .filter(skill => skill.name.toLowerCase().includes(lowerQuery));
+}
+
+/**
+ * Get skill metadata
+ *
+ * @param skillId - Skill ID
+ * @returns Skill metadata or null
+ */
+export function getSkillMeta(skillId: string): {
+  id: string;
+  name: string;
+  class: string;
+  types: PlaceholderType[];
+} | null {
+  const meta = {
+  "11010000": {
+    "id": "11010000",
+    "name": "Rending Blow",
+    "class": "gladiator",
+    "types": [
+      "damage"
+    ]
+  },
+  "12350000": {
+    "id": "12350000",
+    "name": "Warding Strike",
+    "class": "templar",
+    "types": [
+      "duration",
+      "heal"
+    ]
+  },
+  "13010000": {
+    "id": "13010000",
+    "name": "Quick Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13050000": {
+    "id": "13050000",
+    "name": "Flash Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13060000": {
+    "id": "13060000",
+    "name": "Ambush",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13070000": {
+    "id": "13070000",
+    "name": "Shadowstrike",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13100000": {
+    "id": "13100000",
+    "name": "Savage Roar",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13130000": {
+    "id": "13130000",
+    "name": "Insignia Explosion",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13210000": {
+    "id": "13210000",
+    "name": "Whirlwind Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13220000": {
+    "id": "13220000",
+    "name": "Shadow Fall",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13340000": {
+    "id": "13340000",
+    "name": "Storm Rampage",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13350000": {
+    "id": "13350000",
+    "name": "Heart Gore",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13360000": {
+    "id": "13360000",
+    "name": "Infiltrate",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "14010000": {
+    "id": "14010000",
+    "name": "Deadshot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14020000": {
+    "id": "14020000",
+    "name": "Snipe",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14050000": {
+    "id": "14050000",
+    "name": "Drill Dart",
+    "class": "ranger",
+    "types": [
+      "duration",
+      "damage"
+    ]
+  },
+  "14070000": {
+    "id": "14070000",
+    "name": "Suppressing Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14080000": {
+    "id": "14080000",
+    "name": "Burst Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14090000": {
+    "id": "14090000",
+    "name": "Marking Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14110000": {
+    "id": "14110000",
+    "name": "Gale Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14130000": {
+    "id": "14130000",
+    "name": "Snare Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14170000": {
+    "id": "14170000",
+    "name": "Explosion Trap",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14330000": {
+    "id": "14330000",
+    "name": "Arrow Scattershot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14340000": {
+    "id": "14340000",
+    "name": "Tempest Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "15010000": {
+    "id": "15010000",
+    "name": "Flame Scattershot",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15040000": {
+    "id": "15040000",
+    "name": "Firestorm",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15050000": {
+    "id": "15050000",
+    "name": "Blaze",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15060000": {
+    "id": "15060000",
+    "name": "Hellfire",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15090000": {
+    "id": "15090000",
+    "name": "Ice Chain",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15110000": {
+    "id": "15110000",
+    "name": "Winter's Shackles",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15210000": {
+    "id": "15210000",
+    "name": "Flame Arrow",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15220000": {
+    "id": "15220000",
+    "name": "Frost Burst",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15280000": {
+    "id": "15280000",
+    "name": "Bittercold Wind",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15310000": {
+    "id": "15310000",
+    "name": "Wish of Concentration",
+    "class": "sorcerer",
+    "types": [
+      "duration"
+    ]
+  },
+  "17070000": {
+    "id": "17070000",
+    "name": "Chain of Torment",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17080000": {
+    "id": "17080000",
+    "name": "Debilitating Mark",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17090000": {
+    "id": "17090000",
+    "name": "Light of Regeneration",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17100000": {
+    "id": "17100000",
+    "name": "Healing Light",
+    "class": "cleric",
+    "types": [
+      "heal"
+    ]
+  },
+  "17120000": {
+    "id": "17120000",
+    "name": "Radiant Recovery",
+    "class": "cleric",
+    "types": [
+      "heal"
+    ]
+  },
+  "18120000": {
+    "id": "18120000",
+    "name": "Recuperation",
+    "class": "chanter",
+    "types": [
+      "heal"
+    ]
+  }
+};
+  return (meta as Record<string, { id: string; name: string; class: string; types: PlaceholderType[] }>)[skillId] || null;
+}
+
+/**
+ * Calculate level-to-level ratio
+ *
+ * @param skillId - Skill ID
+ * @param fromLevel - Starting level
+ * @param toLevel - Target level
+ * @param type - Placeholder type
+ * @returns Ratio, or null if data unavailable
+ */
+export function calculateLevelRatio(
+  skillId: string,
+  fromLevel: number,
+  toLevel: number,
+  type: PlaceholderType
+): number | null {
+  const fromValue = getSkillValue(skillId, fromLevel, type);
+  const toValue = getSkillValue(skillId, toLevel, type);
+
+  if (fromValue === null || toValue === null || fromValue === 0) {
+    return null;
+  }
+
+  return toValue / fromValue;
+}
+
+/**
+ * Get all available skill IDs
+ *
+ * @param type - Placeholder type (optional)
+ * @returns Array of skill IDs
+ */
+export function getAllSkillIds(type?: PlaceholderType): string[] {
+  if (type) {
+    return Object.keys(LOOKUP_TABLES[type]);
+  }
+
+  const allIds = new Set<string>();
+  for (const t of ['damage', 'heal', 'duration'] as PlaceholderType[]) {
+    Object.keys(LOOKUP_TABLES[t]).forEach(id => allIds.add(id));
+  }
+  return Array.from(allIds);
+}

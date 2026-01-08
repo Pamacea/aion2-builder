@@ -1,0 +1,324 @@
+{
+  "11010000": {
+    "id": "11010000",
+    "name": "Rending Blow",
+    "class": "gladiator",
+    "types": [
+      "damage"
+    ]
+  },
+  "12350000": {
+    "id": "12350000",
+    "name": "Warding Strike",
+    "class": "templar",
+    "types": [
+      "duration",
+      "heal"
+    ]
+  },
+  "13010000": {
+    "id": "13010000",
+    "name": "Quick Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13050000": {
+    "id": "13050000",
+    "name": "Flash Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13060000": {
+    "id": "13060000",
+    "name": "Ambush",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13070000": {
+    "id": "13070000",
+    "name": "Shadowstrike",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13100000": {
+    "id": "13100000",
+    "name": "Savage Roar",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13130000": {
+    "id": "13130000",
+    "name": "Insignia Explosion",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13210000": {
+    "id": "13210000",
+    "name": "Whirlwind Slice",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13220000": {
+    "id": "13220000",
+    "name": "Shadow Fall",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13340000": {
+    "id": "13340000",
+    "name": "Storm Rampage",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13350000": {
+    "id": "13350000",
+    "name": "Heart Gore",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "13360000": {
+    "id": "13360000",
+    "name": "Infiltrate",
+    "class": "assassin",
+    "types": [
+      "damage"
+    ]
+  },
+  "14010000": {
+    "id": "14010000",
+    "name": "Deadshot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14020000": {
+    "id": "14020000",
+    "name": "Snipe",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14050000": {
+    "id": "14050000",
+    "name": "Drill Dart",
+    "class": "ranger",
+    "types": [
+      "duration",
+      "damage"
+    ]
+  },
+  "14070000": {
+    "id": "14070000",
+    "name": "Suppressing Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14080000": {
+    "id": "14080000",
+    "name": "Burst Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14090000": {
+    "id": "14090000",
+    "name": "Marking Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14110000": {
+    "id": "14110000",
+    "name": "Gale Arrow",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14130000": {
+    "id": "14130000",
+    "name": "Snare Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14170000": {
+    "id": "14170000",
+    "name": "Explosion Trap",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14330000": {
+    "id": "14330000",
+    "name": "Arrow Scattershot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "14340000": {
+    "id": "14340000",
+    "name": "Tempest Shot",
+    "class": "ranger",
+    "types": [
+      "damage"
+    ]
+  },
+  "15010000": {
+    "id": "15010000",
+    "name": "Flame Scattershot",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15040000": {
+    "id": "15040000",
+    "name": "Firestorm",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15050000": {
+    "id": "15050000",
+    "name": "Blaze",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15060000": {
+    "id": "15060000",
+    "name": "Hellfire",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15090000": {
+    "id": "15090000",
+    "name": "Ice Chain",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15110000": {
+    "id": "15110000",
+    "name": "Winter's Shackles",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15210000": {
+    "id": "15210000",
+    "name": "Flame Arrow",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15220000": {
+    "id": "15220000",
+    "name": "Frost Burst",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15280000": {
+    "id": "15280000",
+    "name": "Bittercold Wind",
+    "class": "sorcerer",
+    "types": [
+      "damage"
+    ]
+  },
+  "15310000": {
+    "id": "15310000",
+    "name": "Wish of Concentration",
+    "class": "sorcerer",
+    "types": [
+      "duration"
+    ]
+  },
+  "17070000": {
+    "id": "17070000",
+    "name": "Chain of Torment",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17080000": {
+    "id": "17080000",
+    "name": "Debilitating Mark",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17090000": {
+    "id": "17090000",
+    "name": "Light of Regeneration",
+    "class": "cleric",
+    "types": [
+      "duration"
+    ]
+  },
+  "17100000": {
+    "id": "17100000",
+    "name": "Healing Light",
+    "class": "cleric",
+    "types": [
+      "heal"
+    ]
+  },
+  "17120000": {
+    "id": "17120000",
+    "name": "Radiant Recovery",
+    "class": "cleric",
+    "types": [
+      "heal"
+    ]
+  },
+  "18120000": {
+    "id": "18120000",
+    "name": "Recuperation",
+    "class": "chanter",
+    "types": [
+      "heal"
+    ]
+  }
+}
