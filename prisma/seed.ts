@@ -6,6 +6,7 @@ import { config } from "dotenv";
 import { PrismaClient } from "generated/prisma/client";
 import { resolve } from "path";
 import { DaevanionRune } from "../src/types/daevanion.type";
+import { cleanClassDescriptions } from "../src/data/classes/cleanDescription";
 
 // Charger les variables d'environnement depuis .env.local puis .env
 config({ path: resolve(process.cwd(), ".env.local") });
@@ -60,19 +61,22 @@ async function main() {
 
   // --- Seed CLASSES ---
   for (const c of classesData) {
+    // Nettoyer les descriptions Questlog avant de seed
+    const cleanedClass = cleanClassDescriptions(c);
+
     const existingTags = await prisma.tag.findMany({
-      where: { name: { in: c.tags.map((t) => t.toLowerCase()) } },
+      where: { name: { in: cleanedClass.tags.map((t: string) => t.toLowerCase()) } },
     });
 
     const classRecord = await prisma.class.upsert({
-      where: { name: c.name },
+      where: { name: cleanedClass.name },
       update: {},
       create: {
-        name: c.name,
-        iconUrl: c.iconUrl,
-        bannerUrl: c.bannerUrl,
-        characterUrl: c.characterURL,
-        description: c.description,
+        name: cleanedClass.name,
+        iconUrl: cleanedClass.iconUrl,
+        bannerUrl: cleanedClass.bannerUrl,
+        characterUrl: cleanedClass.characterURL,
+        description: cleanedClass.description,
         tags: {
           connect: existingTags.map((tag) => ({ id: tag.id })),
         },
@@ -80,8 +84,8 @@ async function main() {
     });
 
     // --- Seed ABILITIES for this class ---
-    if (c.abilities && c.abilities.length > 0) {
-      for (const ability of c.abilities) {
+    if (cleanedClass.abilities && cleanedClass.abilities.length > 0) {
+      for (const ability of cleanedClass.abilities) {
         // Get or create SpellTags for this ability
         const spellTagNames = ability.spellTag || [];
         const existingSpellTags = await prisma.spellTag.findMany({
@@ -253,8 +257,8 @@ async function main() {
     }
 
     // --- Seed STIGMAS for this class ---
-    if (c.stigmas && c.stigmas.length > 0) {
-      for (const stigma of c.stigmas) {
+    if (cleanedClass.stigmas && cleanedClass.stigmas.length > 0) {
+      for (const stigma of cleanedClass.stigmas) {
         // Get or create SpellTags for this stigma
         const spellTagNames = stigma.spellTag || [];
         const existingSpellTags = await prisma.spellTag.findMany({
@@ -390,8 +394,8 @@ async function main() {
     }
 
     // --- Seed PASSIVES for this class ---
-    if (c.passives && c.passives.length > 0) {
-      for (const passive of c.passives) {
+    if (cleanedClass.passives && cleanedClass.passives.length > 0) {
+      for (const passive of cleanedClass.passives) {
         // Get or create SpellTags for this passive
         const spellTagNames = passive.spellTag || [];
         const existingSpellTags = await prisma.spellTag.findMany({

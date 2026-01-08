@@ -3,6 +3,7 @@
 import { AbilityType, PassiveType, StigmaType } from "@/types/schema";
 import { SkillDescProps } from "@/types/skill.type";
 import { calculateStat, calculateStatWithQuestlogData } from "@/utils/statsUtils";
+import { parseQuestlogDescription } from "@/utils/questlogDescriptionParser";
 import React from "react";
 
 /**
@@ -283,10 +284,10 @@ export const SkillDesc = ({
   className = "",
 }: SkillDescProps & { daevanionBoost?: number }) => {
   const skill = ability || passive || stigma;
-  const description = skill?.description;
+  let description = skill?.description;
   const baseLevel =
     buildAbility?.level || buildPassive?.level || buildStigma?.level || 1;
-  
+
   // Utiliser le niveau effectif (base + boost Daevanion) pour le calcul des stats
   const level = baseLevel + (buildAbility || buildPassive ? daevanionBoost : 0);
 
@@ -294,6 +295,10 @@ export const SkillDesc = ({
     return null;
   }
 
+  // D'abord, parser les descriptions Questlog si présentes
+  description = parseQuestlogDescription(description, skill, level);
+
+  // Puis traiter les placeholders restants avec le système existant
   const processedDescription = processDescription(description, skill, level);
 
   return (
