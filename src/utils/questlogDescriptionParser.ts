@@ -22,37 +22,26 @@ export function parseQuestlogDescription(
   // ==================== DÉGÂTS ====================
   // {se_dmg:XXXX:SkillUIMinDmgsum} ou {se_dmg:XXXX:SkillUIMinDmgSum} -> {{DMG_MIN}}
   cleaned = cleaned.replace(/\{se_dmg:[^}]+:SkillUIMinDmg[^\}]*\}/gi, '{{DMG_MIN}}');
-  // {se_dmg:XXXX:SkillUIMaxDmgsum} ou {se_dmg:XXXX:SkillUIMaxDmgSum} -> {{DMG_MAX}}
   cleaned = cleaned.replace(/\{se_dmg:[^}]+:SkillUIMaxDmg[^\}]*\}/gi, '{{DMG_MAX}}');
 
   // ==================== HEALS ====================
   // {se_dmg:XXXX:SkillUIHPHealMin} -> {{HEAL_MIN}}
   cleaned = cleaned.replace(/\{se_dmg:[^}]+:SkillUIHPHealMin\}/gi, '{{HEAL_MIN}}');
-  // {se_dmg:XXXX:SkillUIHPHealMax} -> {{HEAL_MAX}}
   cleaned = cleaned.replace(/\{se_dmg:[^}]+:SkillUIHPHealMax\}/gi, '{{HEAL_MAX}}');
 
   // ==================== DURÉES ====================
   // {se:XXXX:effect_value02:time} -> {{DURATION}}
   cleaned = cleaned.replace(/\{se:[^}]+:effect_value02:time\}/gi, '{{DURATION}}');
 
-  // ==================== POURCENTAGES ET AUTRES VALEURS ====================
-  // {se:XXXX:effect_value05:divide100} -> {{VALUE}}
-  // {se_abe:XXXX:XXXX:value02:divide100} -> {{VALUE}}
-  // {abe:XXXX:value02:divide100} -> {{VALUE}}
-  // {se:XXXX:effect_value02} -> {{VALUE}}
-  // {se_abe:XXXX:XXXX:value02} -> {{VALUE}}
-  // {abe:XXXX:value02} -> {{VALUE}}
-  // Tous les patterns se:XXX:value, se_abe:XXX:value, abe:XXX:value
+  // ==================== TOUS LES AUTRES PLACEHOLDERS ====================
+  // {se:XXXX:effect_value02} ou {se:XXXX:effect_value05} ou {se_abe:...} ou {abe:...}
   cleaned = cleaned.replace(/\{se_abe:[^}]+\}/gi, '{{VALUE}}');
   cleaned = cleaned.replace(/\{se:[^}]+:effect_value\d+\}/gi, '{{VALUE}}');
   cleaned = cleaned.replace(/\{abe:[^}]+\}/gi, '{{VALUE}}');
-
-  // ==================== TARGET COUNT ====================
-  // {sef:XXXX:target_count_max} -> {{VALUE}}
   cleaned = cleaned.replace(/\{sef:[^}]+\}/gi, '{{VALUE}}');
 
   // ==================== TOUT LE RESTE ====================
-  // Tous les autres placeholders Questlog restants -> {{VALUE}}
+  // Tous les autres placeholders Questlog restants
   cleaned = cleaned.replace(/\{[a-z_]+:[^}]+\}/gi, '{{VALUE}}');
 
   return cleaned.trim();
