@@ -2,8 +2,8 @@ import type { ClassData } from "./types";
 
 /**
  * Nettoie les descriptions Questlog pour les utiliser dans le builder
- * - Retire le HTML
- * - Convertit les placeholders Questlog au format {{PLACEHOLDER}}
+ * - Retire UNIQUEMENT le HTML
+ * - Les placeholders Questlog seront traités dynamiquement à l'affichage
  */
 export function cleanQuestlogDescription(description: string): string {
   let cleaned = description;
@@ -11,18 +11,6 @@ export function cleanQuestlogDescription(description: string): string {
   // Retirer tous les tags HTML <span>
   cleaned = cleaned.replace(/<span[^>]*>/g, '');
   cleaned = cleaned.replace(/<\/span>/g, '');
-
-  // Convertir les placeholders Questlog en placeholders simples
-  // {se_dmg:XXXX:SkillUIMinDmgsum} -> {{DMG_MIN}}
-  cleaned = cleaned.replace(/\{se_dmg:[^:]+:SkillUIMinDmg[^\}]*\}/g, '{{DMG_MIN}}');
-  cleaned = cleaned.replace(/\{se_dmg:[^:]+:SkillUIMaxDmg[^\}]*\}/g, '{{DMG_MAX}}');
-
-  // Autres placeholders courants
-  cleaned = cleaned.replace(/\{se:[^:]+:[^:]+:effect_value01\}/g, '{{VALUE}}');
-  cleaned = cleaned.replace(/\{se:[^:]+:[^:]+:effect_value02\}/g, '{{TIME}}');
-  cleaned = cleaned.replace(/\{se:[^:]+:[^:]+:effect_value05\}/g, '{{PERCENT}}');
-  cleaned = cleaned.replace(/\{abe:[^:]+:[^:]+:[^:]+\}/g, '{{VALUE}}');
-  cleaned = cleaned.replace(/\{[^}]+\}/g, '{{VALUE}}');
 
   // Nettoyer les sauts de ligne excessifs
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
