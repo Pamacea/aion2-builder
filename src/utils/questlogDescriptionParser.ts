@@ -4,22 +4,21 @@ import { calculateStatFromLevels } from "./statsUtils";
 type SkillWithDataLevels = AbilityType | PassiveType | StigmaType;
 
 /**
- * Parse les descriptions Questlog et remplace les placeholders par les vraies valeurs
- * Supporte les formats:
- * - {{DMG_MIN}} / {{DMG_MAX}} (format actuel)
- * - {{VALUE}} (détecte automatiquement quelle stat utiliser)
+ * Parse les descriptions Questlog et convertit les placeholders au format standard
+ * Nettoie le HTML et convertit {{VALUE}} en {{DMG_MIN}}-{{DMG_MAX}}
+ * Retourne une string qui sera ensuite traitée par processDescription
  */
 export function parseQuestlogDescription(
   description: string,
   skill: SkillWithDataLevels,
   level: number
 ): string {
-  let parsed = description;
+  let cleaned = description;
 
   // Nettoyer le HTML si présent
-  parsed = parsed.replace(/<span[^>]*>/g, '');
-  parsed = parsed.replace(/<\/span>/g, '');
-  parsed = parsed.replace(/&quot;/g, '"');
+  cleaned = cleaned.replace(/<span[^>]*>/g, '');
+  cleaned = cleaned.replace(/<\/span>/g, '');
+  cleaned = cleaned.replace(/&quot;/g, '"');
 
   // Helper pour récupérer une valeur depuis les levels Questlog ou les stats classiques
   const getValue = (
@@ -62,34 +61,40 @@ export function parseQuestlogDescription(
     return null;
   };
 
-  // Remplacer {{DMG_MIN}} et {{DMG_MAX}}
+  // Calculer les valeurs
   const dmgMin = getValue('damageMin', 'minValue');
   const dmgMax = getValue('damageMax', 'maxValue');
-
-  parsed = parsed.replace(/\{\{DMG_MIN\}\}/g, dmgMin !== null ? String(dmgMin) : '???');
-  parsed = parsed.replace(/\{\{DMG_MAX\}\}/g, dmgMax !== null ? String(dmgMax) : '???');
-  parsed = parsed.replace(/\{\{MIN_DMG\}\}/g, dmgMin !== null ? String(dmgMin) : '???');
-
-  // Remplacer {{HEAL_MIN}} et {{HEAL_MAX}}
   const healMin = getValue('healMin', 'minValue');
   const healMax = getValue('healMax', 'maxValue');
 
-  parsed = parsed.replace(/\{\{HEAL_MIN\}\}/g, healMin !== null ? String(healMin) : '???');
-  parsed = parsed.replace(/\{\{HEAL_MAX\}\}/g, healMax !== null ? String(healMax) : '???');
-
-  // Remplacer {{VALUE}} intelligemment
-  // Si on a des dégâts, utiliser ceux-ci
+  // Remplacer {{VALUE}} par le bon format (dégâts ou heal)
   if (dmgMin !== null && dmgMax !== null) {
-    const value = dmgMin === dmgMax ? String(dmgMin) : `${dmgMin}-${dmgMax}`;
-    parsed = parsed.replace(/\{\{VALUE\}\}/g, value);
+    cleaned = cleaned.replace(/\{\{VALUE\}\}/g, dmgMin === dmgMax ? '{{DMG_MIN}}' : '{{DMG_MIN}}-{{DMG_MAX}}');
   } else if (healMin !== null && healMax !== null) {
-    const value = healMin === healMax ? String(healMin) : `${healMin}-${healMax}`;
-    parsed = parsed.replace(/\{\{VALUE\}\}/g, value);
+    cleaned = cleaned.replace(/\{\{VALUE\}\}/g, healMin === healMax ? '{{HEAL_MIN}}' : '{{HEAL_MIN}}-{{HEAL_MAX}}');
   }
 
-  // Autres remplacements
-  parsed = parsed.replace(/\{\{TIME\}\}/g, 'X');
-  parsed = parsed.replace(/\{\{PERCENT\}\}/g, 'X%');
+  // Remplacer {{DMG_MIN}} s'il n'y a pas de valeur
+  if (dmgMin === null) {
+    cleaned = cleaned.replace(/\{\{DMG_MIN\}\}/g, '???');
+    cleaned = cleaned.replace(/\{\{MIN_DMG\}\}/g, '???');
+  }
 
-  return parsed.trim();
+  if (dmgMax === null) {
+    cleaned = cleaned.replace(/\{\{DMG_MAX\}\}/g, '???');
+  }
+
+  if (healMin === null) {
+    cleaned = cleaned.replace(/\{\{HEAL_MIN\}\}/g, '???');
+  }
+
+  if (healMax === null) {
+    cleaned = cleaned.replace(/\{\{HEAL_MAX\}\}/g, '???');
+  }
+
+  // Autres placeholders génériques - on les laisse pour le système existant
+  cleaned = cleaned.replace(/\{\{TIME\}\}/g, 'X');
+  cleaned = cleaned.replace(/\{\{PERCENT\}\}/g, 'X%');
+
+  return cleaned.trim();
 }

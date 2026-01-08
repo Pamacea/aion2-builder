@@ -284,7 +284,7 @@ export const SkillDesc = ({
   className = "",
 }: SkillDescProps & { daevanionBoost?: number }) => {
   const skill = ability || passive || stigma;
-  let description = skill?.description;
+  const description = skill?.description;
   const baseLevel =
     buildAbility?.level || buildPassive?.level || buildStigma?.level || 1;
 
@@ -295,11 +295,11 @@ export const SkillDesc = ({
     return null;
   }
 
-  // D'abord, parser les descriptions Questlog si présentes
-  description = parseQuestlogDescription(description, skill, level);
+  // D'abord, parser et normaliser les descriptions Questlog
+  const normalizedDescription = parseQuestlogDescription(description, skill, level);
 
-  // Puis traiter les placeholders restants avec le système existant
-  const processedDescription = processDescription(description, skill, level);
+  // Puis traiter tous les placeholders avec le système existant (qui affiche en orange)
+  const processedDescription = processDescription(normalizedDescription, skill, level);
 
   return (
     <div className={className}>
