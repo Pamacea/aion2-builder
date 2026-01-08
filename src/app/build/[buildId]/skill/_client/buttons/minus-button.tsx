@@ -3,9 +3,10 @@ import { IconButton } from "../../_utils/iconButton";
 type MinusButtonProps = {
   onClick?: () => void;
   disabled?: boolean;
+  skillName?: string;
 };
 
-export const MinusButton = ({ onClick, disabled = false }: MinusButtonProps) => (
+export const MinusButton = ({ onClick, disabled = false, skillName }: MinusButtonProps) => (
   <IconButton
     icon="/icons/IC_Feature_Minus.webp"
     alt="Minus Icon"
@@ -13,5 +14,7 @@ export const MinusButton = ({ onClick, disabled = false }: MinusButtonProps) => 
     disabled={disabled}
     className="h-full w-full sm:w-auto bg-destructive/50 border-y-2 border-secondary hover:border-primary hover:bg-destructive/80 disabled:opacity-50"
     iconSize={18}
+    ariaLabel={skillName ? `Remove skill point from ${skillName}` : "Remove skill point"}
+    title={skillName ? `Remove point from ${skillName}` : "Remove skill point"}
   />
 );

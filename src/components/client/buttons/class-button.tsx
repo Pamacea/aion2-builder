@@ -13,18 +13,21 @@ export const ClassButton = () => {
       href="/classes"
       className={cn(
         "h-full justify-start items-center flex px-2 sm:px-4 md:px-6",
-        pathname.startsWith("/classes") 
+        pathname.startsWith("/classes")
            ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-primary/80"
           : "border-b-2 border-b-secondary hover:border-b-2 hover:border-b-foreground/50"
       )}
+      aria-label="Classes"
+      aria-current={pathname.startsWith("/classes") ? "page" : undefined}
       suppressHydrationWarning
     >
       <Image
         src="/icons/IC_Page_Classes.webp"
-        alt="Class Logo"
+        alt=""
         width={32}
         height={32}
         className="w-6 h-6 md:w-8 md:h-8"
+        aria-hidden="true"
       />
     </Link>
   );

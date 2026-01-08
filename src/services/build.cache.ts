@@ -2,23 +2,11 @@ import { unstable_cache, revalidateTag } from "next/cache";
 import { BuildSchema, BuildType } from "@/types/schema";
 import { prisma } from "@/lib/prisma";
 import { buildDetailInclude, buildListingInclude } from "@/utils/actionsUtils";
+import cacheManager, { CACHE_TTL } from "@/lib/cache/cache-manager";
 
 // ========================================
 // Cache Configuration
 // ========================================
-
-/**
- * Cache TTL settings for different data types
- *
- * SHORT: 1 minute - For highly dynamic data (likes, real-time updates)
- * MEDIUM: 5 minutes - For regularly updated data (build listings)
- * LONG: 1 hour - For relatively static data (build details)
- */
-export const CACHE_TTL = {
-  SHORT: 60, // 1 minute
-  MEDIUM: 300, // 5 minutes
-  LONG: 3600, // 1 hour
-};
 
 /**
  * Cache tag prefixes for organized invalidation
@@ -69,11 +57,7 @@ export const CACHE_TAGS = {
  * ```
  */
 export class BuildCache {
-  private readonly ttl: typeof CACHE_TTL;
-
-  constructor() {
-    this.ttl = CACHE_TTL;
-  }
+  private readonly ttl = CACHE_TTL;
 
   // ========================================
   // Single Build Operations
@@ -82,8 +66,9 @@ export class BuildCache {
   /**
    * Get a build by ID (cached)
    *
-   * Uses unstable_cache with:
-   * - 1 minute TTL (short cache for frequently updated data)
+   * Uses hybrid caching strategy with:
+   * - Redis (primary) with 5 min TTL, stale-while-revalidate
+   * - Next.js cache (fallback) with 5 min TTL
    * - Tags: 'build-{id}', 'builds-detail', 'builds'
    *
    * @param id - Build ID
@@ -94,22 +79,31 @@ export class BuildCache {
       return null;
     }
 
-    return unstable_cache(
-      async (): Promise<BuildType | null> => {
-        const build = await prisma.build.findUnique({
-          where: { id },
-          include: buildDetailInclude,
-        });
+    try {
+      const { data } = await cacheManager.get<BuildType | null>(
+        {
+          key: `build:${id}`,
+          tags: [CACHE_TAGS.BUILD_PREFIX(id), CACHE_TAGS.BUILDS_DETAIL, CACHE_TAGS.ALL_BUILDS],
+          redisTTL: CACHE_TTL.MEDIUM, // 5 minutes
+          nextjsRevalidate: CACHE_TTL.MEDIUM,
+          useStaleWhileRevalidate: true,
+        },
+        async (): Promise<BuildType | null> => {
+          const build = await prisma.build.findUnique({
+            where: { id },
+            include: buildDetailInclude,
+          });
 
-        if (!build) return null;
-        return BuildSchema.parse(build);
-      },
-      [`build-by-id-${id}`],
-      {
-        revalidate: this.ttl.SHORT,
-        tags: [CACHE_TAGS.BUILD_PREFIX(id), CACHE_TAGS.BUILDS_DETAIL, CACHE_TAGS.ALL_BUILDS],
-      }
-    )();
+          if (!build) return null;
+          return BuildSchema.parse(build);
+        }
+      );
+
+      return data;
+    } catch (error) {
+      console.error(`[BuildCache] Error fetching build ${id}:`, error);
+      return null;
+    }
   }
 
   /**
@@ -135,6 +129,8 @@ export class BuildCache {
    * - 'builds-detail'
    * - 'builds'
    *
+   * Also invalidates Redis cache for the specific build
+   *
    * Use this after:
    * - Updating a build
    * - Liking/unliking a build
@@ -142,10 +138,11 @@ export class BuildCache {
    *
    * @param id - Build ID to invalidate
    */
-  invalidateBuild(id: number): void {
-    revalidateTag(CACHE_TAGS.BUILD_PREFIX(id), "max");
-    revalidateTag(CACHE_TAGS.BUILDS_DETAIL, "max");
-    revalidateTag(CACHE_TAGS.ALL_BUILDS, "max");
+  async invalidateBuild(id: number): Promise<void> {
+    const tags = [CACHE_TAGS.BUILD_PREFIX(id), CACHE_TAGS.BUILDS_DETAIL, CACHE_TAGS.ALL_BUILDS];
+    const keyPatterns = [`build:${id}`];
+
+    await cacheManager.invalidate(tags, keyPatterns);
   }
 
   // ========================================
@@ -155,33 +152,43 @@ export class BuildCache {
   /**
    * Get all public builds (cached)
    *
-   * Uses unstable_cache with:
-   * - 5 minutes TTL (balances freshness and performance)
+   * Uses hybrid caching strategy with:
+   * - Redis (primary) with 5 min TTL, stale-while-revalidate
+   * - Next.js cache (fallback) with 5 min TTL
    * - Tags: 'builds-listing', 'builds'
    *
    * @returns Array of public builds
    */
   async getAllBuilds(): Promise<BuildType[]> {
-    return unstable_cache(
-      async (): Promise<BuildType[]> => {
-        const builds = await prisma.build.findMany({
-          where: {
-            private: false,
-          },
-          include: buildListingInclude,
-          orderBy: {
-            id: "desc",
-          },
-        });
+    try {
+      const { data } = await cacheManager.get<BuildType[]>(
+        {
+          key: 'builds:all',
+          tags: [CACHE_TAGS.BUILDS_LISTING, CACHE_TAGS.ALL_BUILDS],
+          redisTTL: CACHE_TTL.MEDIUM, // 5 minutes
+          nextjsRevalidate: CACHE_TTL.MEDIUM,
+          useStaleWhileRevalidate: true,
+        },
+        async (): Promise<BuildType[]> => {
+          const builds = await prisma.build.findMany({
+            where: {
+              private: false,
+            },
+            include: buildListingInclude,
+            orderBy: {
+              id: "desc",
+            },
+          });
 
-        return builds.map((build) => BuildSchema.parse(build));
-      },
-      ["all-builds"],
-      {
-        revalidate: this.ttl.MEDIUM,
-        tags: [CACHE_TAGS.BUILDS_LISTING, CACHE_TAGS.ALL_BUILDS],
-      }
-    )();
+          return builds.map((build) => BuildSchema.parse(build));
+        }
+      );
+
+      return data;
+    } catch (error) {
+      console.error('[BuildCache] Error fetching all builds:', error);
+      return [];
+    }
   }
 
   /**
@@ -201,14 +208,18 @@ export class BuildCache {
    * - 'builds-listing'
    * - 'builds'
    *
+   * Also invalidates Redis cache for build listings
+   *
    * Use this after:
    * - Creating a new public build
    * - Changing build privacy (public <-> private)
    * - Deleting a public build
    */
-  invalidateAllBuilds(): void {
-    revalidateTag(CACHE_TAGS.BUILDS_LISTING, "max");
-    revalidateTag(CACHE_TAGS.ALL_BUILDS, "max");
+  async invalidateAllBuilds(): Promise<void> {
+    const tags = [CACHE_TAGS.BUILDS_LISTING, CACHE_TAGS.ALL_BUILDS];
+    const keyPatterns = ['builds:all', 'builds:*'];
+
+    await cacheManager.invalidate(tags, keyPatterns);
   }
 
   // ========================================

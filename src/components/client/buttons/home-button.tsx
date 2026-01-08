@@ -16,14 +16,17 @@ export const HomeButton = () => {
           ? "border-b-2 border-b-foreground hover:border-b-2 hover:border-b-primary/80"
           : "border-b-2 border-b-secondary hover:border-b-2 hover:border-b-foreground/50"
       )}
+      aria-label="Home"
+      aria-current={pathname === "/" ? "page" : undefined}
       suppressHydrationWarning
     >
       <Image
         src="/icons/IC_Page_Home.webp"
-        alt="Bahion Logo"
+        alt=""
         width={32}
         height={32}
         className="w-6 h-6 md:w-8 md:h-8"
+        aria-hidden="true"
       />
     </Link>
   );

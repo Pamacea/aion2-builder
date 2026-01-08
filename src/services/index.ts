@@ -49,7 +49,6 @@ export {
 // Re-export cache service
 export {
   BuildCache,
-  CACHE_TTL,
   CACHE_TAGS,
 } from "./build.cache";
 

@@ -65,8 +65,10 @@ export const DeleteButton = ({ buildId, className = "" }: DeleteButtonProps) => 
           disabled={isDeleting}
           className={`flex items-center justify-center p-1.5 sm:p-2 rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
           title="Supprimer le build"
+          aria-label="Delete build"
+          aria-busy={isDeleting}
         >
-          <X className="size-3 sm:size-4" />
+          <X className="size-3 sm:size-4" aria-hidden="true" />
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent onClick={(e) => e.stopPropagation()} className="bg-background border-2 border-secondary">
@@ -82,6 +84,7 @@ export const DeleteButton = ({ buildId, className = "" }: DeleteButtonProps) => 
             onClick={confirmDelete}
             disabled={isDeleting}
             className="bg-red-500 hover:bg-red-600 text-white"
+            aria-busy={isDeleting}
           >
             {isDeleting ? "Suppression..." : "Supprimer"}
           </AlertDialogAction>

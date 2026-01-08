@@ -158,7 +158,7 @@ export class BuildService {
       userId,
     });
 
-    // Invalidate caches
+    // Invalidate caches (fire and forget for performance)
     this.cache.invalidateUserBuilds(userId);
     this.cache.invalidateAllBuilds();
 
@@ -265,7 +265,7 @@ export class BuildService {
       await this.repo.createLike(buildId, userId);
     }
 
-    // Invalidate caches
+    // Invalidate caches (fire and forget for performance)
     this.cache.invalidateBuild(buildId);
     this.cache.invalidateLikedBuilds(userId);
 

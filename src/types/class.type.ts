@@ -41,10 +41,10 @@ export type ClassGridProps = {
 export const ClassSchemaBase = z.object({
   id: z.number(),
   name: z.string(),
-  iconUrl: z.string().nullable(),
-  bannerUrl: z.string().nullable(),
-  characterUrl: z.string().nullable(),
-  description: z.string().nullable(),
+  iconUrl: z.string().nullish(),
+  bannerUrl: z.string().nullish(),
+  characterUrl: z.string().nullish(),
+  description: z.string().nullish(),
 });
 export type ClassTypeBase = z.infer<typeof ClassSchemaBase>;
 

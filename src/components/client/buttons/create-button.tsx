@@ -113,6 +113,8 @@ export const CreateButton = ({
       onClick={handleCreate}
       disabled={isDisabled}
       className={textClassName}
+      aria-label={isCreating ? "Creating build..." : isLoading ? "Verifying authentication..." : `Create ${text}`}
+      aria-busy={isCreating || isLoading}
       suppressHydrationWarning
     >
       {isCreating ? "Creating..." : isLoading ? "Vérification..." : text}

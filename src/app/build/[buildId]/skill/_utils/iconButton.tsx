@@ -9,6 +9,7 @@ type IconButtonProps = {
   className?: string;
   iconSize?: number;
   title?: string;
+  ariaLabel?: string;
 };
 
 export const IconButton = ({
@@ -19,6 +20,7 @@ export const IconButton = ({
   className = "",
   iconSize = 28,
   title,
+  ariaLabel,
 }: IconButtonProps) => {
   return (
     <Button
@@ -29,13 +31,15 @@ export const IconButton = ({
       disabled={disabled}
       className={className}
       title={title}
+      aria-label={ariaLabel || alt}
     >
       <Image
         src={icon}
-        alt={alt}
+        alt=""
         width={iconSize}
         height={iconSize}
         className="object-contain"
+        aria-hidden="true"
       />
     </Button>
   );
