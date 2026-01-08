@@ -88,6 +88,11 @@ function processDescription(
     let value: number;
 
     switch (placeholder) {
+      case "VALUE":
+        // Placeholder générique - on ne peut pas le calculer, on l'affiche tel quel
+        parts.push(match[0]);
+        currentIndex = match.index + match[0].length;
+        continue;
       case "DMG_MIN":
       case "MIN_DMG":
         value = getCalculatedValue(
