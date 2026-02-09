@@ -1,3 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/v/release/Pamacea/aion2-builder)](https://github.com/Pamacea/aion2-builder/releases/latest)
+[![CI](https://github.com/Pamacea/aion2-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/Pamacea/aion2-builder/actions)
+
+
 ![Logo](/bahion.webp)
 
 # BAHION - AION 2 BUILDER
